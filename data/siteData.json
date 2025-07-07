@@ -1,0 +1,91 @@
+{
+  "titleSite": "L'image qui vous ressemble",
+  "descriptionSite": "{{Émotion,Avec toi à jamais,Moments inoubliable,Rêver ensemble,notre Histoire,Nostalgie,notre Trésor,Instants précieux,Ensemble,Famille,Confiance,Chaleur,Héritage,Racines,une grande Maison,Fratrie,Enfants,Parents,Souvenirs,Joie,Instant inoubliable,Âme Sœur,Vœux,Complicité,Éternité,Tendresse,Promesse,Souvenirs immortels}}",
+  "primaryColor": "rgba(245, 17, 173, 0.32)",
+  "fontFamily": "Satisfy",
+  "fontSizePx": "13",
+  "pageSettings": {
+    "Accueil": {
+      "fontFamily": "Pacifico",
+      "fontSize": 19,
+      "titleFontSize": 29
+    },
+    "Contact": {
+      "fontFamily": "Lora",
+      "fontSize": 16
+    },
+    "Profil": {
+      "fontFamily": "Satisfy",
+      "fontSize": 20,
+      "artistNameFontSize": 49
+    },
+    "Albums": {
+      "fontFamily": "Allura",
+      "fontSize": 71
+    }
+  },
+  "gradientType": "granular",
+  "gradientColors": [
+    "rgba(255, 236, 236, 1)",
+    "rgba(255, 250, 247, 1)",
+    "rgba(255, 251, 250, 1)",
+    "rgba(255, 240, 232, 0.74)",
+    "rgba(240, 17, 17, 1)"
+  ],
+  "gradientAngle": "232",
+  "gradientCenter": "20% 52%",
+  "gradientStops": [
+    24,
+    23,
+    24,
+    25,
+    11,
+    100,
+    100
+  ],
+  "dynamicElements": [
+    "Émotion",
+    "Avec toi à jamais",
+    "Moments inoubliable",
+    "Rêver ensemble",
+    "notre Histoire",
+    "Nostalgie",
+    "notre Trésor",
+    "Instants précieux",
+    "Ensemble",
+    "Famille",
+    "Confiance",
+    "Chaleur",
+    "Héritage",
+    "Racines",
+    "une grande Maison",
+    "Fratrie",
+    "Enfants",
+    "Parents",
+    "Souvenirs",
+    "Joie",
+    "Instant inoubliable",
+    "Âme Sœur",
+    "Vœux",
+    "Complicité",
+    "Éternité",
+    "Tendresse",
+    "Promesse",
+    "Souvenirs immortels"
+  ],
+  "dynamicElements1": [],
+  "dynamicElements2": [],
+  "dynamicElements3": [],
+  "animationStyles": {
+    "default": "fade",
+    "type1": "bounce",
+    "type2": "fade",
+    "type3": "fade"
+  },
+  "granularGranuleSize": "7.5",
+  "granularDensity": "80",
+  "granularVariation": "90",
+  "granularBaseColor": "rgba(230, 11, 182, 0.14)",
+  "showWeddingLocation": true,
+  "showWeddingDescription": false
+}

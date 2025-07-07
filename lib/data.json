@@ -1,0 +1,449 @@
+{
+  "weddings": [
+    {
+      "id": 1,
+      "title": "Mariage Nour",
+      "folderId": "1736284401300",
+      "date": "",
+      "location": "Paris",
+      "description": "",
+      "visible": true,
+      "showLocation": true,
+      "showDescription": true,
+      "coverImage": {
+        "id": "1736899059204",
+        "fileUrl": "/1736284401300/1736899298693-N 1.O.jpg",
+        "fileType": "coverStorage",
+        "fileUrlThumbnail": "/1736284401300/thumbnails/1736899298693-N 1.O_THUMBEL.jpg",
+        "description": ""
+      },
+      "images": [
+        {
+          "id": "1736898980879",
+          "fileUrl": "/1736284401300/1736899023653-N 6.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899023653-N 6_THUMBEL.jpg",
+          "description": "",
+          "descriptionVisibility": true,
+          "imageVisibility": true
+        },
+        {
+          "id": "1736898980865",
+          "fileUrl": "/1736284401300/1736898996907-N 1.O.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898996907-N 1.O_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980864",
+          "fileUrl": "/1736284401300/1736898995845-N 2.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898995845-N 2_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980863",
+          "fileUrl": "/1736284401300/1736898994802-N 3.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898994802-N 3_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980871",
+          "fileUrl": "/1736284401300/1736899006809-N 14.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899006809-N 14_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980878",
+          "fileUrl": "/1736284401300/1736899021023-N 7.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899021023-N 7_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980880",
+          "fileUrl": "/1736284401300/1736899025834-N 5.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899025834-N 5_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980862",
+          "fileUrl": "/1736284401300/1736898994342-N 4.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898994342-N 4_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980877",
+          "fileUrl": "/1736284401300/1736899019274-N 8.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899019274-N 8_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980867",
+          "fileUrl": "/1736284401300/1736898999872-N 18.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898999872-N 18_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980870",
+          "fileUrl": "/1736284401300/1736899005149-N 15.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899005149-N 15_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980869",
+          "fileUrl": "/1736284401300/1736899003783-N 16.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899003783-N 16_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980876",
+          "fileUrl": "/1736284401300/1736899014183-N 9.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899014183-N 9_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980875",
+          "fileUrl": "/1736284401300/1736899012118-N 10.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899012118-N 10_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980868",
+          "fileUrl": "/1736284401300/1736899002068-N 17.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899002068-N 17_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980866",
+          "fileUrl": "/1736284401300/1736898997530-N 19.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736898997530-N 19_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980874",
+          "fileUrl": "/1736284401300/1736899010131-N 11.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899010131-N 11_THUMBEL.jpg",
+          "description": "",
+          "descriptionVisibility": true
+        },
+        {
+          "id": "1736898980873",
+          "fileUrl": "/1736284401300/1736899009056-N 12.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899009056-N 12_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736898980872",
+          "fileUrl": "/1736284401300/1736899008000-N 13.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736284401300/thumbnails/1736899008000-N 13_THUMBEL.jpg",
+          "description": ""
+        }
+      ],
+      "templateType": "masonry"
+    },
+    {
+      "id": 2,
+      "folderId": "1736326837983",
+      "coverImage": {
+        "id": "1745348003817",
+        "fileUrl": "/1736326837983/1745417229237-Sans titre 2.png",
+        "fileType": "coverStorage",
+        "fileUrlThumbnail": "/1736326837983/thumbnails/1745417229237-Sans titre 2_THUMBEL.png",
+        "description": ""
+      },
+      "title": "Mariage S.B",
+      "date": "",
+      "location": "Paris",
+      "description": "",
+      "visible": true,
+      "showLocation": true,
+      "showDescription": true,
+      "images": [
+        {
+          "id": "1745348003808",
+          "fileUrl": "/1736326837983/1745416603190-SB 18.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1745416603190-SB 18_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411613",
+          "fileUrl": "/1736326837983/1736902456154-Mariage_S_et_B_26.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902456154-Mariage_S_et_B_26_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1745348003810",
+          "fileUrl": "/1736326837983/1745416605911-SB 16.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1745416605911-SB 16_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411614",
+          "fileUrl": "/1736326837983/1736902456585-Mariage_S_et_B_27.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902456585-Mariage_S_et_B_27_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411592",
+          "fileUrl": "/1736326837983/1736902449921-Mariage_S_et_B_5.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902449921-Mariage_S_et_B_5_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411601",
+          "fileUrl": "/1736326837983/1736902451468-Mariage_S_et_B_14.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902451468-Mariage_S_et_B_14_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411595",
+          "fileUrl": "/1736326837983/1736902450348-Mariage_S_et_B_8.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450348-Mariage_S_et_B_8_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411596",
+          "fileUrl": "/1736326837983/1736902450502-Mariage_S_et_B_9.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450502-Mariage_S_et_B_9_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411599",
+          "fileUrl": "/1736326837983/1736902450983-Mariage_S_et_B_12.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450983-Mariage_S_et_B_12_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411597",
+          "fileUrl": "/1736326837983/1736902450651-Mariage_S_et_B_10.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450651-Mariage_S_et_B_10_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411594",
+          "fileUrl": "/1736326837983/1736902450192-Mariage_S_et_B_7.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450192-Mariage_S_et_B_7_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411590",
+          "fileUrl": "/1736326837983/1736902449480-Mariage_S_et_B_3.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902449480-Mariage_S_et_B_3_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411606",
+          "fileUrl": "/1736326837983/1736902453146-Mariage_S_et_B_19.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902453146-Mariage_S_et_B_19_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411591",
+          "fileUrl": "/1736326837983/1736902449670-Mariage_S_et_B_4.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902449670-Mariage_S_et_B_4_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411593",
+          "fileUrl": "/1736326837983/1736902450022-Mariage_S_et_B_6.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450022-Mariage_S_et_B_6_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1745348003809",
+          "fileUrl": "/1736326837983/1745416604026-SB 31.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1745416604026-SB 31_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411607",
+          "fileUrl": "/1736326837983/1736902453873-Mariage_S_et_B_20.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902453873-Mariage_S_et_B_20_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411589",
+          "fileUrl": "/1736326837983/1736902449312-Mariage_S_et_B_2.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902449312-Mariage_S_et_B_2_THUMBEL.jpg",
+          "description": "TEST"
+        },
+        {
+          "id": "1736902411600",
+          "fileUrl": "/1736326837983/1736902451176-Mariage_S_et_B_13.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902451176-Mariage_S_et_B_13_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411603",
+          "fileUrl": "/1736326837983/1736902451884-Mariage_S_et_B_16.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902451884-Mariage_S_et_B_16_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411604",
+          "fileUrl": "/1736326837983/1736902452130-Mariage_S_et_B_17.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902452130-Mariage_S_et_B_17_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411605",
+          "fileUrl": "/1736326837983/1736902452335-Mariage_S_et_B_18.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902452335-Mariage_S_et_B_18_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411608",
+          "fileUrl": "/1736326837983/1736902454285-Mariage_S_et_B_21.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902454285-Mariage_S_et_B_21_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411609",
+          "fileUrl": "/1736326837983/1736902454787-Mariage_S_et_B_22.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902454787-Mariage_S_et_B_22_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411610",
+          "fileUrl": "/1736326837983/1736902455363-Mariage_S_et_B_23.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902455363-Mariage_S_et_B_23_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411611",
+          "fileUrl": "/1736326837983/1736902455476-Mariage_S_et_B_24.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902455476-Mariage_S_et_B_24_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411612",
+          "fileUrl": "/1736326837983/1736902455941-Mariage_S_et_B_25.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902455941-Mariage_S_et_B_25_THUMBEL.jpg",
+          "description": ""
+        },
+        {
+          "id": "1736902411598",
+          "fileUrl": "/1736326837983/1736902450851-Mariage_S_et_B_11.jpg",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1736326837983/thumbnails/1736902450851-Mariage_S_et_B_11_THUMBEL.jpg",
+          "description": ""
+        }
+      ],
+      "templateType": "masonry",
+      "imageId": "1736902411589"
+    },
+    {
+      "id": 3,
+      "folderId": "1750694583143",
+      "coverImage": {
+        "id": "1750619227719",
+        "fileUrl": "/1750694583143/1750694695205-DSCF1204.JPG",
+        "fileType": "coverStorage",
+        "fileUrlThumbnail": "/1750694583143/thumbnails/1750694695205-DSCF1204_THUMBEL.JPG",
+        "description": ""
+      },
+      "title": "Mariage KH",
+      "date": "",
+      "location": "Paris",
+      "description": "",
+      "visible": true,
+      "showLocation": true,
+      "showDescription": true,
+      "images": [
+        {
+          "id": "1750619227725",
+          "fileUrl": "/1750694583143/1750694722956-DSCF1093.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694722956-DSCF1093_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227720",
+          "fileUrl": "/1750694583143/1750694712796-DSCF1204.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694712796-DSCF1204_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227723",
+          "fileUrl": "/1750694583143/1750694717541-DSCF0969.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694717541-DSCF0969_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227722",
+          "fileUrl": "/1750694583143/1750694715671-DSCF0967.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694715671-DSCF0967_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227724",
+          "fileUrl": "/1750694583143/1750694719627-DSCF0989.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694719627-DSCF0989_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227721",
+          "fileUrl": "/1750694583143/1750694714036-DSCF0963.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694714036-DSCF0963_THUMBEL.JPG",
+          "description": ""
+        },
+        {
+          "id": "1750619227726",
+          "fileUrl": "/1750694583143/1750694726053-DSCF1210.JPG",
+          "fileType": "storage",
+          "fileUrlThumbnail": "/1750694583143/thumbnails/1750694726053-DSCF1210_THUMBEL.JPG",
+          "description": ""
+        }
+      ],
+      "templateType": "masonry"
+    }
+  ]
+}

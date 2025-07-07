@@ -1,0 +1,74 @@
+{
+  "titleSite": "Miel de Lune 🍯",
+  "descriptionSite": "Studio de photographie spécialisé dans les mariages, \ncapturant vos moments précieux avec {{passion,créativité,authenticité,élégance,émotion}}",
+  "dynamicElements": [
+    "passion",
+    "créativité",
+    "authenticité",
+    "élégance",
+    "émotion"
+  ],
+  "dynamicElements1": [
+    "mémorable",
+    "unique",
+    "intemporel",
+    "magique",
+    "exceptionnel"
+  ],
+  "dynamicElements2": [
+    "amour",
+    "bonheur",
+    "joie",
+    "émotions",
+    "souvenirs"
+  ],
+  "dynamicElements3": [
+    "professionnel",
+    "attentif",
+    "disponible",
+    "créatif",
+    "passionné"
+  ],
+  "animationStyles": {
+    "default": "zoom",
+    "type1": "slide",
+    "type2": "zoom",
+    "type3": "fade"
+  },
+  "primaryColor": "#d95000",
+  "theme": "clair",
+  "fontFamily": "Great Vibes",
+  "fontSize": "sm",
+  "widgetCountdown": "false",
+  "widgetPlaylist": "false",
+  "widgetGuestbook": "false",
+  "widgetMap": "false",
+  "gradientType": "none",
+  "gradientColors": [
+    "#f9d3e0",
+    "#ffffff",
+    "#ff8647",
+    "#b1dd8c",
+    "#caf0fe"
+  ],
+  "gradientCenter": "16% 13%",
+  "gradientStops": [
+    0,
+    50,
+    84,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100
+  ],
+  "layout": "mosaique",
+  "gradientAngle": "155",
+  "fontSizePx": "30",
+  "granularBaseColor": "#f9d3e0",
+  "granularGranuleSize": 8,
+  "granularDensity": 40,
+  "granularVariation": 30
+}

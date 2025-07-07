@@ -1,0 +1,25 @@
+/* Styles pour les pages d'administration */
+.admin-content * {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+/* Classe utilitaire pour la police Roboto */
+.font-roboto {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+/* Styles pour les menus déroulants (Select) */
+[data-radix-popper-content-wrapper] * {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.select-dropdown-content * {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+/* S'assurer que les popups et portails utilisent la bonne police */
+[role="dialog"] *,
+[role="menu"] *,
+[role="listbox"] * {
+  font-family: 'Roboto', sans-serif !important;
+}

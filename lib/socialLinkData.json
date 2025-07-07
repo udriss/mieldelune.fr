@@ -1,0 +1,31 @@
+{
+  "Facebook": {
+    "icon": "SiFacebook",
+    "href": "https://www.facebook.com/artaidem",
+    "label": "Facebook",
+    "hoverColor": "#1877F2",
+    "showed": false
+  },
+  "Instagram": {
+    "icon": "SiInstagram",
+    "href": "https://www.instagram.com/aidem.art/",
+    "label": "Instagram",
+    "hoverColor": "#E4405F",
+    "showed": false
+  },
+  "TikTok": {
+    "icon": "SiTiktok",
+    "href": "https://www.tiktok.com/@aidem.art",
+    "label": "TikTok",
+    "hoverColor": "#000000",
+    "hoverIcon": "TikTokColoredIcon",
+    "showed": false
+  },
+  "WhatsApp": {
+    "icon": "SiWhatsapp",
+    "href": "https://wa.me/33652673258",
+    "label": "WhatsApp",
+    "hoverColor": "#25D366",
+    "showed": true
+  }
+}
