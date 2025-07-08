@@ -1,0 +1,22 @@
+export const GOOGLE_FONTS = [
+  'Montserrat',
+  'Roboto',
+  'Open Sans',
+  'Lato',
+  'Poppins',
+  'Source Sans Pro',
+  'Oswald',
+  'Nunito',
+  'Raleway',
+  'PT Sans',
+  'Playfair Display',
+  'Dancing Script',
+  'Caveat',
+  'Merriweather',
+  'Pacifico',
+  'Indie Flower',
+  'Shadows Into Light',
+  'Amatic SC',
+  'Quicksand',
+  'Ubuntu'
+];

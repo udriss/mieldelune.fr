@@ -528,7 +528,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <NextUIProvider>
               <NavbarClient />
-              <section className="pt-6 m-0 min-h-screen pt-8 flex flex-col items-center justify-start w-full">
+              <section className="pt-6 m-0 pt-8 flex flex-col items-center justify-start w-full">
                 {children}
               </section>
               <Footer />

@@ -20,6 +20,26 @@ import {
 import { Plus } from 'lucide-react';
 import { OverlaySuccess } from '../OverlaySuccess';
 
+// Liste des polices disponibles
+const AVAILABLE_FONTS = [
+  'Montserrat',
+  'Roboto',
+  'Playfair Display',
+  'Lora',
+  'Pacifico',
+  'Dancing Script',
+  'Great Vibes',
+  'Satisfy',
+  'Allura',
+  'Parisienne',
+  'Sacramento',
+  'Herr Von Muellerhoff',
+  'Tangerine',
+  'Yellowtail',
+  'Arial',
+  'Times New Roman'
+];
+
 // Hook pour charger dynamiquement les Google Fonts
 function useGoogleFont(fontFamily: string) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -90,6 +110,28 @@ function useGoogleFont(fontFamily: string) {
   }, [fontFamily]);
 
   return isLoaded;
+}
+
+// Hook pour charger toutes les polices disponibles pour la prévisualisation
+function useAllFonts() {
+  useEffect(() => {
+    // Charger toutes les polices Google Fonts pour les aperçus dans les selects
+    const fontsToLoad = AVAILABLE_FONTS.filter(font => 
+      font !== 'Arial' && font !== 'Times New Roman'
+    );
+
+    fontsToLoad.forEach(fontFamily => {
+      const fontId = `google-font-preview-${fontFamily.replace(/\s+/g, '-').toLowerCase()}`;
+      
+      if (!document.getElementById(fontId)) {
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:wght@300;400;500;600;700&display=swap`;
+        document.head.appendChild(link);
+      }
+    });
+  }, []);
 }
 
 // Composant d'aperçu amélioré avec chargement de police
@@ -637,6 +679,9 @@ export function AppearanceCustomization({
   onExpandedChange
 }: AppearanceCustomizationProps) {
   
+  // Charger toutes les polices pour les aperçus dans les selects
+  useAllFonts();
+  
   // États pour les overlays de succès séparés
   const [showPageSettingsOverlay, setShowPageSettingsOverlay] = useState(false);
   const [pageSettingsAnimation, setPageSettingsAnimation] = useState<'none' | 'enter' | 'exit'>('none');
@@ -1010,23 +1055,43 @@ export function AppearanceCustomization({
                         label="Police"
                         value={currentPageSettings.fontFamily}
                         onChange={(e) => handlePageSettingChange(pageName, 'fontFamily', e.target.value)}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              maxHeight: 400,
+                              '& .MuiMenuItem-root': {
+                                fontSize: '14px',
+                                padding: '8px 16px'
+                              }
+                            }
+                          }
+                        }}
                       >
-                        <MenuItem value="Montserrat">Montserrat</MenuItem>
-                        <MenuItem value="Roboto">Roboto</MenuItem>
-                        <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                        <MenuItem value="Lora">Lora</MenuItem>
-                        <MenuItem value="Pacifico">Pacifico</MenuItem>
-                        <MenuItem value="Dancing Script">Dancing Script</MenuItem>
-                        <MenuItem value="Great Vibes">Great Vibes (calligraphie)</MenuItem>
-                        <MenuItem value="Satisfy">Satisfy (calligraphie)</MenuItem>
-                        <MenuItem value="Allura">Allura (calligraphie)</MenuItem>
-                        <MenuItem value="Parisienne">Parisienne (calligraphie)</MenuItem>
-                        <MenuItem value="Sacramento">Sacramento (calligraphie)</MenuItem>
-                        <MenuItem value="Herr Von Muellerhoff">Herr Von Muellerhoff (calligraphie)</MenuItem>
-                        <MenuItem value="Tangerine">Tangerine (calligraphie)</MenuItem>
-                        <MenuItem value="Yellowtail">Yellowtail (calligraphie)</MenuItem>
-                        <MenuItem value="Arial">Arial</MenuItem>
-                        <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                        {AVAILABLE_FONTS.map(font => {
+                          const displayText = font === 'Great Vibes' ? 'Great Vibes (calligraphie)' :
+                                             font === 'Satisfy' ? 'Satisfy (calligraphie)' :
+                                             font === 'Allura' ? 'Allura (calligraphie)' :
+                                             font === 'Parisienne' ? 'Parisienne (calligraphie)' :
+                                             font === 'Sacramento' ? 'Sacramento (calligraphie)' :
+                                             font === 'Herr Von Muellerhoff' ? 'Herr Von Muellerhoff (calligraphie)' :
+                                             font === 'Tangerine' ? 'Tangerine (calligraphie)' :
+                                             font === 'Yellowtail' ? 'Yellowtail (calligraphie)' :
+                                             font;
+                          
+                          return (
+                            <MenuItem 
+                              key={font} 
+                              value={font} 
+                              sx={{ 
+                                fontFamily: `'${font}', Arial, sans-serif !important`,
+                                fontSize: '14px !important',
+                                fontWeight: '400 !important'
+                              }}
+                            >
+                              {displayText}
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
                     </FormControl>
 
@@ -1128,23 +1193,43 @@ export function AppearanceCustomization({
                         label="Police"
                         value={currentPageSettings.fontFamily}
                         onChange={(e) => handlePageSettingChange(pageName, 'fontFamily', e.target.value)}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              maxHeight: 400,
+                              '& .MuiMenuItem-root': {
+                                fontSize: '14px',
+                                padding: '8px 16px'
+                              }
+                            }
+                          }
+                        }}
                       >
-                        <MenuItem value="Montserrat">Montserrat</MenuItem>
-                        <MenuItem value="Roboto">Roboto</MenuItem>
-                        <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                        <MenuItem value="Lora">Lora</MenuItem>
-                        <MenuItem value="Pacifico">Pacifico</MenuItem>
-                        <MenuItem value="Dancing Script">Dancing Script</MenuItem>
-                        <MenuItem value="Great Vibes">Great Vibes (calligraphie)</MenuItem>
-                        <MenuItem value="Satisfy">Satisfy (calligraphie)</MenuItem>
-                        <MenuItem value="Allura">Allura (calligraphie)</MenuItem>
-                        <MenuItem value="Parisienne">Parisienne (calligraphie)</MenuItem>
-                        <MenuItem value="Sacramento">Sacramento (calligraphie)</MenuItem>
-                        <MenuItem value="Herr Von Muellerhoff">Herr Von Muellerhoff (calligraphie)</MenuItem>
-                        <MenuItem value="Tangerine">Tangerine (calligraphie)</MenuItem>
-                        <MenuItem value="Yellowtail">Yellowtail (calligraphie)</MenuItem>
-                        <MenuItem value="Arial">Arial</MenuItem>
-                        <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                        {AVAILABLE_FONTS.map(font => {
+                          const displayText = font === 'Great Vibes' ? 'Great Vibes (calligraphie)' :
+                                             font === 'Satisfy' ? 'Satisfy (calligraphie)' :
+                                             font === 'Allura' ? 'Allura (calligraphie)' :
+                                             font === 'Parisienne' ? 'Parisienne (calligraphie)' :
+                                             font === 'Sacramento' ? 'Sacramento (calligraphie)' :
+                                             font === 'Herr Von Muellerhoff' ? 'Herr Von Muellerhoff (calligraphie)' :
+                                             font === 'Tangerine' ? 'Tangerine (calligraphie)' :
+                                             font === 'Yellowtail' ? 'Yellowtail (calligraphie)' :
+                                             font;
+                          
+                          return (
+                            <MenuItem 
+                              key={font} 
+                              value={font} 
+                              sx={{ 
+                                fontFamily: `'${font}', Arial, sans-serif !important`,
+                                fontSize: '14px !important',
+                                fontWeight: '400 !important'
+                              }}
+                            >
+                              {displayText}
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
                     </FormControl>
 
@@ -1255,23 +1340,43 @@ export function AppearanceCustomization({
                         value={currentPageSettings.fontFamily}
                         onChange={(e) => handlePageSettingChange(pageName, 'fontFamily', e.target.value)}
                         disabled={pageName === 'Contact'}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              maxHeight: 400,
+                              '& .MuiMenuItem-root': {
+                                fontSize: '14px',
+                                padding: '8px 16px'
+                              }
+                            }
+                          }
+                        }}
                       >
-                        <MenuItem value="Montserrat">Montserrat</MenuItem>
-                        <MenuItem value="Roboto">Roboto</MenuItem>
-                        <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                        <MenuItem value="Lora">Lora</MenuItem>
-                        <MenuItem value="Pacifico">Pacifico</MenuItem>
-                        <MenuItem value="Dancing Script">Dancing Script</MenuItem>
-                        <MenuItem value="Great Vibes">Great Vibes (calligraphie)</MenuItem>
-                        <MenuItem value="Satisfy">Satisfy (calligraphie)</MenuItem>
-                        <MenuItem value="Allura">Allura (calligraphie)</MenuItem>
-                        <MenuItem value="Parisienne">Parisienne (calligraphie)</MenuItem>
-                        <MenuItem value="Sacramento">Sacramento (calligraphie)</MenuItem>
-                        <MenuItem value="Herr Von Muellerhoff">Herr Von Muellerhoff (calligraphie)</MenuItem>
-                        <MenuItem value="Tangerine">Tangerine (calligraphie)</MenuItem>
-                        <MenuItem value="Yellowtail">Yellowtail (calligraphie)</MenuItem>
-                        <MenuItem value="Arial">Arial</MenuItem>
-                        <MenuItem value="Times New Roman">Times New Roman</MenuItem>
+                        {AVAILABLE_FONTS.map(font => {
+                          const displayText = font === 'Great Vibes' ? 'Great Vibes (calligraphie)' :
+                                             font === 'Satisfy' ? 'Satisfy (calligraphie)' :
+                                             font === 'Allura' ? 'Allura (calligraphie)' :
+                                             font === 'Parisienne' ? 'Parisienne (calligraphie)' :
+                                             font === 'Sacramento' ? 'Sacramento (calligraphie)' :
+                                             font === 'Herr Von Muellerhoff' ? 'Herr Von Muellerhoff (calligraphie)' :
+                                             font === 'Tangerine' ? 'Tangerine (calligraphie)' :
+                                             font === 'Yellowtail' ? 'Yellowtail (calligraphie)' :
+                                             font;
+                          
+                          return (
+                            <MenuItem 
+                              key={font} 
+                              value={font} 
+                              sx={{ 
+                                fontFamily: `'${font}', Arial, sans-serif !important`,
+                                fontSize: '14px !important',
+                                fontWeight: '400 !important'
+                              }}
+                            >
+                              {displayText}
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
                     </FormControl>
 

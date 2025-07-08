@@ -12,6 +12,7 @@ import AdminProfil from '@/components/admin/admin-profil';
 import { Profile } from '@/lib/dataProfil';
 import { AdminSiteSettings, AdminSiteSettingsRef } from '@/components/admin/admin-site-settings';
 import { AdminAvailability } from '@/components/admin/admin-availability';
+import { CustomPagesManager } from '@/components/admin/CustomPagesManager';
 import { Box, Paper, Tabs, Tab, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import { myFetch } from '@/lib/fetch-wrapper';
 
@@ -23,11 +24,13 @@ interface AdminClientWrapperProps {
 export default function AdminClientWrapper({ initialWeddings, initialProfile }: AdminClientWrapperProps) {
   const [weddingsToTransfer, setWeddingsForTransfer] = useState<Wedding[]>(initialWeddings);
   const [profileToTransfer, setProfileForTransfer] = useState<Profile[]>(initialProfile);
-  const [activeTab, setActiveTab] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<string>('nouveau');
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [hasCustomPageChanges, setHasCustomPageChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [nextTab, setNextTab] = useState<string | null>(null);
   const siteSettingsRef = useRef<AdminSiteSettingsRef>(null);
+  const mainScrollableRef = useRef<HTMLDivElement>(null);
   
   const router = useRouter();
   const handleLogout = () => {
@@ -37,9 +40,9 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasPendingChanges) {
+      if (hasPendingChanges || hasCustomPageChanges) {
         e.preventDefault();
-        e.returnValue = ''; // For older browsers
+        e.returnValue = 'Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter ?';
       }
     };
 
@@ -48,7 +51,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [hasPendingChanges]);
+  }, [hasPendingChanges, hasCustomPageChanges]);
 
   const fetchWeddings = async () => {
     try {
@@ -97,13 +100,22 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
   }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    // Vérifier s'il y a des changements non sauvegardés dans les paramètres du site
     if (activeTab === 'parameters' && hasPendingChanges) {
       setNextTab(newValue);
       setShowConfirmDialog(true);
-    } else {
-      setActiveTab(newValue);
-      document.cookie = `activeTab=${newValue}; path=/; max-age=31536000`;
+      return;
     }
+    
+    // Vérifier s'il y a des changements non sauvegardés dans les pages personnalisées
+    if (activeTab === 'custom-pages' && hasCustomPageChanges) {
+      toast.warning('Veuillez sauvegarder vos modifications avant de changer d\'onglet');
+      return;
+    }
+    
+    // Continuer le changement d'onglet normalement
+    setActiveTab(newValue);
+    document.cookie = `activeTab=${newValue}; path=/; max-age=31536000`;
   };
 
   const handleDialogSave = () => {
@@ -115,6 +127,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
     setShowConfirmDialog(false);
     if (nextTab) {
       setHasPendingChanges(false); // Allow tab change, changes will be lost on component unmount/remount
+      setHasCustomPageChanges(false); // Reset aussi les changements des pages personnalisées
       setActiveTab(nextTab);
       document.cookie = `activeTab=${nextTab}; path=/; max-age=31536000`;
       setNextTab(null);
@@ -146,22 +159,50 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
   return (
     <>
       <Dialog open={showConfirmDialog} onClose={handleDialogCancel}>
-        <DialogTitle>Changements non insérés</DialogTitle>
+        <DialogTitle>Changements non sauvegardés</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Vous avez des éléments dynamiques qui n'ont pas été insérés dans la description. Voulez-vous les insérer avant de changer d'onglet ?
+            {activeTab === 'parameters' 
+              ? 'Vous avez des éléments dynamiques qui n\'ont pas été insérés dans la description. Voulez-vous les insérer avant de changer d\'onglet ?'
+              : 'Vous avez des modifications non sauvegardées. Voulez-vous les enregistrer avant de continuer ?'
+            }
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogCancel}>Rester sur la page</Button>
-          <Button onClick={handleDialogDiscard}>Changer sans insérer</Button>
-          <Button onClick={handleDialogSave} autoFocus>Insérer et changer</Button>
+          <Button onClick={handleDialogDiscard}>
+            {activeTab === 'parameters' ? 'Changer sans insérer' : 'Abandonner les modifications'}
+          </Button>
+          <Button onClick={handleDialogSave} autoFocus>
+            {activeTab === 'parameters' ? 'Insérer et changer' : 'Sauvegarder et changer'}
+          </Button>
         </DialogActions>
       </Dialog>
 
       <Box 
-        className="w-full min-h-screen flex flex-col items-center justify-start mt-16"
+        ref={mainScrollableRef}
+        className="w-full min-h-screen overflow-y-auto"
+        sx={{
+          // Styles de scrollbar personnalisés pour la scrollbar principale
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(0,0,0,0.1)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(0,0,0,0.3)',
+            borderRadius: '4px',
+            '&:hover': {
+              background: 'rgba(0,0,0,0.4)',
+            },
+          },
+        }}
       >
+        <Box 
+          className="w-full min-h-screen flex flex-col items-center justify-start mt-16"
+        >
         <Box sx={{ mb: 2 }} />
         <Box className="w-full min-w-[800px] max-w-[800px]">
           <Header onLogout={handleLogout} />
@@ -173,9 +214,9 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
             <Paper 
               elevation={0}
               sx={{
-                position: 'sticky',
-                top: '4rem',
-                zIndex: 1000,
+                position: activeTab === 'custom-pages' ? 'static' : 'sticky',
+                top: activeTab === 'custom-pages' ? 'auto' : '4rem',
+                zIndex: activeTab === 'custom-pages' ? 'auto' : 1000,
                 minWidth: '800px',
                 maxWidth: '800px',
                 margin: '0 auto',
@@ -222,20 +263,23 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
                 <Tab label="Profil" value="profil" />
                 <Tab label="Disponibilités" value="disponibilites" />
                 <Tab label="Gestion du site web" value="parameters" />
+                <Tab label="Pages perso" value="custom-pages" />
                 <Tab label="Connexions" value="connections" />
               </Tabs>
             </Paper>
       
-            <Box className="mt-4 flex flex-col items-center justify-center">
+            <Box className="mt-4 flex flex-col items-center justify-center w-full">
               {activeTab === 'nouveau' && <NewEventButton onEventCreated={handleEventCreated} />}
               {activeTab === 'modification' && <AdminWeddings weddings={weddingsToTransfer} setWeddings={setWeddingsForTransfer} />}
               {activeTab === 'profil' &&  <AdminProfil profile={profileToTransfer[0]} setProfile={setProfileForTransfer} />}
               {activeTab === 'disponibilites' && <AdminAvailability />}
               {activeTab === 'parameters' && <AdminSiteSettings ref={siteSettingsRef} onPendingInsertionsChange={setHasPendingChanges} />}
+              {activeTab === 'custom-pages' && <CustomPagesManager onUnsavedChanges={setHasCustomPageChanges} scrollableContainerRef={mainScrollableRef} />}
               {activeTab === 'connections' && <ConnectionsList />}
             </Box>
           </Box>
         </Container>
+        </Box>
       </Box>
     </>
   );

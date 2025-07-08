@@ -37,7 +37,7 @@ export function AdminLayoutClient({ children, fontClass }: AdminLayoutClientProp
   }, []);
 
   return (
-    <section className={`${fontClass} admin-content pt-6 m-0 min-h-screen granular-gradient pt-8 flex flex-col items-center justify-start w-full`}>
+    <div className={`${fontClass} admin-content max-w-4xl mx-auto`}>
       <AdminStyleOverrides />
       {children}
       <ToastContainer 
@@ -53,6 +53,6 @@ export function AdminLayoutClient({ children, fontClass }: AdminLayoutClientProp
         theme="dark"
         style={{ fontSize: 16 }}
       />
-    </section>
+    </div>
   );
 }

@@ -131,7 +131,7 @@ export function WeddingForm({
                   name="showLocation"
                 />
               }
-              label={<Typography sx={{ fontSize: '0.875rem' }}>{Boolean(editedWedding?.showLocation ?? true) ? "Affichée" : "Masquée"}</Typography>}
+              label={<Typography sx={{ fontSize: '0.875rem' }}>{Boolean(editedWedding?.showLocation ?? true) ? "Affiché" : "Masqué"}</Typography>}
             />
           </div>
         </div>

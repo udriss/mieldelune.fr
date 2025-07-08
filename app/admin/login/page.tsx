@@ -2,10 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { 
+  Card, 
+  CardContent, 
+  TextField, 
+  Button, 
+  Typography, 
+  Container, 
+  Box, 
+  IconButton, 
+  InputAdornment, 
+  FormControlLabel, 
+  Checkbox,
+  Alert,
+  CircularProgress
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
@@ -53,55 +65,88 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="container py-8 mt-16">
-      <h1 className="text-3xl font-bold mb-8 text-center">Connexion admin</h1>
-      <Card className="max-w-md mx-auto p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={error ? "border-red-500 pr-10" : "pr-10"}
-                autoComplete="current-password"
-                aria-describedby={error ? "password-error" : undefined}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-            {error && <p id="password-error" className="text-sm text-red-500">{error}</p>}
-            
-            <div className="flex items-center space-x-2 mt-2">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="remember" className="text-sm text-gray-600">
-                Se souvenir de moi
-              </label>
-            </div>
-          </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
+    <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
+      <Typography variant="h3" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+        Connexion admin
+      </Typography>
+      
+      <Card sx={{ maxWidth: 400, mx: 'auto', p: 3 }}>
+        <CardContent>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+            autoComplete="on"
           >
-            {isLoading ? "Connexion..." : "Se connecter"}
-          </Button>
-        </form>
+            {/* Champ caché pour indiquer au navigateur qu'il s'agit d'un login sans username */}
+            <input
+              type="text"
+              name="username"
+              value="admin"
+              autoComplete="username"
+              style={{ display: 'none' }}
+              readOnly
+            />
+            
+            <TextField
+              id="password"
+              name="password"
+              label="Mot de passe"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!error}
+              helperText={error || ""}
+              autoComplete="current-password"
+              variant="outlined"
+              fullWidth
+              required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  name="remember"
+                />
+              }
+              label="Se souvenir de moi"
+            />
+            
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={isLoading}
+              size="large"
+              sx={{ mt: 2 }}
+            >
+              {isLoading ? (
+                <>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  Connexion...
+                </>
+              ) : (
+                "Se connecter"
+              )}
+            </Button>
+          </Box>
+        </CardContent>
       </Card>
-    </div>
+    </Container>
   );
 }
