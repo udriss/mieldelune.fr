@@ -128,6 +128,7 @@ export function TypographyCustomizer({ element, onUpdate }: TypographyCustomizer
                 <MenuItem value="500">Medium</MenuItem>
                 <MenuItem value="600">Semi-bold</MenuItem>
                 <MenuItem value="700">Bold</MenuItem>
+                <MenuItem value="800">Très gras</MenuItem>
               </Select>
             </FormControl>
           </Box>

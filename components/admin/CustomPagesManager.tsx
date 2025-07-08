@@ -44,45 +44,7 @@ import { toast } from 'react-toastify';
 import { myFetch } from '@/lib/fetch-wrapper';
 import CustomPageEditor from '@/components/admin/customPages/CustomPageEditor';
 import { CustomPageSettings } from '@/components/admin/customPages/CustomPageSettings';
-
-interface CustomPage {
-  id: string;
-  title: string;
-  slug: string;
-  isPasswordProtected: boolean;
-  password?: string;
-  isPublished: boolean;
-  isRandomSlug: boolean;
-  showTitle?: boolean; // Nouveau: contrôle l'affichage du titre sur la page
-  // Nouvelles propriétés pour la personnalisation du titre
-  titleSettings?: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: 'normal' | 'bold' | '300' | '400' | '500' | '600' | '700';
-    color?: string;
-  };
-  content: ContentElement[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-interface ContentElement {
-  id: string;
-  type: 'title' | 'text' | 'image' | 'video';
-  content: string;
-  order: number;
-  settings?: {
-    // Pour les titres
-    level?: 1 | 2 | 3 | 4 | 5 | 6;
-    // Pour les images/vidéos
-    width?: string;
-    height?: string;
-    alt?: string;
-    // Pour les vidéos
-    autoplay?: boolean;
-    controls?: boolean;
-  };
-}
+import { CustomPage, ContentElement } from '@/components/admin/customPages/editor';
 
 interface CustomPagesManagerProps {
   onUnsavedChanges?: (hasChanges: boolean) => void;
@@ -286,15 +248,27 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
       {pages.length === 0 ? (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <Globe size={48} color="#9ca3af" style={{ marginBottom: 16 }} />
+              <Globe 
+                size={200} 
+                color="#9ca3af" 
+                style={{ 
+                  margin: 'auto',
+                  position: 'absolute', 
+                  top: '50%', 
+                  left: '0',
+                  right: '0', 
+                  opacity: 0.3,
+                  zIndex: -1,
+                }} 
+              />
             <Typography variant="h6" color="textSecondary" gutterBottom>
-              Aucune page créée
+              Aucune page disponible
             </Typography>
             <Typography variant="body2" color="textSecondary" mb={3}>
-              Créez votre première page personnalisée pour commencer
+              Ajoutez votre première page personnalisée pour commencer
             </Typography>
             <Button variant="outlined" startIcon={<Plus />} onClick={createNewPage}>
-              Créer une page
+              Ajouter une page
             </Button>
           </CardContent>
         </Card>
@@ -400,14 +374,15 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         mt: 8, 
         mb: 12,
         width: '100%', 
-        maxWidth: 'xl', 
+        maxWidth: '1200px', 
         borderRadius: 2, 
         border: '1px solid #e5e7eb',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         backgroundColor: 'rgba(255, 255, 255, 0.3)', 
         backdropFilter: 'blur(8px)',
-        height: 'calc(100vh - 120px)', // Hauteur fixe pour forcer le scroll interne
-        overflow: 'hidden', // Pas de scroll sur le Paper principal
+        // Hauteur fixe seulement pour l'éditeur (tab 1) pour l'auto-scroll D&D
+        height: selectedTab === 1 ? 'calc(100vh - 120px)' : 'auto',
+        overflow: selectedTab === 1 ? 'hidden' : 'visible',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -483,22 +458,24 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         ref={internalScrollableRef}
         sx={{
           flex: 1,
-          overflow: 'auto',
-          // Scrollbar personnalisée positionnée au bord droit
-          '&::-webkit-scrollbar': {
-            width: '6px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'rgba(0,0,0,0.05)',
-            borderRadius: '3px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(37, 99, 235, 0.3)',
-            borderRadius: '3px',
-            '&:hover': {
-              background: 'rgba(37, 99, 235, 0.5)',
+          overflow: selectedTab === 1 ? 'auto' : 'visible',
+          // Scrollbar personnalisée positionnée au bord droit (seulement pour l'éditeur)
+          ...(selectedTab === 1 && {
+            '&::-webkit-scrollbar': {
+              width: '6px',
             },
-          },
+            '&::-webkit-scrollbar-track': {
+              background: 'rgba(0,0,0,0.05)',
+              borderRadius: '3px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(37, 99, 235, 0.3)',
+              borderRadius: '3px',
+              '&:hover': {
+                background: 'rgba(37, 99, 235, 0.5)',
+              },
+            },
+          }),
         }}
       >
         {selectedTab === 0 && renderPagesList()}
@@ -506,7 +483,9 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         {selectedTab === 1 && selectedPage && (
           <CustomPageEditor 
             page={selectedPage}
-            onSave={savePage}
+            onSave={(page) => {
+              savePage(page);
+            }}
             onCancel={() => {
               setSelectedPage(null);
               setSelectedTab(0);
@@ -521,7 +500,9 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         {selectedTab === 2 && selectedPage && (
           <CustomPageSettings 
             page={selectedPage}
-            onSave={savePage}
+            onSave={(page) => {
+              savePage(page);
+            }}
             onSlugGenerate={() => {
               const updatedPage = { 
                 ...selectedPage, 

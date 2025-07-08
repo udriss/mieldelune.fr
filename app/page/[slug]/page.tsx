@@ -17,46 +17,23 @@ import {
 import { Lock, Eye } from 'lucide-react';
 import { myFetch } from '@/lib/fetch-wrapper';
 import Image from 'next/image';
+import { CustomPage, ContentElement } from '@/types/customPages';
+import { profile } from '@/lib/dataProfil';
 
-interface CustomPage {
-  id: string;
-  title: string;
-  slug: string;
-  isPasswordProtected: boolean;
-  password?: string;
-  isPublished: boolean;
-  isRandomSlug: boolean;
-  showTitle?: boolean; // Nouveau: contrôle l'affichage du titre sur la page
-  // Nouvelles propriétés pour la personnalisation du titre
-  titleSettings?: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: 'normal' | 'bold' | '300' | '400' | '500' | '600' | '700';
-    color?: string;
-  };
-  content: ContentElement[];
-  createdAt: number;
-  updatedAt: number;
-}
+// Hook pour gérer le titre de l'onglet
+function usePageTitle(page: CustomPage | null) {
+  useEffect(() => {
+    if (!page) return;
 
-interface ContentElement {
-  id: string;
-  type: 'title' | 'text' | 'image' | 'video';
-  content: string;
-  order: number;
-  settings?: {
-    level?: 1 | 2 | 3 | 4 | 5 | 6;
-    width?: string | '100%' | '50%'; // Largeur pour images et vidéos
-    height?: string;
-    alt?: string;
-    autoplay?: boolean;
-    controls?: boolean;
-    // Nouvelles propriétés pour la typographie
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: 'normal' | 'bold' | '300' | '400' | '500' | '600' | '700';
-    color?: string;
-  };
+    // Utiliser le titre de la page, ou le nom de l'artiste si le titre est vide
+    const pageTitle = page.title?.trim() || profile.artistName;
+    document.title = pageTitle;
+
+    // Nettoyer le titre quand le composant est démonté
+    return () => {
+      document.title = profile.artistName; // Revenir au nom de l'artiste par défaut
+    };
+  }, [page]);
 }
 
 // Hook pour charger les Google Fonts au niveau global
@@ -111,6 +88,7 @@ export default function CustomPageView() {
 
   // Charger les Google Fonts pour cette page
   useGoogleFonts(page);
+  usePageTitle(page);
 
   useEffect(() => {
     if (slug) {
@@ -224,15 +202,17 @@ export default function CustomPageView() {
 
       case 'image':
         const isExternalImage = content.startsWith('http');
+        const imageWidth = settings?.width ? `${settings.width}%` : '100%';
         return (
-          <Box key={element.id} sx={{ margin: '1rem 0', textAlign: 'center' }}>
+          <Box key={element.id} sx={{ margin: '1rem 0', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {isExternalImage ? (
               <img
                 src={content}
                 alt={settings?.alt || 'Image'}
                 style={{
-                  maxWidth: settings?.width || '100%',
-                  height: settings?.height || 'auto',
+                  width: imageWidth,
+                  maxWidth: '100%%', // 576px, contrainte maximale
+                  height: 'auto',
                   borderRadius: '8px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}
@@ -241,10 +221,11 @@ export default function CustomPageView() {
               <Image
                 src={content}
                 alt={settings?.alt || 'Image'}
-                width={parseInt(settings?.width || '800')}
-                height={parseInt(settings?.height || '600')}
+                width={800}
+                height={600}
                 style={{
-                  maxWidth: '100%',
+                  width: imageWidth,
+                  maxWidth: '100%', // 576px, contrainte maximale
                   height: 'auto',
                   borderRadius: '8px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
@@ -257,8 +238,9 @@ export default function CustomPageView() {
       case 'video':
         const embedUrl = getVideoEmbedUrl(content);
         const isYouTubeOrVimeo = getYouTubeVideoId(content) || getVimeoVideoId(content);
-        const videoWidth = settings?.width === '50%' ? '50%' : '100%';
-        const maxWidth = settings?.width === '50%' ? '400px' : '800px';
+        const videoWidth = settings?.width ? `${settings.width}%` : '100%';
+        const widthValue = typeof settings?.width === 'number' ? settings.width : parseInt(settings?.width || '100');
+        const maxWidth = widthValue <= 50 ? '400px' : '800px';
         
         return (
           <Box key={element.id} sx={{ 

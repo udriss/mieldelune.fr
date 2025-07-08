@@ -209,7 +209,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         </Box>
         <Box sx={{ mb: 2 }} />
         
-        <Container maxWidth="xl" sx={{ p: 3 }}>
+        <Container maxWidth="xl" sx={{ p: 3, maxWidth: '1100px', width: '100%' }}>
           <Box className="w-full">
             <Paper 
               elevation={0}
@@ -218,7 +218,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
                 top: activeTab === 'custom-pages' ? 'auto' : '4rem',
                 zIndex: activeTab === 'custom-pages' ? 'auto' : 1000,
                 minWidth: '800px',
-                maxWidth: '800px',
+                maxWidth: '100%',
                 margin: '0 auto',
                 background: 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(12px)',

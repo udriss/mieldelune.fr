@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { HexColorPicker, RgbaColorPicker } from 'react-colorful';
+import { CustomPage, ContentElement } from './editor';
 
 // Cache global pour éviter les rechargements de polices
 const loadedFonts = new Set<string>();
@@ -236,42 +237,6 @@ const ColorCircle = ({ color, onChange }: { color: string, onChange: (val: strin
   );
 };
 
-interface CustomPage {
-  id: string;
-  title: string;
-  slug: string;
-  isPasswordProtected: boolean;
-  password?: string;
-  isPublished: boolean;
-  isRandomSlug: boolean;
-  showTitle?: boolean; // Nouveau: contrôle l'affichage du titre sur la page
-  // Nouvelles propriétés pour la personnalisation du titre
-  titleSettings?: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: 'normal' | 'bold' | '300' | '400' | '500' | '600' | '700';
-    color?: string;
-  };
-  content: ContentElement[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-interface ContentElement {
-  id: string;
-  type: 'title' | 'text' | 'image' | 'video';
-  content: string;
-  order: number;
-  settings?: {
-    level?: 1 | 2 | 3 | 4 | 5 | 6;
-    width?: string;
-    height?: string;
-    alt?: string;
-    autoplay?: boolean;
-    controls?: boolean;
-  };
-}
-
 interface CustomPageSettingsProps {
   page: CustomPage;
   onSave: (page: CustomPage) => void;
@@ -434,7 +399,7 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
 
     onSave(editedPage);
     setHasUnsavedChanges(false); // Reset changes after successful save
-    toast.success('Paramètres sauvegardés');
+    // toast.success('Paramètres sauvegardés');
   };
 
   return (
@@ -449,7 +414,7 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
           borderBottom: '1px solid #e0e0e0',
           px: 3,
           py: 2,
-          mb: 3
+          mb: 3,
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -673,12 +638,12 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
                 }))}
                 label="Graisse de police"
               >
-                <MenuItem value="300">Léger (300)</MenuItem>
-                <MenuItem value="400">Normal (400)</MenuItem>
-                <MenuItem value="500">Medium (500)</MenuItem>
-                <MenuItem value="600">Semi-gras (600)</MenuItem>
-                <MenuItem value="700">Gras (700)</MenuItem>
-                <MenuItem value="bold">Très gras (bold)</MenuItem>
+                <MenuItem value="300">Léger</MenuItem>
+                <MenuItem value="400">Normal</MenuItem>
+                <MenuItem value="500">Médium</MenuItem>
+                <MenuItem value="600">Semi-gras</MenuItem>
+                <MenuItem value="700">Gras</MenuItem>
+                <MenuItem value="800">Très gras</MenuItem>
               </Select>
             </FormControl>
 

@@ -13,7 +13,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Chip
+  Chip,
+  Slider
 } from '@mui/material';
 import { 
   GripVertical,
@@ -202,7 +203,7 @@ export function PragmaticSortableContentElement({
       handleContentChange(tempUrl.trim());
       setTempUrl('');
       setUploadType(null);
-      toast.success('Vidéo ajoutée avec succès');
+      toast.success('Media ajouté avec succès');
     } else {
       toast.error('Veuillez saisir une URL valide');
     }
@@ -353,39 +354,73 @@ export function PragmaticSortableContentElement({
               </Box>
             ) : (
               <Box>
-                <Box position="relative" mb={2}>
-                  <Image 
-                    src={element.content} 
-                    alt={element.settings?.alt || 'Image'} 
-                    width={300} 
-                    height={200} 
-                    style={{ 
-                      borderRadius: 8,
-                      width: '100%',
-                      height: 'auto'
+                <Box textAlign="center" sx={{ position: 'relative', maxWidth: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ 
+                    width: `${element.settings?.width || 100}%`,
+                    maxWidth: '800px',
+                    position: 'relative'
+                  }}>
+                    <Image
+                      src={element.content}
+                      alt="Aperçu de l'image"
+                      width={300}
+                      height={200}
+                      style={{ 
+                        borderRadius: 8,
+                        width: '100%',
+                        height: 'auto',
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => handleContentChange('')}
+                      sx={{ 
+                        position: 'absolute', 
+                        top: 8, 
+                        right: 8, 
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* Slider pour la largeur de l'image */}
+                <Box sx={{ mt: 2, px: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                    Largeur de l'image : {element.settings?.width || 100}%
+                  </Typography>
+                  <Slider
+                    value={element.settings?.width || 100}
+                    onChange={(_, value) => handleSettingChange('width', value)}
+                    min={20}
+                    max={100}
+                    step={5}
+                    marks={[
+                      { value: 25, label: '25%' },
+                      { value: 50, label: '50%' },
+                      { value: 75, label: '75%' },
+                      { value: 100, label: '100%' }
+                    ]}
+                    sx={{
+                      color: '#2563eb',
+                      '& .MuiSlider-thumb': {
+                        bgcolor: '#2563eb',
+                        '&:hover': {
+                          boxShadow: '0 0 0 8px rgba(37, 99, 235, 0.16)',
+                        },
+                      },
+                      '& .MuiSlider-track': {
+                        bgcolor: '#2563eb',
+                      },
+                      '& .MuiSlider-rail': {
+                        bgcolor: '#e5e7eb',
+                      },
                     }}
                   />
-                  <IconButton
-                    size="small"
-                    onClick={() => handleContentChange('')}
-                    sx={{ 
-                      position: 'absolute', 
-                      top: 8, 
-                      right: 8, 
-                      bgcolor: 'rgba(255,255,255,0.8)',
-                      '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </IconButton>
                 </Box>
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Texte alternatif (alt)"
-                  value={element.settings?.alt || ''}
-                  onChange={(e) => handleSettingChange('alt', e.target.value)}
-                />
               </Box>
             )}
           </Box>
@@ -475,7 +510,7 @@ export function PragmaticSortableContentElement({
                   {(() => {
                     const embedUrl = getVideoEmbedUrl(element.content);
                     const isYouTubeOrVimeo = getYouTubeVideoId(element.content) || getVimeoVideoId(element.content);
-                    const videoWidth = element.settings?.width === '50%' ? '50%' : '100%';
+                    const videoWidth = `${element.settings?.width || 100}%`;
                     
                     if (isYouTubeOrVimeo && embedUrl) {
                       return (
@@ -483,16 +518,15 @@ export function PragmaticSortableContentElement({
                           position: 'relative', 
                           width: videoWidth,
                           margin: '0 auto',
-                          maxWidth: '500px'
+                          maxWidth: '800px'  // Limite maximale pour les vidéos
                         }}>
                           <iframe
                             width="100%"
                             height="300"
                             src={embedUrl}
-                            frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
-                            style={{ borderRadius: 8 }}
+                            style={{ borderRadius: 8, border: 'none' }}
                           />
                           <IconButton
                             size="small"
@@ -516,7 +550,7 @@ export function PragmaticSortableContentElement({
                           position: 'relative', 
                           width: videoWidth,
                           margin: '0 auto',
-                          maxWidth: '500px'
+                          maxWidth: '800px'
                         }}>
                           <video 
                             width="100%"
@@ -548,19 +582,42 @@ export function PragmaticSortableContentElement({
                   })()}
                 </Box>
                 
+                {/* Slider pour la largeur de la vidéo */}
+                <Box sx={{ mb: 2, px: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                    Largeur de la vidéo : {element.settings?.width || 100}%
+                  </Typography>
+                  <Slider
+                    value={element.settings?.width || 100}
+                    onChange={(_, value) => handleSettingChange('width', value)}
+                    min={25}
+                    max={100}
+                    step={5}
+                    marks={[
+                      { value: 25, label: '25%' },
+                      { value: 50, label: '50%' },
+                      { value: 75, label: '75%' },
+                      { value: 100, label: '100%' }
+                    ]}
+                    sx={{
+                      color: '#2563eb',
+                      '& .MuiSlider-thumb': {
+                        bgcolor: '#2563eb',
+                        '&:hover': {
+                          boxShadow: '0 0 0 8px rgba(37, 99, 235, 0.16)',
+                        },
+                      },
+                      '& .MuiSlider-track': {
+                        bgcolor: '#2563eb',
+                      },
+                      '& .MuiSlider-rail': {
+                        bgcolor: '#e5e7eb',
+                      },
+                    }}
+                  />
+                </Box>
+                
                 <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Largeur</InputLabel>
-                    <Select
-                      value={element.settings?.width || '100%'}
-                      label="Largeur"
-                      onChange={(e) => handleSettingChange('width', e.target.value)}
-                    >
-                      <MenuItem value="100%">100% (pleine largeur)</MenuItem>
-                      <MenuItem value="50%">50% (demi-largeur)</MenuItem>
-                    </Select>
-                  </FormControl>
-                  
                   {!getYouTubeVideoId(element.content) && !getVimeoVideoId(element.content) && (
                     <>
                       <FormControl size="small" sx={{ minWidth: 120 }}>

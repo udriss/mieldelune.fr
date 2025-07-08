@@ -1,36 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { CustomPage } from '@/types/customPages';
 
 const CUSTOM_PAGES_FILE = path.join(process.cwd(), 'data', 'customPages.json');
-
-interface CustomPage {
-  id: string;
-  title: string;
-  slug: string;
-  isPasswordProtected: boolean;
-  password?: string;
-  isPublished: boolean;
-  isRandomSlug: boolean;
-  content: ContentElement[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-interface ContentElement {
-  id: string;
-  type: 'title' | 'text' | 'image' | 'video';
-  content: string;
-  order: number;
-  settings?: {
-    level?: 1 | 2 | 3 | 4 | 5 | 6;
-    width?: string;
-    height?: string;
-    alt?: string;
-    autoplay?: boolean;
-    controls?: boolean;
-  };
-}
 
 // Créer le fichier s'il n'existe pas
 function ensureDataFile() {

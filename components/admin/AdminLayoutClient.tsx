@@ -37,7 +37,7 @@ export function AdminLayoutClient({ children, fontClass }: AdminLayoutClientProp
   }, []);
 
   return (
-    <div className={`${fontClass} admin-content max-w-4xl mx-auto`}>
+    <div className={`${fontClass} admin-content max-w-5xl w-[1200px] min-w-[800px] mx-auto`}>
       <AdminStyleOverrides />
       {children}
       <ToastContainer 
