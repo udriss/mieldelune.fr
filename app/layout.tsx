@@ -134,7 +134,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       height: 100vh;
       pointer-events: none;
       z-index: -1;
-      overflow: hidden;
     `;
 
     // Générer les granules
@@ -243,6 +242,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
     // Appliquer les styles globaux au body
     document.body.dataset.theme = siteSettings.theme || 'clair';
+    
+    // Gestion spécifique pour la page d'admin
+    if (pathname?.startsWith('/admin')) {
+      // Pour la page d'admin, s'assurer que le body n'interfère pas avec le scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      return;
+    } else {
+      // Pour les autres pages, permettre le scroll normal
+      document.body.style.overflow = 'visible';
+      document.body.style.height = 'auto';
+    }
 
     // Couleur principale (convertie en HSL pour Tailwind)
     if (siteSettings.primaryColor) {
@@ -523,16 +534,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="twitter:description" content="Photographe professionnel spécialisé dans les mariages et événements prestigieux." />
         <meta name="twitter:image" content="https://mieldelune.fr/og-image.jpg" />
       </head>
-      <body style={getMainGradient() ? { background: getMainGradient() } : {}}>
+      <body style={getMainGradient() ? { 
+        background: getMainGradient(), 
+        overflow: pathname?.startsWith('/admin') ? 'auto' : 'visible' 
+      } : { 
+        overflow: pathname?.startsWith('/admin') ? 'auto' : 'visible' 
+      }}>
         <SiteSettingsContext.Provider value={siteSettings}>
           <ThemeProvider>
             <NextUIProvider>
-              <NavbarClient />
-              <section className="pt-6 m-0 pt-8 flex flex-col items-center justify-start w-full">
+              {!pathname?.startsWith('/admin') && <NavbarClient />}
+              <section className={`pt-6 m-0 pt-8 flex flex-col items-center justify-start w-full ${pathname?.startsWith('/admin') ? 'pt-0' : ''}`}>
                 {children}
               </section>
-              <Footer />
-              <ScrollToTopButton />
+              {!pathname?.startsWith('/admin') && <Footer />}
+              {!pathname?.startsWith('/admin') && <ScrollToTopButton />}
               <ToastContainer 
                 position="top-center" 
                 autoClose={2000} 

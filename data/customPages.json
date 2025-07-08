@@ -38,38 +38,10 @@
           }
         },
         {
-          "id": "element_1751904890367",
-          "type": "text",
-          "content": "Test TEXTE",
-          "order": 2,
-          "settings": {
-            "fontFamily": "Caveat",
-            "color": "#ef0000"
-          }
-        },
-        {
-          "id": "element_1751938482471",
-          "type": "image",
-          "content": "https://cnes.fr/sites/default/files/styles/banner_lg/public/2024-06/terre.jpg.webp",
-          "order": 3,
-          "settings": {
-            "width": 55
-          }
-        },
-        {
-          "id": "element_1751939402674",
-          "type": "video",
-          "content": "https://www.youtube.com/watch?v=24GfgNtnjXc",
-          "order": 4,
-          "settings": {
-            "width": 35
-          }
-        },
-        {
           "id": "element_1751941971077",
           "type": "video",
           "content": "/custom-pages/videos/1751941990999_74motk2k3.mov",
-          "order": 5,
+          "order": 2,
           "settings": {
             "width": 65
           }
@@ -78,14 +50,33 @@
           "id": "element_1751941980327",
           "type": "image",
           "content": "/custom-pages/images/1751941985964_zbsa5lqib.jpeg",
-          "order": 6,
+          "order": 3,
           "settings": {
             "width": 65
+          }
+        },
+        {
+          "id": "element_1751938482471",
+          "type": "image",
+          "content": "https://cnes.fr/sites/default/files/styles/banner_lg/public/2024-06/terre.jpg.webp",
+          "order": 4,
+          "settings": {
+            "width": 55
+          }
+        },
+        {
+          "id": "element_1751904890367",
+          "type": "text",
+          "content": "Test TEXTE",
+          "order": 5,
+          "settings": {
+            "fontFamily": "Caveat",
+            "color": "#ef0000"
           }
         }
       ],
       "createdAt": 1751904810039,
-      "updatedAt": 1751942082451
+      "updatedAt": 1751948469006
     },
     {
       "id": "page_1751911534484",

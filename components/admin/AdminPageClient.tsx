@@ -181,8 +181,9 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
 
       <Box 
         ref={mainScrollableRef}
-        className="w-full min-h-screen overflow-y-auto"
+        className="mainScrollableRef w-full h-screen overflow-y-auto flex flex-col"
         sx={{
+          mb:16, // Pour laisser de l'espace pour le header
           // Styles de scrollbar personnalisés pour la scrollbar principale
           '&::-webkit-scrollbar': {
             width: '8px',
@@ -201,7 +202,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         }}
       >
         <Box 
-          className="w-full min-h-screen flex flex-col items-center justify-start mt-16"
+          className="w-full flex flex-col items-center justify-start pt-16 mb-32"
         >
         <Box sx={{ mb: 2 }} />
         <Box className="w-full min-w-[800px] max-w-[800px]">
@@ -209,13 +210,13 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         </Box>
         <Box sx={{ mb: 2 }} />
         
-        <Container maxWidth="xl" sx={{ p: 3, maxWidth: '1100px', width: '100%' }}>
+        <Container maxWidth='md' sx={{ p: 3, maxWidth: '1000px', width: '100%' }}>
           <Box className="w-full">
             <Paper 
               elevation={0}
               sx={{
                 position: activeTab === 'custom-pages' ? 'static' : 'sticky',
-                top: activeTab === 'custom-pages' ? 'auto' : '4rem',
+                top: activeTab === 'custom-pages' ? 'auto' : 0, // 4rem = 64px
                 zIndex: activeTab === 'custom-pages' ? 'auto' : 1000,
                 minWidth: '800px',
                 maxWidth: '100%',

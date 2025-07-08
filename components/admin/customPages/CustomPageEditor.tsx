@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { toast } from 'react-toastify';
-import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 // Import des composants refactorisés
 import {
@@ -19,6 +18,7 @@ import {
   TitleSettings,
   PragmaticSortableContentElement,
   reorderContentElements,
+  autoScrollRegistry,
 } from './editor';
 
 interface CustomPageEditorProps {
@@ -48,57 +48,56 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
     // Utiliser le conteneur scrollable parent s'il est fourni, sinon utiliser document.documentElement
     const scrollableElement = scrollableContainerRef?.current || document.documentElement;
     
-    return combine(
-      monitorForElements({
-        canMonitor: ({ source }) => source.data.type === 'content-element',
-        onDrop({ source, location }) {
-          const draggedData = source.data;
-          if (draggedData.type !== 'content-element') return;
+    // Enregistrer l'auto-scroll avec le registry
+    const autoScrollCleanup = autoScrollRegistry.registerAutoScroll(scrollableElement);
+    
+    const monitorCleanup = monitorForElements({
+      canMonitor: ({ source }) => source.data.type === 'content-element',
+      onDrop({ source, location }) {
+        const draggedData = source.data;
+        if (draggedData.type !== 'content-element') return;
 
-          const innerMost = location.current.dropTargets[0];
-          if (!innerMost) return;
+        const innerMost = location.current.dropTargets[0];
+        if (!innerMost) return;
 
-          const targetData = innerMost.data;
-          if (targetData.type !== 'content-element') return;
+        const targetData = innerMost.data;
+        if (targetData.type !== 'content-element') return;
 
-          const draggedId = draggedData.elementId as string;
-          const targetId = targetData.elementId as string;
-          const edge = targetData.closestEdge as 'top' | 'bottom';
+        const draggedId = draggedData.elementId as string;
+        const targetId = targetData.elementId as string;
+        const edge = targetData.closestEdge as 'top' | 'bottom';
 
-          if (draggedId === targetId || !edge) return;
+        if (draggedId === targetId || !edge) return;
 
-          // Utiliser la fonction de réordonnancement simplifiée
-          const reorderedContent = reorderContentElements(
-            editedPage.content,
-            draggedId,
-            targetId,
-            edge
-          );
+        // Utiliser la fonction de réordonnancement simplifiée
+        const reorderedContent = reorderContentElements(
+          editedPage.content,
+          draggedId,
+          targetId,
+          edge
+        );
 
-          setEditedPage(prev => ({
-            ...prev,
-            content: reorderedContent,
-            updatedAt: Date.now()
-          }));
+        setEditedPage(prev => ({
+          ...prev,
+          content: reorderedContent,
+          updatedAt: Date.now()
+        }));
 
-          // Nettoyer tous les indicateurs visuels après le drop
-          setTimeout(() => {
-            // Déclencher un événement pour nettoyer les indicateurs
-            window.dispatchEvent(new CustomEvent('clearDropIndicators'));
-          }, 50);
-        },
-      }),
-      // Auto-scroll pour l'élément scrollable approprié
-      autoScrollForElements({
-        element: scrollableElement,
-        canScroll: ({ source }) => source.data.type === 'content-element',
-        getAllowedAxis: () => 'vertical',
-        getConfiguration: () => ({
-          maxScrollSpeed: 'fast',
-          damping: 0.5,
-        }),
-      })
-    );
+        // Nettoyer tous les indicateurs visuels après le drop
+        setTimeout(() => {
+          // Déclencher un événement pour nettoyer les indicateurs
+          window.dispatchEvent(new CustomEvent('clearDropIndicators'));
+        }, 50);
+      },
+    });
+
+    return () => {
+      monitorCleanup();
+      // L'auto-scroll sera nettoyé automatiquement par le registry
+      if (autoScrollCleanup) {
+        autoScrollCleanup();
+      }
+    };
   }, [editedPage.content, scrollableContainerRef]);
 
   // Synchroniser l'état interne si la prop `page` change
@@ -116,7 +115,18 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
     if (onUnsavedChanges) {
       onUnsavedChanges(isChanged);
     }
+    
+    // Debug: afficher l'état du registry
+    console.log('Auto-scroll registry status:', autoScrollRegistry.getDebugInfo());
   }, [editedPage, initialPage, onUnsavedChanges]);
+
+  // Nettoyer le registry d'auto-scroll au démontage du composant
+  useEffect(() => {
+    return () => {
+      // Nettoyer toutes les registrations d'auto-scroll
+      autoScrollRegistry.cleanupAll();
+    };
+  }, []);
 
   const addElement = (type: ContentElement['type']) => {
     const newElement: ContentElement = {
@@ -239,9 +249,21 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
                     boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
                   }}
                 >
-                  <Typography variant="h2" sx={{ color: 'rgba(59, 130, 246, 0.6)' }}>
-                    📝
-                  </Typography>
+                    <Box
+                      sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ color: 'rgba(59, 130, 246, 0.8)' }}>
+                      <AddCircleOutlineIcon fontSize="large" />
+                      </Typography>
+                    </Box>
                 </Box>
                 <Typography variant="h6" color="textSecondary" gutterBottom sx={{ fontWeight: 600 }}>
                   Aucun contenu ajouté
@@ -283,6 +305,7 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
                     element={element}
                     onUpdate={updateElement}
                     onDelete={deleteElement}
+                    scrollableContainerRef={scrollableContainerRef}
                   />
                 ))}
             </Box>

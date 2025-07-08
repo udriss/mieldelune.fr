@@ -17,7 +17,7 @@ export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onAd
     <Box 
       sx={{
         position: 'sticky',
-        top: '0px', // Décalé pour laisser place aux tabs (hauteur approximative)
+        top: '70px', // Décalé pour laisser place aux tabs (hauteur approximative)
         zIndex: 1000,
         bgcolor: 'white',
         borderBottom: '1px solid #e0e0e0',

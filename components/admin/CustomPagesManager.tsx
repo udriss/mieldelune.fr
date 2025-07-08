@@ -60,9 +60,6 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
   const [pageToDelete, setPageToDelete] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Référence au conteneur scrollable interne
-  const internalScrollableRef = useRef<HTMLDivElement>(null);
-
   // Notifier le parent des changements non sauvegardés
   useEffect(() => {
     if (onUnsavedChanges) {
@@ -247,9 +244,9 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
 
       {pages.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
               <Globe 
-                size={200} 
+                size={100} 
                 color="#9ca3af" 
                 style={{ 
                   margin: 'auto',
@@ -257,8 +254,8 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
                   top: '50%', 
                   left: '0',
                   right: '0', 
-                  opacity: 0.3,
-                  zIndex: -1,
+                  opacity: 0.1,
+                  zIndex: 0,
                 }} 
               />
             <Typography variant="h6" color="textSecondary" gutterBottom>
@@ -371,7 +368,7 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
   return (
     <Paper elevation={1} 
     sx={{ 
-        mt: 8, 
+        mt: 1, 
         mb: 12,
         width: '100%', 
         maxWidth: '1200px', 
@@ -380,9 +377,9 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         backgroundColor: 'rgba(255, 255, 255, 0.3)', 
         backdropFilter: 'blur(8px)',
-        // Hauteur fixe seulement pour l'éditeur (tab 1) pour l'auto-scroll D&D
-        height: selectedTab === 1 ? 'calc(100vh - 120px)' : 'auto',
-        overflow: selectedTab === 1 ? 'hidden' : 'visible',
+        // Hauteur automatique pour tous les onglets
+        height: 'auto',
+        overflow: 'visible',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -453,29 +450,12 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         </Tabs>
       </Paper>
 
-      {/* Conteneur scrollable pour le contenu */}
+      {/* Conteneur pour le contenu */}
       <Box
-        ref={internalScrollableRef}
         sx={{
           flex: 1,
-          overflow: selectedTab === 1 ? 'auto' : 'visible',
-          // Scrollbar personnalisée positionnée au bord droit (seulement pour l'éditeur)
-          ...(selectedTab === 1 && {
-            '&::-webkit-scrollbar': {
-              width: '6px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'rgba(0,0,0,0.05)',
-              borderRadius: '3px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(37, 99, 235, 0.3)',
-              borderRadius: '3px',
-              '&:hover': {
-                background: 'rgba(37, 99, 235, 0.5)',
-              },
-            },
-          }),
+          overflow: 'visible',
+          // Plus besoin de scrollbar personnalisée ici car le scroll se fait au niveau parent
         }}
       >
         {selectedTab === 0 && renderPagesList()}
@@ -493,7 +473,7 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
               setHasUnsavedChanges(false);
             }}
             onUnsavedChanges={setHasUnsavedChanges}
-            scrollableContainerRef={internalScrollableRef}
+            scrollableContainerRef={scrollableContainerRef}
           />
         )}
         

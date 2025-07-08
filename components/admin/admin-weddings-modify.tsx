@@ -505,7 +505,7 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
   };
 
   return (
-    <div className="p-8 flex flex-col items-center max-w-[800px] w-full">
+    <div className="flex flex-col items-center max-w-[800px] w-full mt-8">
       <div className="justify-between items-center flex flex-col max-w-[800px] w-full">
         <div className="flex justify-between items-center w-full">
           <WeddingSelector 

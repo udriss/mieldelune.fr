@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   Navbar,
@@ -21,8 +21,8 @@ export function NavbarClient() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const lastScrollY = useRef(0); // Utiliser useRef au lieu d'un state
   const pathname = usePathname();
 
 
@@ -48,17 +48,19 @@ export function NavbarClient() {
       } else {
         setIsScrolled(true);
         
-        // Si on scroll vers le bas, cacher la navbar
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Si on scroll vers le bas et qu'on a scrollé d'au moins 5px, cacher la navbar
+        if (currentScrollY > lastScrollY.current + 5 && currentScrollY > 100) {
+          console.log('Hiding navbar - scrolling down:', currentScrollY, 'vs', lastScrollY.current);
           setIsNavbarVisible(false);
         }
-        // Si on scroll vers le haut, montrer la navbar
-        else if (currentScrollY < lastScrollY) {
+        // Si on scroll vers le haut et qu'on a scrollé d'au moins 5px, montrer la navbar
+        else if (currentScrollY < lastScrollY.current - 5) {
+          console.log('Showing navbar - scrolling up:', currentScrollY, 'vs', lastScrollY.current);
           setIsNavbarVisible(true);
         }
       }
       
-      setLastScrollY(currentScrollY);
+      lastScrollY.current = currentScrollY;
     };
 
     checkScreenSize();
@@ -69,7 +71,7 @@ export function NavbarClient() {
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [lastScrollY]);
+  }, []); // Retirer lastScrollY des dépendances
 
   if (isMobile) {
     return (
@@ -166,8 +168,8 @@ export function NavbarClient() {
       isBordered 
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`bg-background/40 backdrop-blur-md shadow-sm fixed top-0 z-50 transition-transform duration-300 ease-in-out ${
-        isNavbarVisible ? "translate-y-0" : "-translate-y-full"
+      className={`bg-background/40 backdrop-blur-md shadow-sm fixed z-50 transition-all duration-300 ease-in-out ${
+        isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
       style={{ 
         backdropFilter: "blur(20px)", 
@@ -178,6 +180,7 @@ export function NavbarClient() {
         borderRadius: "0 0 16px 16px", // 1rem = 16px 
         height: "64px", // 4rem = 64px
         padding: "16px 16px 16px 16px", // 1rem = 16px
+        top: "0px", // Garder top à 0 et utiliser transform pour l'animation
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

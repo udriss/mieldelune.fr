@@ -8,4 +8,5 @@ export { TypographyCustomizer } from './TypographyCustomizer';
 export { PragmaticSortableContentElement } from './PragmaticSortableContentElement';
 export { EditorToolbar } from './EditorToolbar';
 export { TitleSettings } from './TitleSettings';
+export { autoScrollRegistry } from './AutoScrollRegistry';
 

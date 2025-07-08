@@ -29,23 +29,27 @@ import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { ContentElement } from './types';
 import { TypographyCustomizer } from './TypographyCustomizer';
 import { useLoadFontOnDemand } from './hooks';
 import { getYouTubeVideoId, getVimeoVideoId, getVideoEmbedUrl } from './videoUtils';
 import { CustomFileUploader } from '../CustomFileUploader';
 import { MediaSelector } from '../MediaSelector';
+import { autoScrollRegistry } from './AutoScrollRegistry';
 
 interface PragmaticSortableContentElementProps {
   element: ContentElement;
   onUpdate: (element: ContentElement) => void;
   onDelete: (id: string) => void;
+  scrollableContainerRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function PragmaticSortableContentElement({ 
   element, 
   onUpdate, 
-  onDelete 
+  onDelete,
+  scrollableContainerRef
 }: PragmaticSortableContentElementProps) {
   const ref = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
@@ -73,7 +77,7 @@ export function PragmaticSortableContentElement({
 
     window.addEventListener('clearDropIndicators', handleClearDropIndicators);
 
-    const cleanup = combine(
+    const cleanupFunctions = [
       draggable({
         element: dragHandle,
         getInitialData: () => ({ 
@@ -166,13 +170,26 @@ export function PragmaticSortableContentElement({
           setDropEdge(null);
         },
       })
-    );
+    ];
+
+    // Ajouter l'auto-scroll si le conteneur est disponible
+    if (scrollableContainerRef?.current) {
+      const scrollableElement = scrollableContainerRef.current;
+      
+      // Utiliser le registry pour éviter les enregistrements multiples
+      const autoScrollCleanup = autoScrollRegistry.registerAutoScroll(scrollableElement);
+      if (autoScrollCleanup) {
+        cleanupFunctions.push(autoScrollCleanup);
+      }
+    }
+
+    const cleanup = combine(...cleanupFunctions);
 
     return () => {
       cleanup();
       window.removeEventListener('clearDropIndicators', handleClearDropIndicators);
     };
-  }, [element.id, dragPreview]);
+  }, [element.id, dragPreview, scrollableContainerRef]);
 
   useEffect(() => {
     if (tempUrl) {
