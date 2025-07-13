@@ -176,6 +176,14 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
     setHasUnsavedChanges(false); // Reset changes after successful save
   };
 
+  const handleReset = () => {
+    // Réinitialiser aux valeurs d'origine sans changer d'onglet
+    const resetPage = JSON.parse(JSON.stringify(initialPage));
+    setEditedPage(resetPage);
+    setHasUnsavedChanges(false);
+    toast.info('Modifications annulées');
+  };
+
   return (
     <Box sx={{ position: 'relative' }}>
       {/* Barre d'outils sticky */}
@@ -184,6 +192,7 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
         hasUnsavedChanges={hasUnsavedChanges}
         onSave={handleSave}
         onCancel={onCancel}
+        onReset={handleReset}
         onAddElement={addElement}
       />
 

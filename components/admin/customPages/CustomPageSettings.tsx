@@ -35,7 +35,8 @@ import {
   ExternalLink,
   Settings as SettingsIcon,
   Palette,
-  ChevronDown
+  ChevronDown,
+  X
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { HexColorPicker, RgbaColorPicker } from 'react-colorful';
@@ -408,7 +409,7 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
       <Box 
         sx={{
           position: 'sticky',
-          top: '0px', // Décalé pour laisser place aux tabs (hauteur approximative)
+          top: '70px', // Décalé pour laisser place aux tabs (hauteur approximative)
           zIndex: 1000,
           bgcolor: 'white',
           borderBottom: '1px solid #e0e0e0',
@@ -422,18 +423,39 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
             Paramètres de la page : {editedPage.title}
           </Typography>
           
-          <Button 
-            variant="contained" 
-            startIcon={<Save />}
-            onClick={handleSave}
-            sx={{ 
-              bgcolor: hasUnsavedChanges ? '#f97316' : '#3b82f6', 
-              '&:hover': { bgcolor: hasUnsavedChanges ? '#ea580c' : '#2563eb' },
-              transition: 'background-color 0.3s ease'
-            }}
-          >
-            {hasUnsavedChanges ? 'Sauvegarder les modifications' : 'Sauvegarder'}
-          </Button>
+          <Box display="flex" gap={2}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                // Réinitialiser les changements
+                setEditedPage(page);
+                setCustomSlug(page.slug);
+                setHasUnsavedChanges(false);
+                // Notifier le parent qu'il n'y a plus de changements
+                if (onUnsavedChanges) {
+                  onUnsavedChanges(false);
+                }
+              }}
+              startIcon={<X />}
+              disabled={!hasUnsavedChanges}
+              size="small"
+            >
+              Annuler modifications
+            </Button>
+            <Button 
+              variant="contained" 
+              startIcon={<Save />}
+              onClick={handleSave}
+              size="small"
+              sx={{ 
+                bgcolor: hasUnsavedChanges ? '#f97316' : '#3b82f6', 
+                '&:hover': { bgcolor: hasUnsavedChanges ? '#ea580c' : '#2563eb' },
+                transition: 'background-color 0.3s ease'
+              }}
+            >
+              {hasUnsavedChanges ? 'Sauvegarder modifications' : 'Sauvegarder'}
+            </Button>
+          </Box>
         </Box>
       </Box>
 

@@ -19,6 +19,7 @@ import { myFetch } from '@/lib/fetch-wrapper';
 import Image from 'next/image';
 import { CustomPage, ContentElement } from '@/types/customPages';
 import { profile } from '@/lib/dataProfil';
+import NotFoundPage from '@/app/not-found';
 
 // Hook pour gérer le titre de l'onglet
 function usePageTitle(page: CustomPage | null) {
@@ -111,7 +112,7 @@ export default function CustomPageView() {
         } else if (response.status === 403) {
           setError('Page non publiée');
         } else {
-          setError('Erreur lors du chargement de la page');
+          setError('Page non trouvée'); // Utiliser le même message pour toutes les erreurs
         }
         return;
       }
@@ -125,7 +126,7 @@ export default function CustomPageView() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement de la page:', error);
-      setError('Erreur lors du chargement de la page');
+      setError('Page non trouvée'); // Utiliser le même message pour les erreurs de réseau
     } finally {
       setLoading(false);
     }
@@ -346,37 +347,53 @@ export default function CustomPageView() {
   }
 
   if (error) {
-    return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-        <Button href="/" variant="contained">
-          Retour à l'accueil
-        </Button>
-      </Container>
-    );
+    return <NotFoundPage />;
   }
 
   if (!page) {
-    return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Page non trouvée
-        </Alert>
-        <Button href="/" variant="contained">
-          Retour à l'accueil
-        </Button>
-      </Container>
-    );
+    return <NotFoundPage />;
   }
 
   // Si la page est protégée et qu'on n'est pas authentifié
   if (page.isPasswordProtected && !isAuthenticated) {
     return (
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Card sx={{ p: 3, textAlign: 'center' }}>
-          <CardContent>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          minHeight: '100vh',
+          width: '100%',
+          backgroundColor: 'transparent', // Fond transparent
+          // backdropFilter: 'blur(12px)', // Effet de flou
+          position: 'relative'
+        }}
+      >
+        {/* Main Content Container */}
+        <Container 
+          component="main" 
+          maxWidth="md"
+          sx={{ 
+            flex: 1, 
+            p: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '80vh'
+          }}
+        >
+          <Paper 
+            elevation={0}
+            sx={{ 
+              textAlign: 'center', 
+              p: 4, 
+              maxWidth: '600px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)', // Fond semi-transparent
+              backdropFilter: 'blur(8px)', // Flou supplémentaire
+              border: '1px solid rgba(255, 255, 255, 0.2)', // Bordure subtile
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+            }}
+          >
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <Lock style={{ fontSize: 60, color: '#1976d2' }} />
             </Box>
@@ -389,55 +406,64 @@ export default function CustomPageView() {
             
             <Box component="form" onSubmit={handlePasswordSubmit}>
               <TextField
-                type={showPassword ? 'text' : 'password'}
-                label="Mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                required
-                sx={{ mb: 2 }}
-                InputProps={{
-                  endAdornment: (
-                    <Button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      sx={{ minWidth: 'auto', p: 1 }}
-                    >
-                      <Eye size={20} />
-                    </Button>
-                  ),
-                }}
+              type={showPassword ? 'text' : 'password'}
+              label="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                endAdornment: (
+                  <Button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  sx={{ minWidth: 'auto', p: 1 }}
+                  >
+                  <Eye size={20} />
+                  </Button>
+                ),
+                },
+              }}
               />
               
               {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
               )}
               
               <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                sx={{ mb: 2 }}
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ mb: 2 }}
               >
-                Accéder à la page
+              Accéder à la page
               </Button>
               
               <Button href="/" variant="text" fullWidth>
-                Retour à l'accueil
+              Retour à l'accueil
               </Button>
             </Box>
-          </CardContent>
-        </Card>
-      </Container>
+          </Paper>
+        </Container>
+      </Box>
     );
   }
 
   // Affichage de la page
   return (
     <Container maxWidth="md" sx={{ py: 4, mt: 8 }}>
-      <Paper sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>
+      <Paper sx={{ 
+        p: 4, 
+        borderRadius: 2, 
+        boxShadow: 3,
+        backgroundColor: 'transparent', // Fond transparent
+        backdropFilter: 'blur(12px)', // Effet de flou pour la lisibilité
+        border: '1px solid rgba(255, 255, 255, 0.2)' // Bordure subtile
+      }}>
         {/* Affichage conditionnel du titre avec personnalisation */}
         {(page.showTitle !== false) && (
           <Typography variant="h3" gutterBottom sx={{ 

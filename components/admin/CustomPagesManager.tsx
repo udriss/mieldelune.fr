@@ -368,7 +368,6 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
   return (
     <Paper elevation={1} 
     sx={{ 
-        mt: 1, 
         mb: 12,
         width: '100%', 
         maxWidth: '1200px', 

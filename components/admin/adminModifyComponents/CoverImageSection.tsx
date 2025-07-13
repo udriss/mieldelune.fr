@@ -2,13 +2,13 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import * as Slider from '@radix-ui/react-slider';
 import { toast } from 'react-toastify';
 import { Wedding, Image as WeddingImage } from '@/lib/dataTemplate';
 import { FileUploader } from '@/components/admin/admin-file-uploader';
 import { myFetch } from '@/lib/fetch-wrapper';
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, IconButton, Box } from '@mui/material';
 
 
 interface CoverImageSectionProps {
@@ -138,9 +138,32 @@ export function CoverImageSection({
 
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
-      <Typography variant="h6" fontWeight={600} mb={2}>
-      Image de couverture
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" fontWeight={600}>
+          Image de couverture
+        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton
+            size="small"
+            onClick={() => window.open('/', '_blank')}
+            title="Voir la page d'accueil"
+            sx={{ 
+              color: '#3b82f6',
+              border: '1px solid #3b82f6',
+              borderRadius: '6px',
+              '&:hover': {
+                backgroundColor: '#eff6ff',
+                borderColor: '#2563eb'
+              }
+            }}
+          >
+            <ExternalLink size={16} />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary">
+            Voir la page d'accueil
+          </Typography>
+        </Box>
+      </Box>
       <div className="grid grid-cols-4 border rounded-lg p-1 min-h-[200px]">
         {editedWedding.coverImage ? (
           <div key={`${editedWedding.coverImage.id}-${updateKey}`} className='flex flex-col items-center justify-center'>
@@ -274,7 +297,7 @@ export function CoverImageSection({
                     {isProcessingCoverThumbnail && (
                       <div className="flex flex-col items-center gap-2 bg-gray-50 rounded-lg mt-4 p-2">
                         <div className="text-sm text-gray-600 flex justify-around items-center">
-                          <p>Production de la miniature ... </p> 
+                          <p>Production de la miniature... </p> 
                           <Loader2 className="w-6 h-6 animate-spin" />
                         </div>
                       </div>

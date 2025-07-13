@@ -81,8 +81,10 @@ export default function Page() {
           <PageHeader 
             title={siteSettings?.titleSite || ""}
             description={siteSettings?.descriptionSite || ""} 
-            classNameAddedTitle="animate-fadeIn"
-            classNameAddedDescription="animate-fadeIn-two"
+            classNameAddedTitle=""
+            //classNameAddedTitle="animate-fadeIn"
+            classNameAddedDescription=""
+            // classNameAddedDescription="animate-fadeIn-two"
           />
           <ClientWrapper />
         </>

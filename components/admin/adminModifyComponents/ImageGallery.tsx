@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Eye, EyeOff, Plus, X, Save, Check, Trash2, Link, Upload } from "lucide-react";
+import { Loader2, Eye, EyeOff, Plus, X, Save, Check, Trash2, Link, Upload, ExternalLink } from "lucide-react";
 import { SortableWeddingImage } from '@/components/admin/SortableEvent';
 import { FileUploader } from '@/components/admin/admin-file-uploader';
 import { myFetch } from '@/lib/fetch-wrapper';
@@ -25,7 +25,7 @@ import {
   rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, IconButton, Box } from '@mui/material';
 
 import {createSnapModifier} from '@dnd-kit/modifiers';
 
@@ -544,9 +544,32 @@ export function ImageGallery({
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
 
-      <Typography variant="h6" fontWeight={600} mb={2}>
-      Galerie d'images
-    </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" fontWeight={600}>
+          Galerie d'images
+        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton
+            size="small"
+            onClick={() => window.open(`/mariage/${editedWedding?.id}`, '_blank')}
+            title="Voir la page du mariage"
+            sx={{ 
+              color: '#3b82f6',
+              border: '1px solid #3b82f6',
+              borderRadius: '6px',
+              '&:hover': {
+                backgroundColor: '#eff6ff',
+                borderColor: '#2563eb'
+              }
+            }}
+          >
+            <ExternalLink size={16} />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary">
+            Voir la page du mariage
+          </Typography>
+        </Box>
+      </Box>
       {/* Barre d'outils principale */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
         {/* Actions sur les images */}

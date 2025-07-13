@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { myFetch } from '@/lib/fetch-wrapper';
-import { Paper, Typography, Switch, FormControlLabel } from '@mui/material';
+import { Paper, Typography, Switch, FormControlLabel, IconButton, Box } from '@mui/material';
+import { ExternalLink } from 'lucide-react';
 
 
 interface WeddingFormProps {
@@ -88,9 +89,32 @@ export function WeddingForm({
 
       <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
       <div className="space-y-4 w-full">
-        <Typography variant="h6" fontWeight={600} mb={2}>
-        Informations du mariage
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" fontWeight={600}>
+            Informations du mariage
+          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <IconButton
+              size="small"
+              onClick={() => window.open(`/mariage/${editedWedding?.id}`, '_blank')}
+              title="Voir la page du mariage"
+              sx={{ 
+                color: '#3b82f6',
+                border: '1px solid #3b82f6',
+                borderRadius: '6px',
+                '&:hover': {
+                  backgroundColor: '#eff6ff',
+                  borderColor: '#2563eb'
+                }
+              }}
+            >
+              <ExternalLink size={16} />
+            </IconButton>
+            <Typography variant="caption" color="text.secondary">
+              Voir la page du mariage
+            </Typography>
+          </Box>
+        </Box>
         <h2 className="font-bold text-lg mb-4"></h2>
         <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4 items-center">
           <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Titre</h4>

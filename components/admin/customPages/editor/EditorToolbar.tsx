@@ -9,10 +9,11 @@ interface EditorToolbarProps {
   hasUnsavedChanges: boolean;
   onSave: () => void;
   onCancel: () => void;
+  onReset?: () => void; // Nouvelle prop pour réinitialiser sans changer d'onglet
   onAddElement: (type: ContentElement['type']) => void;
 }
 
-export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onAddElement }: EditorToolbarProps) {
+export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onReset, onAddElement }: EditorToolbarProps) {
   return (
     <Box 
       sx={{
@@ -34,22 +35,25 @@ export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onAd
         <Box display="flex" gap={2}>
           <Button
             variant="outlined"
-            onClick={onCancel}
+            onClick={onReset || onCancel}
             startIcon={<X />}
+            disabled={onReset && !hasUnsavedChanges}
+            size="small"
           >
-            Annuler
+            {onReset ? 'Annuler modifications' : 'Annuler'}
           </Button>
           <Button
             variant="contained"
             onClick={onSave}
             startIcon={<Save />}
+            size="small"
             sx={{ 
               bgcolor: hasUnsavedChanges ? '#f97316' : '#3b82f6', 
               '&:hover': { bgcolor: hasUnsavedChanges ? '#ea580c' : '#2563eb' },
               transition: 'background-color 0.3s ease'
             }}
           >
-            {hasUnsavedChanges ? 'Sauvegarder les modifications' : 'Sauvegarder'}
+            {hasUnsavedChanges ? 'Sauvegarder modifications' : 'Sauvegarder'}
           </Button>
         </Box>
       </Box>

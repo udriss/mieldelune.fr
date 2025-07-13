@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
     if (!res.ok) {
       return {
-        title: 'Mariage introuvable | MielDeLune',
+        title: 'Mariage | MielDeLune - Introuvable',
         description: 'Ce mariage n\'existe pas ou n\'est plus disponible.',
       };
     }
@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: 'Mariage | MielDeLune',
-      description: 'Galerie de photos de mariage professionnelles.',
+      title: 'Mariage | MielDeLune - Introuvable',
+      description: 'Ce mariage n\'existe pas ou n\'est plus disponible.',
     };
   }
 }
@@ -44,24 +44,29 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function WeddingPage({ params }: Params) {
   const { id } = await params;
 
-  const res = await myFetch(`/api/mariage/${id}`, {
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    }
-  });
+  try {
+    const res = await myFetch(`/api/mariage/${id}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      notFound();
+    }
+
+    const wedding = await res.json();
+
+    return (
+        <div className="max-w-[1600px] mx-auto py-16">
+          <WeddingGallery wedding={wedding} />
+        </div>
+    );
+  } catch (error) {
+    // Si l'API retourne une erreur (404, 500, etc.), on redirige vers la page 404
     notFound();
   }
-
-  const wedding = await res.json();
-
-  return (
-      <div className="max-w-[1600px] mx-auto py-16">
-        <WeddingGallery wedding={wedding} />
-      </div>
-  );
 }

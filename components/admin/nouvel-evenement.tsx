@@ -91,7 +91,7 @@ const NewEventButton: React.FC<NewEventButtonProps> = ({ onEventCreated }) => {
                 startIcon={!isLoading && <AddIcon />}
                 size="large"
             >
-                {isLoading ? 'En cours ...' : 'Nouvel événement'}
+                {isLoading ? 'En cours...' : 'Nouvel événement'}
             </Button>
             {newWedding && (
                 <Paper elevation={1} sx={{ mt: 8, width: 800, maxWidth: 800, p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>

@@ -42,3 +42,4 @@ next-env.d.ts
 deploy.sh
 dev.sh
 update_permissions.sh
+sync_mieldelune_to_aidem.sh

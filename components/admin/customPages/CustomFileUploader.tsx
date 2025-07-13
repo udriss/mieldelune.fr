@@ -236,7 +236,7 @@ export function CustomFileUploader({
       {isUploading && (
         <Box sx={{ p: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="textSecondary" mb={2}>
-            Upload en cours ...
+            Upload en cours...
           </Typography>
           <LinearProgress 
             variant="determinate" 

@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Profile } from '@/lib/dataProfil';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import { debounce } from 'lodash';
 import { myFetch } from '@/lib/fetch-wrapper';
 import { FaTiktok, FaInstagram, FaFacebook, FaWhatsapp } from "react-icons/fa";
 import { Switch } from "@/components/ui/switch";
 import type { SocialMediaData } from '@/lib/utils/data-parser';
-import { Paper, Grid, Typography, TextField } from '@mui/material';
+import { Paper, Grid, Typography, TextField, IconButton, Box } from '@mui/material';
 
 
 interface AdminProfilProps {
@@ -405,8 +405,32 @@ const getInputStyle = (field: string) => {
 
       
     <Paper elevation={1} sx={{ mt: 8, width: '800px', p: 3, borderRadius: 2, border: '1px solid #e5e7eb', maxWidth: '800px', margin: '0 auto' }}>
-      <Typography variant="h6" fontWeight={600} mb={2}>
-        Profil</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" fontWeight={600}>
+          Profil
+        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton
+            size="small"
+            onClick={() => window.open('/artiste', '_blank')}
+            title="Voir la page artiste"
+            sx={{ 
+              color: '#3b82f6',
+              border: '1px solid #3b82f6',
+              borderRadius: '6px',
+              '&:hover': {
+                backgroundColor: '#eff6ff',
+                borderColor: '#2563eb'
+              }
+            }}
+          >
+            <ExternalLink size={16} />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary">
+            Voir la page de profil
+          </Typography>
+        </Box>
+      </Box>
       <Grid container spacing={2} direction={'row'}
       sx={{
         display: 'flex',
@@ -626,7 +650,7 @@ const getInputStyle = (field: string) => {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Upload en cours ...</span>
+                      <span>Upload en cours...</span>
                     </div>
                     <Button 
                       variant="ghost" 

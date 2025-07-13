@@ -3,10 +3,10 @@
     {
       "id": "page_1751904810039",
       "title": "Dyor",
-      "slug": "RECC22",
-      "isPasswordProtected": false,
+      "slug": "DYOR",
+      "isPasswordProtected": true,
       "isPublished": true,
-      "isRandomSlug": true,
+      "isRandomSlug": false,
       "showTitle": true,
       "titleSettings": {
         "fontFamily": "Playfair Display",
@@ -32,9 +32,9 @@
           "content": "Aidem",
           "order": 1,
           "settings": {
-            "fontSize": 30,
+            "fontSize": 48,
             "fontFamily": "PT Sans",
-            "color": "#1a2f57"
+            "color": "#f90000"
           }
         },
         {
@@ -61,7 +61,7 @@
           "content": "https://cnes.fr/sites/default/files/styles/banner_lg/public/2024-06/terre.jpg.webp",
           "order": 4,
           "settings": {
-            "width": 55
+            "width": 95
           }
         },
         {
@@ -76,7 +76,8 @@
         }
       ],
       "createdAt": 1751904810039,
-      "updatedAt": 1751948469006
+      "updatedAt": 1752353107436,
+      "password": "123"
     },
     {
       "id": "page_1751911534484",
