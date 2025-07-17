@@ -1,9 +1,21 @@
 import React, { useState, useRef, ChangeEvent, DragEvent, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Image } from '@/lib/dataTemplate';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from '@nextui-org/react';
+import { 
+  Button, 
+  TextField, 
+  LinearProgress, 
+  Box, 
+  Typography, 
+  Paper, 
+  IconButton,
+  CircularProgress,
+  Stack,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import { IoCheckmarkDone, IoClose } from "react-icons/io5";
 import { FaUpload, FaXmark } from "react-icons/fa6";
 import { Upload } from "lucide-react";
@@ -35,7 +47,7 @@ export const FileUploader = ({
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
-  const fileItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const fileItemsRef = useRef<(HTMLElement | null)[]>([]);
 
   // Effect to handle scrolling to the currently uploading file
   useEffect(() => {
@@ -55,7 +67,7 @@ export const FileUploader = ({
   }, [uploadQueue.length]);
 
   // Fonction pour assigner la référence à l'élément DOM de manière correcte
-  const setFileItemRef = (el: HTMLDivElement | null, index: number) => {
+  const setFileItemRef = (el: HTMLElement | null, index: number) => {
     fileItemsRef.current[index] = el;
   };
 
@@ -272,113 +284,153 @@ export const FileUploader = ({
   };
 
   return (
-    <div className="space-y-4">
-      {h3Title &&
-      <h3 className="text-sm text-gray-500">
-        Sélectionnez un ou plusieurs fichiers image</h3>
-      }
+    <Stack spacing={2}>
+      {h3Title && (
+        <Typography variant="body2" color="text.secondary">
+          Sélectionnez un ou plusieurs fichiers image
+        </Typography>
+      )}
       
       {/* Zone de glisser-déposer */}
-      <div 
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
-          ${isDragging 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-          }`}
+      <Paper
+        variant="outlined"
+        sx={{
+          border: '2px dashed',
+          borderColor: isDragging ? 'primary.main' : 'grey.300',
+          backgroundColor: isDragging ? 'primary.light' : 'background.paper',
+          p: 3,
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+        borderColor: 'primary.main',
+        backgroundColor: 'grey.50'
+          }
+        }}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={triggerFileInput}
       >
-        <div className="flex flex-col items-center justify-center space-y-2 cursor-pointer">
-          <Upload className="h-10 w-10 text-gray-400" />
-          <p className="text-sm font-medium text-gray-600">
-            Glissez-déposez vos images ici ou cliquez pour parcourir
-          </p>
-          <p className="text-xs text-gray-400">
-            Formats acceptés: JPG, PNG, GIF, WEBP
-          </p>
-        </div>
-        <Input
-          ref={fileInputRef}
+        <Stack spacing={1} alignItems="center">
+          <Upload style={{ width: 40, height: 40, color: '#9CA3AF' }} />
+          <Typography variant="body2" fontWeight="medium" color="text.primary">
+        Glissez-déposez vos images ici ou cliquez pour parcourir
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+        Formats acceptés: JPG, PNG, GIF, WEBP
+          </Typography>
+        </Stack>
+        <TextField
+          inputRef={fileInputRef}
           type="file"
-          accept="image/*"
+          slotProps={{ 
+        htmlInput: {
+          accept: "image/*",
+          multiple: h3Title
+        }
+          }}
           disabled={isUploading}
           onChange={handleFileSelect}
-          className="hidden"
-          {...(h3Title ? { multiple: true } : {})}
+          sx={{ display: 'none' }}
         />
-      </div>
+      </Paper>
 
-      <div className="text-sm text-gray-500 h-[70px] max-h-[70px] overflow-hidden">
-      {uploadQueue.length > 0 && !isUploading && (
-        <div className={`flex gap-2 justify-around ${h3Title ? 'flex-row' : 'flex-row'}`}>
-          <Button 
-            className='font-semibold bg-white text-black border-gray-300 hover:bg-green-100 hover:text-green-500'
-            onClick={startUpload}
-            variant={'outline'}>
-            Charger
-          </Button>
-          <Button 
-            className='font-semibold bg-white text-black border-gray-300 hover:bg-orange-100 hover:text-orange-500'
-            onClick={clearQueue}
-            variant={'outline'}>
-            Effacer la liste
-          </Button>
-        </div>
-      )}
+      {uploadQueue.length > 0 && (
+        <>
+          <Box sx={{ maxHeight: '70px', overflow: 'hidden' }}>
+            {!isUploading && (
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button 
+                  variant="outlined" 
+                  color="success" 
+                  onClick={startUpload}
+                >
+                  Charger
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="warning" 
+                  onClick={clearQueue}
+                >
+                  Effacer la liste
+                </Button>
+              </Stack>
+            )}
 
-        {isUploading && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-            <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCancelUpload}
-            className='font-semibold bg-white text-black border-gray-300 hover:bg-red-100 hover:text-red-500'>
-                Annuler
-              </Button>
-              <span>Chargement en cours ({currentUploadIndex + 1}/{uploadQueue.length}) ... {Math.round(uploadProgress)}%</span>
-            </div>
-            <Progress 
-                value={uploadProgress} 
-                className="w-full h-2 bg-gray-200 rounded-full"
-                aria-label="Upload progress"
-              >
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full" 
-                  style={{ width: `${uploadProgress}%` }} 
+            {isUploading && (
+              <Stack spacing={2}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={handleCancelUpload}
+                  >
+                    Annuler
+                  </Button>
+                  <Typography variant="body2">
+                    Chargement en cours ({currentUploadIndex + 1}/{uploadQueue.length}) ... {Math.round(uploadProgress)}%
+                  </Typography>
+                </Stack>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={uploadProgress}
+                  sx={{ width: '100%' }}
                 />
-              </Progress>
-          </div>
-        )}
-      </div>
-      
-      {/* Liste des fichiers */}
-      <div className="max-h-[150px] overflow-auto">
-        {uploadQueue.map((item, idx) => (
-          <div 
-            key={`${item.file.name}-${idx}`} 
-            className={`text-sm flex flex-row items-center mb-1 py-1 px-2 rounded transition-colors duration-300 ${
-              idx === currentUploadIndex ? 'bg-blue-50' : 'hover:bg-gray-50'
-            }`}
-            ref={(el) => setFileItemRef(el, idx)}
-          >
-            {item.status === 'annulé' || item.status === 'error' ? (
-              <span className="text-red-500 mr-2 max-w-6 max-w-h-6 w-6 h-6"><FaXmark className='w-6 h-6' /></span>
-            ) : item.status === 'terminé' ? (
-              <span className="text-green-400 mr-2 max-w-6 max-w-h-6 w-6 h-6"><IoCheckmarkDone className='w-6 h-6' /></span> 
-            ) : item.status === 'chargement' ? (
-              <span className="text-orange-300 mr-2 max-w-6 max-w-h-6 w-6 h-6"><FaUpload className='w-5 h-5' /></span>
-            )  : null}
-            <div className="flex-1 flex items-center">
-              <span className="mr-2">{truncateFileName(item.file.name, 25)}</span>
-              <span className="text-xs text-gray-500">{Math.round(item.progress)}% - {item.status}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+              </Stack>
+            )}
+          </Box>
+          
+          {/* Liste des fichiers */}
+          <Box sx={{ maxHeight: '150px', overflowY: 'auto' }}>
+            <List dense>
+              {uploadQueue.map((item, idx) => (
+                <ListItem 
+                  key={`${item.file.name}-${idx}`}
+                  ref={(el) => setFileItemRef(el, idx)}
+                  sx={{
+                    backgroundColor: idx === currentUploadIndex ? 'primary.light' : 'transparent',
+                    '&:hover': {
+                      backgroundColor: 'grey.50'
+                    },
+                    transition: 'background-color 0.3s ease',
+                    borderRadius: 1,
+                    mb: 0.5
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    {item.status === 'annulé' || item.status === 'error' ? (
+                      <IconButton color="error" size="small">
+                        <FaXmark />
+                      </IconButton>
+                    ) : item.status === 'terminé' ? (
+                      <IconButton color="success" size="small">
+                        <IoCheckmarkDone />
+                      </IconButton>
+                    ) : item.status === 'chargement' ? (
+                      <CircularProgress size={20} color="primary" />
+                    ) : null}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body2">
+                          {truncateFileName(item.file.name, 25)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {Math.round(item.progress)}% - {item.status}
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </>
+      )}
+    </Stack>
   );
 };

@@ -16,7 +16,8 @@ import {
   Grid, 
   Chip,
   LinearProgress,
-  Collapse
+  Collapse,
+  Button as MuiButton
 } from '@mui/material';
 import { 
   BarChartOutlined, 
@@ -213,7 +214,7 @@ export function CoverImageSection({
 
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
         <Typography variant="h6" fontWeight={600}>
           Image de couverture
         </Typography>
@@ -240,9 +241,9 @@ export function CoverImageSection({
         </Box>
       </Box>
       
-      <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: '200px' }}>
+      <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 150 }}>
         <Grid size={{ xs: 3 }}>
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100%">
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" height="100%">
             {editedWedding.coverImage ? (
               <>
                 <Image
@@ -272,7 +273,15 @@ export function CoverImageSection({
         </Grid>
         
         <Grid size={{ xs: 3 }}>
-          <Box display="flex" flexDirection="column" gap={2} justifyContent="center" height="100%">
+          <Box display="flex" flexDirection="column" gap={2} justifyContent="flex-start" height="100%"
+          sx={{
+            minHeight: 100,
+          }}>
+          <Box display="flex" flexDirection="column" gap={2} justifyContent="center"
+          sx={{
+            height: '100%',
+            maxHeight: 150,
+          }}>
             <Button 
               variant={uploadType === 'coverUrl' ? 'default' : 'outline'}
               size="sm"
@@ -308,27 +317,49 @@ export function CoverImageSection({
               Produire la vignette
             </Button>
           </Box>
+          </Box>
         </Grid>
 
         {showAddCoverImage && (
           <Grid size={{ xs: 6 }}>
             <Box sx={{ height: '100%', p: 2, bgcolor: '#f9fafb', borderRadius: 1 }}>
               {uploadType === 'coverUrl' && (
-                <Box display="flex" alignItems="center" gap={2} height="100%">
-                  <Input 
-                    type="text" 
-                    placeholder="Entrez l'URL de l'image"
-                    value={newImageUrlCover}
-                    onChange={handleUrlChangeCover}
-                    className={`flex-1 ${isValidUrlCover ? 'border-green-500 border-2' : 'border-red-500'}`}
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleAddImageByUrl('coverLink')}
-                    className="bg-white border-gray-300 text-black hover:bg-green-100 border-gray-300"
+                <Box display="flex" flexDirection="column" gap={2} height="100%">
+                    <Box>
+                    <Box
+                      component="textarea"
+                      value={newImageUrlCover}
+                      onChange={handleUrlChangeCover}
+                      placeholder="Entrez l'URL de l'image"
+                      rows={3}
+                      style={{
+                      width: '100%',
+                      resize: 'vertical',
+                      overflow: 'auto',
+                      border: `2px solid ${isValidUrlCover ? '#4caf50' : '#f44336'}`,
+                      borderRadius: '4px',
+                      padding: '8px',
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
+                      outline: 'none',
+                      }}
+                    />
+                    </Box>
+                  <MuiButton
+                  variant="outlined"
+                  onClick={() => handleAddImageByUrl('coverLink')}
+                  sx={{
+                    bgcolor: 'white',
+                    borderColor: 'gray.300',
+                    color: 'black',
+                    '&:hover': {
+                    bgcolor: 'green.100',
+                    borderColor: 'gray.300',
+                    },
+                  }}
                   >
-                    Ajouter
-                  </Button>
+                  Ajouter
+                  </MuiButton>
                 </Box>
               )}
               
@@ -353,7 +384,7 @@ export function CoverImageSection({
                   
                   {editedWedding.coverImage && editedWedding.coverImage.fileType === 'coverStorage' && (
                     <Box display="flex" flexDirection="column" justifyContent="center" gap={2}>
-                      <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+                      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
                         <Typography variant="body2" color="text.secondary">
                           <CompressOutlined fontSize="small" sx={{ mr: 1 }} />
                           Compression : {resizeValueCover}%
@@ -377,21 +408,29 @@ export function CoverImageSection({
                       </Box>
                       
                       <Box display="flex" justifyContent="center">
-                        <Button 
-                          variant="outline" 
+                        <MuiButton
+                          variant="outlined"
                           onClick={handleGenerateThumbnails}
-                          className="bg-white border-gray-300 text-black hover:bg-green-100 border-gray-300"
                           disabled={isProcessingCoverThumbnail}
+                          sx={{
+                          bgcolor: 'white',
+                          borderColor: 'gray.300',
+                          color: 'black',
+                          '&:hover': {
+                            bgcolor: 'green.100',
+                            borderColor: 'gray.300',
+                          },
+                          }}
                         >
                           {isProcessingCoverThumbnail ? (
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              En cours...
-                            </Box>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            En cours...
+                          </Box>
                           ) : (
-                            'Lancer'
+                          'Lancer'
                           )}
-                        </Button>
+                        </MuiButton>
                       </Box>
                       
                       {isProcessingCoverThumbnail && (

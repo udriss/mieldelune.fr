@@ -140,12 +140,16 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
     }
   };
 
-
   const validateUrl = (url: string) => {
-    const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-    return regex.test(url);
+    const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const urlObj = new URL(url, window.location.origin);
+
+    // Check if the URL has a valid image extension
+    const hasImageExtension = imageExtensions.some(ext => urlObj.pathname.toLowerCase().endsWith(`.${ext}`));
+
+    return regex.test(url) && hasImageExtension;
   };
-  
   interface UrlChangeEvent {
     target: {
       value: string;
