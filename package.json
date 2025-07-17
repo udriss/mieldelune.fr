@@ -8,7 +8,9 @@
     "start": "next start -p 8005",
     "lint": "next lint",
     "sitemap": "next-sitemap",
-    "update-dimensions": "ts-node scripts/update-image-dimensions.ts"
+    "update-dimensions": "ts-node scripts/update-image-dimensions.ts",
+    "cleanup-thumbnails": "ts-node scripts/cleanup-thumbnails.ts",
+    "generate-cover-thumbnails": "ts-node scripts/generate-cover-thumbnails.ts"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.4",

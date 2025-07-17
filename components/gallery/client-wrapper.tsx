@@ -187,17 +187,18 @@ export default function ClientWrapper() {
   }, []);
   
   return (
-    <Container 
-      sx={{ 
-        mt: 6,
-        mb: { xs: 4, sm: 6, md: 8, lg: 10, xl: 12 },
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 5,
-        maxWidth: '800px',
-        minWidth: '300px',
-      }}
-    >
+    <>
+      <Container 
+        sx={{ 
+          mt: 6,
+          mb: { xs: 4, sm: 6, md: 8, lg: 10, xl: 12 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 5,
+          maxWidth: '800px',
+          minWidth: '300px',
+        }}
+      >
       <Grid container spacing={6}>
         {sortedWeddings.map((wedding, index) => (
           wedding.visible && (
@@ -246,7 +247,7 @@ export default function ClientWrapper() {
                       height: '100%',
                       zIndex: 0
                     }}>
-                      {wedding.coverImage && (
+                      {wedding.coverImage ? (
                         <>
                           {loadingImages[wedding.coverImage.id] ? (
                             <Box 
@@ -295,9 +296,58 @@ export default function ClientWrapper() {
                                 transform: hoveredId === wedding.id ? 'scale(1.05)' : 'scale(1)'
                               }}
                               onLoad={() => wedding.coverImage && handleImageLoad(Number(wedding.coverImage.id))}
+                              onError={() => {
+                                // Gérer l'erreur de chargement d'image
+                                console.warn(`Image de couverture non trouvée pour ${wedding.title}`);
+                              }}
                             />
                           )}
                         </>
+                      ) : (
+                        // Image de fallback stylisée quand pas d'image de couverture
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            textAlign: 'center',
+                            p: 3
+                          }}
+                        >
+                          <Favorite
+                            sx={{
+                              fontSize: 60,
+                              mb: 2,
+                              opacity: 0.8,
+                              animation: 'pulse 2s ease-in-out infinite'
+                            }}
+                          />
+                          <Typography 
+                            variant="h6" 
+                            fontWeight={600}
+                            sx={{ 
+                              mb: 1,
+                              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                              letterSpacing: '0.5px'
+                            }}
+                          >
+                            {wedding.title}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              opacity: 0.9,
+                              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                            }}
+                          >
+                            Moments précieux
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
 
@@ -467,5 +517,19 @@ export default function ClientWrapper() {
         ))}
       </Grid>
     </Container>
+    
+    <style jsx global>{`
+      @keyframes pulse {
+        0%, 100% { 
+          opacity: 0.8; 
+          transform: scale(1); 
+        }
+        50% { 
+          opacity: 1; 
+          transform: scale(1.05); 
+        }
+      }
+    `}</style>
+    </>
   );
 }

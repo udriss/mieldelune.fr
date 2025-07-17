@@ -11,18 +11,38 @@ import {
   Chip,
   LinearProgress,
   Grid,
+  ToggleButton,
+  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Pagination,
+  IconButton,
+  Collapse,
   FormControl,
   FormLabel,
-  RadioGroup,
   FormControlLabel,
-  Radio
 } from '@mui/material';
 import { 
   ImageOutlined, 
   BarChartOutlined, 
   CompressOutlined,
-  StopOutlined
+  StopOutlined,
+  ArrowForwardOutlined,
+  ExpandMoreOutlined,
+  ExpandLessOutlined
 } from '@mui/icons-material';
+
+interface CompressionStat {
+  imageName: string;
+  originalSize: number;
+  finalSize: number;
+  compressionRate: number;
+  targetSize: number;
+}
 
 interface ThumbnailManagerProps {
   editedWedding: Wedding;
@@ -46,137 +66,148 @@ export function ThumbnailManager({
   setThumbnailProgress
 }: ThumbnailManagerProps) {
   const [failedThumbnails, setFailedThumbnails] = useState<string[]>([]);
-  const [processedSizes, setProcessedSizes] = useState<{ [key: string]: { target: number, actual: number } }>({});
+  const [compressionStats, setCompressionStats] = useState<{ [key: string]: CompressionStat }>({});
   const [compressionStrategy, setCompressionStrategy] = useState<'best' | 'worst'>('worst');
+  const [currentProcessId, setCurrentProcessId] = useState<string | null>(null);
+  const [tableRowsToShow, setTableRowsToShow] = useState<5 | 11 | 15 | 'all'>(5);
+  const [tablePage, setTablePage] = useState(1);
+  const [showStatsTable, setShowStatsTable] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const generateThumbnail = async (image: Image, signal: AbortSignal) => {
+  const processThumbnailsBatch = async () => {
+    setIsProcessingThumbnails(true);
+    setFailedThumbnails([]);
+    setCompressionStats({});
+    setTablePage(1);
+    setThumbnailProgress(0);
+    
+    // Générer un ID unique pour ce processus
+    const processId = `thumb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setCurrentProcessId(processId);
+
+    // Démarrer le polling du progrès
+    const progressInterval = setInterval(async () => {
+      try {
+        const progressResponse = await fetch(`/api/thumbnail-progress?processId=${processId}`);
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          if (progressData.success) {
+            console.log(`📊 Progrès reçu: ${progressData.progress}% (${progressData.processedImages}/${progressData.totalImages})`);
+            setThumbnailProgress(progressData.progress);
+            
+            // Arrêter le polling si le processus est terminé
+            if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
+              console.log(`✅ Processus terminé avec le statut: ${progressData.status}`);
+              clearInterval(progressInterval);
+            }
+          }
+        } else {
+          console.warn(`⚠️ Erreur API progrès: ${progressResponse.status} - ${progressResponse.statusText}`);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du progrès:', error);
+      }
+    }, 500); // Interroger toutes les 500ms
+
     try {
-      const response = await fetch('/api/generate-thumbnail/', {
+      console.log(`🚀 Démarrage du processus batch avec ID: ${processId}`);
+      const response = await fetch('/api/thumbnail-batch/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           folderId: editedWedding.folderId,
-          imageUrl: image.fileUrl,
           resizePercentage: resizeValue,
           compressionStrategy: compressionStrategy,
+          processId: processId,
         }),
-        signal: signal,
       });
-  
-      if (signal.aborted) {
-        throw new Error('Opération annulée');
-      }
 
       const data = await response.json();
-  
+
       if (!response.ok || !data.success) {
-        setFailedThumbnails(prev => [...prev, image.fileUrl]);
-        toast.error(`Échec pour ${image.fileUrl.split('/').pop()}`, {
+        throw new Error(data.error || 'Erreur lors du traitement en lot');
+      }
+
+      // Mettre à jour les statistiques de compression
+      if (data.compressionStats) {
+        setCompressionStats(data.compressionStats);
+        setShowStatsTable(true);
+      }
+
+      // Gérer les échecs
+      if (data.failedImages && data.failedImages.length > 0) {
+        setFailedThumbnails(data.failedImages);
+      }
+
+      // Afficher le résultat
+      if (data.processedImages === data.totalImages) {
+        toast.success(`${data.processedImages} miniatures optimisées avec compression adaptative`, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          theme: "dark",
+          style: { width: '500px' }
+        });
+      } else {
+        toast.warning(`${data.processedImages}/${data.totalImages} miniatures générées`, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          theme: "dark",
+          style: { width: '300px' }
+        });
+      }
+
+    } catch (error) {
+      console.error('Erreur lors du traitement en lot:', error);
+      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        theme: "dark",
+        style: { width: '400px' }
+      });
+    } finally {
+      clearInterval(progressInterval);
+      setIsProcessingThumbnails(false);
+      setThumbnailProgress(100); // S'assurer que la barre de progrès atteint 100%
+      
+      // Réinitialiser après un délai
+      setTimeout(() => {
+        setThumbnailProgress(0);
+        setCurrentProcessId(null);
+      }, 2000);
+    }
+  };
+
+  const handleCancelThumbnails = async () => {
+    if (currentProcessId) {
+      try {
+        await fetch(`/api/thumbnail-batch/?processId=${currentProcessId}`, {
+          method: 'DELETE',
+        });
+        
+        setIsProcessingThumbnails(false);
+        setThumbnailProgress(0);
+        setCurrentProcessId(null);
+        
+        toast.info('Génération de miniatures annulée', {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
           theme: "dark",
           style: { width: '400px' }
         });
-        return false;
-      }
-      
-      // Enregistrer les tailles pour affichage
-      if (data.finalSizeKB && data.targetSizeKB) {
-        setProcessedSizes(prev => ({
-          ...prev,
-          [image.fileUrl]: {
-            target: data.targetSizeKB,
-            actual: data.finalSizeKB
-          }
-        }));
-      }
-      
-      return true;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return false;
-      }
-      setFailedThumbnails(prev => [...prev, image.fileUrl]);
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        theme: "dark",
-        style: { width: '400px' }
-      });
-      return false;
-    }
-  };
-  
-  const processThumbnails = async () => {
-    setIsProcessingThumbnails(true);
-    setFailedThumbnails([]);
-    setProcessedSizes({});
-    let completed = 0;
-    let succeeded = 0;
-    
-    // Créer un nouvel AbortController
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-  
-    try {
-      for (const image of editedWedding.images) {
-        // Vérifier si l'opération a été annulée
-        if (controller.signal.aborted) {
-          break;
-        }
-        
-        const success = await generateThumbnail(image, controller.signal);
-        completed++;
-        if (success) succeeded++;
-        setThumbnailProgress((completed / editedWedding.images.length) * 100);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        toast.info('Génération de miniatures annulée', {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          theme: "dark",
-          style: { width: '300px' }
-        });
+      } catch (error) {
+        console.error('Erreur lors de l\'annulation:', error);
       }
     }
-  
-    setTimeout(() => {
-      setIsProcessingThumbnails(false);
-      setThumbnailProgress(0);
-      abortControllerRef.current = null;
-      
-      if (!controller.signal.aborted) {
-        if (succeeded === editedWedding.images.length) {
-          toast.success('Miniatures optimisées avec compression adaptative', {
-            position: "top-center",
-            autoClose: 2000,
-            className: 'text-center',
-            hideProgressBar: false,
-            theme: "dark",
-            style: { width: '500px' }
-          });
-        } else {
-          toast.warning(`${succeeded}/${editedWedding.images.length} miniatures générées`, {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            theme: "dark",
-            style: { width: '300px' }
-          });
-        }
-      }
-    }, 1500);
   };
 
   const handleProcessThumbnails = async () => {
-    await processThumbnails();
+    await processThumbnailsBatch();
     
     // Recharger les données du mariage pour obtenir les dimensions mises à jour
     try {
@@ -193,20 +224,16 @@ export function ThumbnailManager({
     }
   };
 
-  const handleCancelThumbnails = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsProcessingThumbnails(false);
-      setThumbnailProgress(0);
-      toast.info('Génération de miniatures annulée', {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        theme: "dark",
-        style: { width: '300px' }
-      });
-    }
-  };
+  // Calculer les données pour le tableau
+  const statsArray = Object.entries(compressionStats).map(([url, stats]) => ({
+    url,
+    ...stats
+  }));
+
+  const totalPages = tableRowsToShow === 'all' ? 1 : Math.ceil(statsArray.length / tableRowsToShow);
+  const startIndex = tableRowsToShow === 'all' ? 0 : (tablePage - 1) * tableRowsToShow;
+  const endIndex = tableRowsToShow === 'all' ? statsArray.length : startIndex + tableRowsToShow;
+  const displayedStats = statsArray.slice(startIndex, endIndex);
 
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
@@ -222,6 +249,7 @@ export function ThumbnailManager({
         gridTemplateColumns: 'repeat(12, 1fr)',
         gap: 2, alignItems: 'center', bgcolor: 'white', 
         p: 2, borderRadius: 1, border: '1px solid #e5e7eb' }}>
+        
         <Box sx={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column' }}>
           <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CompressOutlined fontSize="small" />
@@ -246,29 +274,23 @@ export function ThumbnailManager({
         </Box>
         
         <Box sx={{ gridColumn: 'span 3' }}>
-          <FormControl component="fieldset" size="small">
-            <FormLabel component="legend" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-              Stratégie de compression
-            </FormLabel>
-            <RadioGroup
-              value={compressionStrategy}
-              onChange={(e) => setCompressionStrategy(e.target.value as 'best' | 'worst')}
-              sx={{ mt: 0.5 }}
-            >
-              <FormControlLabel 
-                value="worst" 
-                control={<Radio size="small" />} 
-                label={<Typography variant="caption">Moins bonne qualité</Typography>}
-                sx={{ height: 24 }}
-              />
-              <FormControlLabel 
-                value="best" 
-                control={<Radio size="small" />} 
-                label={<Typography variant="caption">Meilleure qualité</Typography>}
-                sx={{ height: 24 }}
-              />
-            </RadioGroup>
-          </FormControl>
+          <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 1 }}>
+            Stratégie de compression
+          </Typography>
+          <ToggleButtonGroup
+            value={compressionStrategy}
+            exclusive
+            onChange={(_, newStrategy) => newStrategy && setCompressionStrategy(newStrategy)}
+            size="small"
+            sx={{ width: '100%' }}
+          >
+            <ToggleButton value="worst" sx={{ flex: 1, fontSize: '0.75rem', py: 0.5 }}>
+              Moins bonne
+            </ToggleButton>
+            <ToggleButton value="best" sx={{ flex: 1, fontSize: '0.75rem', py: 0.5 }}>
+              Meilleure
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Box>
         
         <Box sx={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -325,7 +347,7 @@ export function ThumbnailManager({
       </Box>
       
       {/* Affichage des statistiques de compression */}
-      {Object.keys(processedSizes).length > 0 && (
+      {Object.keys(compressionStats).length > 0 && (
         <Box sx={{ 
           mt: 2, 
           p: 2, 
@@ -334,17 +356,27 @@ export function ThumbnailManager({
           border: '1px solid', 
           borderColor: 'success.200'
         }}>
-          <Typography variant="body2" color="success.dark" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, fontWeight: 500 }}>
-            <BarChartOutlined fontSize="small" />
-            Statistiques de compression
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+            <Typography variant="body2" color="success.dark" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 500 }}>
+              <BarChartOutlined fontSize="small" />
+              Statistiques de compression
+            </Typography>
+            <IconButton 
+              size="small" 
+              onClick={() => setShowStatsTable(!showStatsTable)}
+              sx={{ color: 'success.dark' }}
+            >
+              {showStatsTable ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+            </IconButton>
+          </Box>
+          
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 6 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" color="success.dark">Taille cible moyenne :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(Object.values(processedSizes).reduce((acc, curr) => acc + curr.target, 0) / Object.values(processedSizes).length).toFixed(1)}KB`}
+                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.targetSize, 0) / Object.values(compressionStats).length / 1024).toFixed(1)}KB`}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="success"
                   variant="outlined"
@@ -356,7 +388,7 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Taille réelle moyenne :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(Object.values(processedSizes).reduce((acc, curr) => acc + curr.actual, 0) / Object.values(processedSizes).length).toFixed(1)}KB`}
+                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.finalSize, 0) / Object.values(compressionStats).length / 1024).toFixed(1)}KB`}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="success"
                   variant="outlined"
@@ -365,15 +397,10 @@ export function ThumbnailManager({
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="caption" color="success.dark">Écart type :</Typography>
+                <Typography variant="caption" color="success.dark">Taux de compression moyen :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(() => {
-                    const sizes = Object.values(processedSizes).map(s => s.actual);
-                    const mean = sizes.reduce((a, b) => a + b, 0) / sizes.length;
-                    const variance = sizes.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / sizes.length;
-                    return Math.sqrt(variance).toFixed(1);
-                  })()}KB`}
+                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.compressionRate, 0) / Object.values(compressionStats).length).toFixed(1)}%`}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="info"
                   variant="outlined"
@@ -385,7 +412,7 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Images traitées :</Typography>
                 <Chip 
                   size="small" 
-                  label={Object.keys(processedSizes).length}
+                  label={Object.keys(compressionStats).length}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="primary"
                   variant="outlined"
@@ -393,6 +420,86 @@ export function ThumbnailManager({
               </Box>
             </Grid>
           </Grid>
+
+          {/* Tableau détaillé des statistiques */}
+          <Collapse in={showStatsTable}>
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body2" fontWeight={500} color="success.dark">
+                  Détail par image
+                </Typography>
+                <ToggleButtonGroup
+                  value={tableRowsToShow}
+                  exclusive
+                  onChange={(_, newValue) => newValue && setTableRowsToShow(newValue)}
+                  size="small"
+                >
+                  <ToggleButton value={5} sx={{ fontSize: '0.7rem', px: 1, py: 0.25 }}>5</ToggleButton>
+                  <ToggleButton value={11} sx={{ fontSize: '0.7rem', px: 1, py: 0.25 }}>11</ToggleButton>
+                  <ToggleButton value={15} sx={{ fontSize: '0.7rem', px: 1, py: 0.25 }}>15</ToggleButton>
+                  <ToggleButton value="all" sx={{ fontSize: '0.7rem', px: 1, py: 0.25 }}>Tout</ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+              
+              <TableContainer 
+                sx={{ 
+                  maxHeight: tableRowsToShow === 'all' ? 300 : 'auto',
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.300'
+                }}
+              >
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: 'success.100' }}>Nom de l'image</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600, bgcolor: 'success.100' }}>Tailles</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600, bgcolor: 'success.100' }}>Compression</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {displayedStats.map((stat, index) => (
+                      <TableRow key={stat.url} sx={{ '&:nth-of-type(odd)': { bgcolor: 'success.50' } }}>
+                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                          {stat.imageName}
+                        </TableCell>
+                        <TableCell align="center" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                            <span>{(stat.originalSize / 1024).toFixed(1)}KB</span>
+                            <ArrowForwardOutlined fontSize="small" sx={{ color: 'success.dark' }} />
+                            <span style={{ color: stat.finalSize < stat.originalSize ? 'green' : 'orange' }}>
+                              {(stat.finalSize / 1024).toFixed(1)}KB
+                            </span>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            size="small"
+                            label={`${stat.compressionRate}%`}
+                            color={stat.compressionRate > 50 ? 'success' : stat.compressionRate > 20 ? 'warning' : 'error'}
+                            variant="outlined"
+                            sx={{ fontFamily: 'monospace', fontSize: '0.7rem', minWidth: 60 }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={tablePage}
+                    onChange={(_, page) => setTablePage(page)}
+                    size="small"
+                    color="primary"
+                  />
+                </Box>
+              )}
+            </Box>
+          </Collapse>
         </Box>
       )}
     </Paper>

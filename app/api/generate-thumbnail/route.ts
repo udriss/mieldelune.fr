@@ -107,10 +107,34 @@ async function handleThumbnailGeneration({
 
     const fileExtension = path.extname(fileName);
     const fileNameWithoutExt = path.basename(fileName, fileExtension);
-    const thumbFileName = `${fileNameWithoutExt}_THUMBEL${fileExtension}`;
+    
+    // Pour les images de couverture, ajouter un timestamp pour éviter les conflits
+    const timestamp = isCover ? `_${Date.now()}` : '';
+    const thumbFileName = `${fileNameWithoutExt}_THUMBEL${timestamp}${fileExtension}`;
     
     const originalPath = path.join(baseDir, fileName);
     const thumbPath = path.join(thumbDir, thumbFileName);
+
+    // Supprimer les anciennes miniatures si c'est une image de couverture
+    if (isCover) {
+      try {
+        const files = await require('fs/promises').readdir(thumbDir);
+        const oldThumbnails = files.filter((file: string) => 
+          file.startsWith(`${fileNameWithoutExt}_THUMBEL`) && file.endsWith(fileExtension)
+        );
+        
+        for (const oldThumb of oldThumbnails) {
+          try {
+            await unlink(path.join(thumbDir, oldThumb));
+            console.log(`🗑️ Ancienne miniature supprimée: ${oldThumb}`);
+          } catch (error) {
+            console.warn(`⚠️ Impossible de supprimer l'ancienne miniature: ${oldThumb}`);
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Erreur lors de la recherche d\'anciennes miniatures:', error);
+      }
+    }
 
     // Get original image metadata
     const metadata = await sharp(originalPath).metadata();
@@ -266,6 +290,12 @@ export async function POST(request: Request) {
 
     // Calculer les tailles cibles adaptatives avec la stratégie
     const allImageUrls = wedding.images.map(img => img.fileUrl);
+    
+    // Pour les images de couverture, s'assurer qu'elle est incluse dans le calcul
+    if (isCover && wedding.coverImage && !allImageUrls.includes(imageUrl)) {
+      allImageUrls.push(imageUrl);
+    }
+    
     const targetSizes = await calculateTargetSize(baseDir, allImageUrls, resizePercentage, compressionStrategy);
     
     // Obtenir la taille cible spécifique pour cette image
@@ -311,11 +341,24 @@ export async function POST(request: Request) {
     await updateWeddingsData(weddings);
     
     const duration = Date.now() - startTime;
+
+    // Calculer les statistiques pour la réponse
+    let originalSizeKB = 0;
+    if (result.finalSizeKB) {
+      try {
+        const originalPath = path.join(baseDir, imageUrl.split('/').pop() || '');
+        const originalStats = await stat(originalPath);
+        originalSizeKB = Math.round(originalStats.size / 1024);
+      } catch (error) {
+        console.warn('⚠️ Impossible de calculer la taille originale:', error);
+      }
+    }
     
     return NextResponse.json({ 
       success: true, 
       thumbnailPath: result.thumbUrlPath,
       finalSizeKB: result.finalSizeKB,
+      originalSizeKB,
       targetSizeKB,
       compressionStrategy,
       duration
