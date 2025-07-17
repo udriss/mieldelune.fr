@@ -1,14 +1,14 @@
 import LightGallery from 'lightgallery/react';
 import { useRouter } from 'next/navigation';
 import { Wedding, Image as WeddingImage } from '@/lib/dataTemplate';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Loader2 } from "lucide-react";
-import Image from 'next/image';
 import Masonry from 'react-masonry-css';
-// import Masonry from '@mui/lab/Masonry'; // Supprimé pour éviter les fluctuations CSS
 import { Skeleton, Box } from '@mui/material';
 import { Heart } from 'lucide-react';
 
@@ -92,8 +92,6 @@ const socialSettings: SocialSettings = {
 export function MasonryGallery({ wedding }: { wedding: Wedding }) {
   const router = useRouter();
   const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
-  const [visibleImages, setVisibleImages] = useState<Set<string>>(new Set());
-  const [imageDimensions, setImageDimensions] = useState<{ [key: string]: { width: number, height: number } }>({});
 
   // Filtrer les images pour n'afficher que celles qui sont visibles
   const visibleWeddingImages = useMemo(() => {
@@ -109,16 +107,6 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
     
     // For images without description or with hidden description
     return `Moment #${index + 1}`;
-  };
-
-  // Calcule la largeur en fonction de la hauteur minimale et des proportions d'origine
-  const calculateWidth = (imageId: string, minHeight: number = 300) => {
-    if (!imageDimensions[imageId]) return 'auto';
-    
-    const { width, height } = imageDimensions[imageId];
-    const aspectRatio = width / height;
-    
-    return `${minHeight * aspectRatio}px`;
   };
 
   return (
@@ -187,87 +175,64 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
                     data-pinterest-text={`${wedding.title} - ${caption}`}
                   >
                     <div className="relative w-full overflow-hidden rounded-[5px]">
-                      {isImageLoading && (
-                        <Box 
-                          sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: 'rgba(254, 226, 226, 0.2)',
-                            backdropFilter: 'blur(16px)',
-                            minWidth: '100px',
-                            minHeight: '100px'
-                          }}
-                        >
-                          <Heart
-                            className="text-red-400 animate-pulse"
-                            style={{
-                              width: '80%',
-                              height: '80%'
-                            }}
-                          />
-                        </Box>
-                      )}
-                      <Image
-                        src={getImageUrl(image)}
-                        alt={`${wedding.title} - ${caption}`}
-                        className={`w-full transition-transform duration-300 hover:scale-105 ${
-                          isImageLoading ? 'opacity-0' : 'opacity-100'
-                        }`}
-                        width={400}
-                        height={600}
-                        sizes="(max-width: 768px) 100vw,
-                              (max-width: 1200px) 33vw,
-                              25vw"
-                              style={{ 
-                                // Hauteur proportionnelle à la hauteur d'origine 
-                                // avec un minimum de 150px
-                                height: 'auto',
-                                objectFit: 'contain'
-                              }}     // Marque l'image comme chargée
-                        onLoad={(e) => {
-                          // // Capture des dimensions réelles de l'image
-                          // const img = e.currentTarget;
-                          // const originalWidth = img.naturalWidth;
-                          // const originalHeight = img.naturalHeight;
-                          
-                          // // Calcule une hauteur proportionnelle aux dimensions originales
-                          // // Applique le style directement à l'image chargée
-                          // const aspectRatio = originalWidth / originalHeight;
-                          // let calculatedHeight;
-                          
-                          // // Approche basée sur le ratio d'aspect pour préserver les proportions
-                          // if (aspectRatio > 1.5) { // Images très larges (panoramiques)
-                          //   calculatedHeight = Math.max(300, originalHeight / 2);
-                          // } else if (aspectRatio > 1) { // Images larges standard
-                          //   calculatedHeight = Math.max(400, originalHeight / 1.5);
-                          // } else { // Images portrait ou carrées
-                          //   calculatedHeight = Math.max(600, originalHeight / 1.2);
-                          // }
-                          
-                          // // Applique la hauteur calculée directement à l'élément
-                          // img.style.height = `${calculatedHeight}px`;
-                          
-                          // Stocke les dimensions pour d'autres calculs si nécessaire
-                          // setImageDimensions(prev => ({
-                          //   ...prev,
-                          //   [image.id]: {
-                          //     width: originalWidth,
-                          //     height: originalHeight
-                          //   }
-                          // }));
-                          
-                          // Marque l'image comme chargée
-                          setLoadingImages(prev => ({
-                            ...prev,
-                            [image.id]: false
-                          }));
-
+                      {/* Conteneur avec aspect-ratio pour éviter le layout shift */}
+                      <div 
+                        className="relative w-full"
+                        style={{ 
+                          aspectRatio: image.width && image.height 
+                            ? `${image.width}/${image.height}` 
+                            : '3/4' // Fallback ratio
                         }}
-
-                      />
+                      >
+                        {isImageLoading && (
+                          <Box 
+                            sx={{
+                              position: 'absolute',
+                              inset: 0,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'rgba(254, 226, 226, 0.2)',
+                              backdropFilter: 'blur(16px)',
+                              zIndex: 1
+                            }}
+                          >
+                            <Heart
+                              className="text-red-400 animate-pulse"
+                              style={{
+                                width: '80%',
+                                height: '80%'
+                              }}
+                            />
+                          </Box>
+                        )}
+                        
+                        <LazyLoadImage
+                          src={getImageUrl(image)}
+                          alt={`${wedding.title} - ${caption}`}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          effect="blur"
+                          placeholder={
+                            <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                              <Heart className="text-red-300 animate-pulse w-12 h-12" />
+                            </div>
+                          }
+                          onLoad={() => {
+                            // Marque l'image comme chargée
+                            setLoadingImages(prev => ({
+                              ...prev,
+                              [image.id]: false
+                            }));
+                          }}
+                          beforeLoad={() => {
+                            // Marque l'image comme en cours de chargement
+                            setLoadingImages(prev => ({
+                              ...prev,
+                              [image.id]: true
+                            }));
+                          }}
+                        />
+                      </div>
                       
                       {/* Caption overlay on hover - only show if description is visible */}
                       {visibleWeddingImages[index]?.descriptionVisibility !== false && (

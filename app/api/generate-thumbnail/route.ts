@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { access, mkdir, unlink } from 'fs/promises';
+import { access, mkdir, unlink, stat } from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 import { parseWeddingsData, updateWeddingsData } from '@/lib/utils/data-parser';
@@ -7,7 +7,7 @@ import { parseWeddingsData, updateWeddingsData } from '@/lib/utils/data-parser';
 interface ThumbnailGenerationParams {
   baseDir: string;
   imageUrl: string;
-  resizePercentage: number;
+  targetSizeKB: number;
   isCover: boolean;
 }
 
@@ -15,26 +15,88 @@ interface ThumbnailGenerationResult {
   success: boolean;
   error?: string;
   thumbUrlPath?: string;
+  finalSizeKB?: number;
+}
+
+// Fonction pour calculer la taille cible adaptive
+async function calculateTargetSize(baseDir: string, images: string[], targetPercentage: number, strategy: 'best' | 'worst' = 'worst'): Promise<{ [imageUrl: string]: number }> {
+  const imageSizes: { [imageUrl: string]: number } = {};
+  
+  // Collecter les tailles de toutes les images
+  for (const imageUrl of images) {
+    try {
+      const fileName = imageUrl.split('/').pop();
+      if (!fileName) continue;
+      
+      const imagePath = path.join(baseDir, fileName);
+      const stats = await stat(imagePath);
+      imageSizes[imageUrl] = stats.size;
+    } catch (error) {
+      console.warn(`Unable to get size for ${imageUrl}:`, error);
+    }
+  }
+  
+  if (Object.keys(imageSizes).length === 0) {
+    return Object.fromEntries(images.map(url => [url, 50 * 1024])); // Fallback: 50KB par défaut
+  }
+  
+  const sizes = Object.values(imageSizes);
+  const targetSizes: { [imageUrl: string]: number } = {};
+  
+  if (strategy === 'worst') {
+    // Stratégie "Moins bonne qualité" : se baser sur l'image la plus petite
+    const minSize = Math.min(...sizes);
+    const targetSizeBytes = minSize * (targetPercentage / 100);
+    
+    for (const imageUrl of images) {
+      targetSizes[imageUrl] = Math.max(10 * 1024, targetSizeBytes);
+    }
+    
+    console.log(`🎯 Stratégie: ${strategy}, Taille de référence: ${(minSize / 1024).toFixed(1)}KB`);
+  } else {
+    // Stratégie "Meilleure qualité" : algorithme intelligent
+    const maxSize = Math.max(...sizes);
+    const baseTargetSizeBytes = maxSize * (targetPercentage / 100);
+    
+    console.log(`🎯 Stratégie: ${strategy}, Taille de référence maximale: ${(maxSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Taille cible de base: ${(baseTargetSizeBytes / 1024).toFixed(1)}KB`);
+    
+    for (const imageUrl of images) {
+      const originalSize = imageSizes[imageUrl];
+      if (!originalSize) continue;
+      
+      // Si l'image brute est plus petite que la taille cible calculée,
+      // utiliser la taille brute comme limite
+      if (originalSize < baseTargetSizeBytes) {
+        targetSizes[imageUrl] = originalSize * 0.9; // Garder 90% de la taille originale
+        console.log(`📏 ${imageUrl}: taille brute (${(originalSize / 1024).toFixed(1)}KB) < cible, utilisation de ${(targetSizes[imageUrl] / 1024).toFixed(1)}KB`);
+      } else {
+        targetSizes[imageUrl] = baseTargetSizeBytes;
+        console.log(`📏 ${imageUrl}: utilisation de la taille cible standard ${(baseTargetSizeBytes / 1024).toFixed(1)}KB`);
+      }
+      
+      // S'assurer d'un minimum raisonnable
+      targetSizes[imageUrl] = Math.max(10 * 1024, targetSizes[imageUrl]);
+    }
+  }
+  
+  return targetSizes;
 }
 
 async function handleThumbnailGeneration({
   baseDir,
   imageUrl,
-  resizePercentage,
+  targetSizeKB,
   isCover
-}: ThumbnailGenerationParams): Promise<ThumbnailGenerationResult> {
-  // 
-  
+}: ThumbnailGenerationParams): Promise<ThumbnailGenerationResult & { dimensions?: { width: number; height: number } }> {
   try {
     const thumbDir = path.join(baseDir, 'thumbnails');
-    // 
 
     // Ensure directories exist
     try {
       await access(thumbDir);
     } catch {
       await mkdir(thumbDir, { recursive: true });
-      // 
     }
 
     const fileName = imageUrl.split('/').pop();
@@ -49,37 +111,111 @@ async function handleThumbnailGeneration({
     
     const originalPath = path.join(baseDir, fileName);
     const thumbPath = path.join(thumbDir, thumbFileName);
-    
-    // 
 
-    // Generate thumbnail
+    // Get original image metadata
     const metadata = await sharp(originalPath).metadata();
     if (!metadata.width || !metadata.height) {
       console.error('❌ Invalid image metadata');
       return { success: false, error: 'Invalid image metadata' };
     }
 
-    await sharp(originalPath)
-      .resize(
-        Math.round(metadata.width * (resizePercentage / 100)),
-        Math.round(metadata.height * (resizePercentage / 100)),
-        {
-          fit: 'contain',
-          withoutEnlargement: true
-        }
-      )
-      .jpeg({
-        quality: 40,
-        chromaSubsampling: '4:2:0',
-        mozjpeg: true,
-        force: true
-      })
-      .toFile(thumbPath);
-
-    const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
-    // 
+    // Algorithme adaptatif pour atteindre la taille cible
+    let quality = 80;
+    let width = metadata.width;
+    let height = metadata.height;
+    const targetSizeBytes = targetSizeKB * 1024;
     
-    return { success: true, thumbUrlPath };
+    // Première estimation : réduire les dimensions si nécessaire
+    const originalStats = await stat(originalPath);
+    const compressionRatio = targetSizeBytes / originalStats.size;
+    
+    if (compressionRatio < 0.5) {
+      // Si la compression est très forte, réduire aussi les dimensions
+      const scaleFactor = Math.sqrt(compressionRatio * 2);
+      width = Math.round(metadata.width * scaleFactor);
+      height = Math.round(metadata.height * scaleFactor);
+    }
+
+    // Ajustement itératif de la qualité
+    let attempt = 0;
+    const maxAttempts = 5;
+    
+    while (attempt < maxAttempts) {
+      try {
+        await sharp(originalPath)
+          .resize(width, height, {
+            fit: 'contain',
+            withoutEnlargement: true
+          })
+          .jpeg({
+            quality: Math.round(quality),
+            chromaSubsampling: '4:2:0',
+            mozjpeg: true,
+            force: true
+          })
+          .toFile(thumbPath);
+
+        // Vérifier la taille du fichier généré
+        const thumbStats = await stat(thumbPath);
+        const actualSizeKB = thumbStats.size / 1024;
+        
+        console.log(`📊 Tentative ${attempt + 1}: ${actualSizeKB.toFixed(1)}KB (cible: ${targetSizeKB}KB, qualité: ${quality})`);
+        
+        // Si la taille est dans la plage acceptable (±20%), on accepte
+        if (actualSizeKB <= targetSizeKB * 1.2 && actualSizeKB >= targetSizeKB * 0.8) {
+          const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
+          return { 
+            success: true, 
+            thumbUrlPath,
+            finalSizeKB: actualSizeKB,
+            dimensions: {
+              width: metadata.width,
+              height: metadata.height
+            }
+          };
+        }
+        
+        // Ajuster la qualité pour la prochaine tentative
+        if (actualSizeKB > targetSizeKB * 1.2) {
+          quality = Math.max(10, quality - 15);
+        } else {
+          quality = Math.min(95, quality + 10);
+        }
+        
+        attempt++;
+        
+        // Supprimer le fichier temporaire si ce n'est pas la dernière tentative
+        if (attempt < maxAttempts) {
+          try {
+            await unlink(thumbPath);
+          } catch (e) {
+            // Ignorer les erreurs de suppression
+          }
+        }
+        
+      } catch (error) {
+        console.error(`❌ Erreur lors de la tentative ${attempt + 1}:`, error);
+        break;
+      }
+    }
+
+    // Si on arrive ici, utiliser le dernier résultat même s'il n'est pas parfait
+    const thumbStats = await stat(thumbPath);
+    const finalSizeKB = thumbStats.size / 1024;
+    const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
+    
+    console.log(`⚠️ Résultat final après ${attempt} tentatives: ${finalSizeKB.toFixed(1)}KB`);
+    
+    return { 
+      success: true, 
+      thumbUrlPath,
+      finalSizeKB,
+      dimensions: {
+        width: metadata.width,
+        height: metadata.height
+      }
+    };
+
   } catch (error) {
     console.error('❌ Thumbnail generation error:', error);
     return { 
@@ -92,10 +228,7 @@ async function handleThumbnailGeneration({
 export async function POST(request: Request) {
   const startTime = Date.now();
   try {
-    // 
-    
-    const { folderId, imageUrl, resizePercentage = 20, isCover = false } = await request.json();
-    // 
+    const { folderId, imageUrl, resizePercentage = 20, isCover = false, compressionStrategy = 'worst' } = await request.json();
     
     // Validation
     if (!folderId || !imageUrl) {
@@ -107,52 +240,22 @@ export async function POST(request: Request) {
     }
 
     // Get wedding data
-    // 
     const weddings = await parseWeddingsData();
     const wedding = weddings.find(w => w.folderId === folderId);
 
-    let originalPath: string;
-    if (isCover) {
-      if (!wedding?.coverImage) {
-        console.error('❌ Cover image not found');
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Cover image not found' 
-        }, { status: 404 });
-      }
-      originalPath = path.join(process.cwd(), 'public', wedding.coverImage.fileUrl);
-    } else {
-      const image = wedding?.images.find(img => img.fileUrl === imageUrl);
-      if (!image) {
-        console.error('❌ Image not found');
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Image not found' 
-        }, { status: 404 });
-      }
-      originalPath = path.join(process.cwd(), 'public', image.fileUrl);
-    }
-
-    // 
-
-    try {
-      await access(originalPath);
-    } catch (err) {
-      console.error('❌ Original file not found:', originalPath);
+    if (!wedding) {
+      console.error('❌ Wedding not found');
       return NextResponse.json({ 
         success: false, 
-        error: 'Original file not found' 
+        error: 'Wedding not found' 
       }, { status: 404 });
     }
 
     // Handle paths
     const baseDir = path.join(process.cwd(), 'public', folderId);
-    const thumbDir = path.join(baseDir, 'thumbnails');
-    // 
 
     try {
       await access(baseDir);
-      // 
     } catch (err) {
       console.error('❌ Base directory access error:', err);
       return NextResponse.json({ 
@@ -161,12 +264,21 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    // Generate thumbnail
-    // 
+    // Calculer les tailles cibles adaptatives avec la stratégie
+    const allImageUrls = wedding.images.map(img => img.fileUrl);
+    const targetSizes = await calculateTargetSize(baseDir, allImageUrls, resizePercentage, compressionStrategy);
+    
+    // Obtenir la taille cible spécifique pour cette image
+    const targetSizeBytes = targetSizes[imageUrl];
+    const targetSizeKB = Math.round(targetSizeBytes / 1024);
+    
+    console.log(`🎯 Taille cible pour ${imageUrl}: ${targetSizeKB}KB (${compressionStrategy})`);
+
+    // Generate thumbnail with adaptive sizing
     const result = await handleThumbnailGeneration({
       baseDir,
       imageUrl,
-      resizePercentage,
+      targetSizeKB,
       isCover
     });
 
@@ -175,32 +287,37 @@ export async function POST(request: Request) {
       return NextResponse.json(result, { status: 500 });
     }
 
-    // Update data
-    // 
-    if (!wedding) {
-      throw new Error('Wedding not found during update');
-    }
-
+    // Update data with dimensions
     if (isCover) {
       if (!wedding.coverImage) {
         throw new Error('Cover image not found during update');
       }
       wedding.coverImage.fileUrlThumbnail = result.thumbUrlPath;
+      if (result.dimensions) {
+        wedding.coverImage.width = result.dimensions.width;
+        wedding.coverImage.height = result.dimensions.height;
+      }
     } else {
       const image = wedding.images.find(img => img.fileUrl === imageUrl);
       if (image) {
         image.fileUrlThumbnail = result.thumbUrlPath;
+        if (result.dimensions) {
+          image.width = result.dimensions.width;
+          image.height = result.dimensions.height;
+        }
       }
     }
 
     await updateWeddingsData(weddings);
     
     const duration = Date.now() - startTime;
-    // 
     
     return NextResponse.json({ 
       success: true, 
       thumbnailPath: result.thumbUrlPath,
+      finalSizeKB: result.finalSizeKB,
+      targetSizeKB,
+      compressionStrategy,
       duration
     });
 

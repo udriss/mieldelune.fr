@@ -782,18 +782,20 @@ export function ConnectionsList() {
             mt: 2
           }}
         >
-          <Box display="flex" gap={1} mb={3} flexWrap="wrap" sx={{
+            <Box display="flex" gap={1} mb={3} flexWrap="wrap" sx={{
             mt: 2,
             '& > *': { flex: '1 1 auto', minWidth: '120px' },
             '& .MuiTextField-root': { minWidth: '200px' }
-          }}>
+            }}>
             <TextField
               placeholder="Rechercher par IP, navigateur..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
-              InputProps={{
+              slotProps={{
+              input: {
                 startAdornment: <Search size={20} />
+              }
               }}
               sx={{ flex: '2 1 200px' }}
             />
@@ -801,29 +803,29 @@ export function ConnectionsList() {
             <FormControl size="small" sx={{ minWidth: 100 }}>
               <InputLabel>Filtre</InputLabel>
               <Select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                label="Filtre"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              label="Filtre"
               >
-                <MenuItem value="all">Tous</MenuItem>
-                <MenuItem value="active">Actifs</MenuItem>
-                <MenuItem value="desktop">Desktop</MenuItem>
-                <MenuItem value="mobile">Mobile</MenuItem>
-                <MenuItem value="tablet">Tablette</MenuItem>
+              <MenuItem value="all">Tous</MenuItem>
+              <MenuItem value="active">Actifs</MenuItem>
+              <MenuItem value="desktop">Desktop</MenuItem>
+              <MenuItem value="mobile">Mobile</MenuItem>
+              <MenuItem value="tablet">Tablette</MenuItem>
               </Select>
             </FormControl>
 
             <FormControl size="small" sx={{ minWidth: 100 }}>
               <InputLabel>Trier par</InputLabel>
               <Select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                label="Trier par"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              label="Trier par"
               >
-                <MenuItem value="timestamp">Date</MenuItem>
-                <MenuItem value="ip">IP</MenuItem>
-                <MenuItem value="duration">Durée</MenuItem>
-                <MenuItem value="lastActivity">Dernière activité</MenuItem>
+              <MenuItem value="timestamp">Date</MenuItem>
+              <MenuItem value="ip">IP</MenuItem>
+              <MenuItem value="duration">Durée</MenuItem>
+              <MenuItem value="lastActivity">Dernière activité</MenuItem>
               </Select>
             </FormControl>
 
@@ -844,7 +846,7 @@ export function ConnectionsList() {
             >
               {viewMode === 'cards' ? <BarChart3 size={16} /> : <Activity size={16} />}
             </Button>
-          </Box>
+            </Box>
 
           {viewMode === 'cards' ? renderCardView() : renderTableView()}
 

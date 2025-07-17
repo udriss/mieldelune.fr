@@ -50,12 +50,10 @@ export function NavbarClient() {
         
         // Si on scroll vers le bas et qu'on a scrollé d'au moins 5px, cacher la navbar
         if (currentScrollY > lastScrollY.current + 5 && currentScrollY > 100) {
-          console.log('Hiding navbar - scrolling down:', currentScrollY, 'vs', lastScrollY.current);
           setIsNavbarVisible(false);
         }
         // Si on scroll vers le haut et qu'on a scrollé d'au moins 5px, montrer la navbar
         else if (currentScrollY < lastScrollY.current - 5) {
-          console.log('Showing navbar - scrolling up:', currentScrollY, 'vs', lastScrollY.current);
           setIsNavbarVisible(true);
         }
       }

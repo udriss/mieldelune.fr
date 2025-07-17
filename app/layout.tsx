@@ -15,6 +15,7 @@ import { useEffect, useState, createContext, useContext } from 'react';
 import { usePathname } from 'next/navigation';
 import { myFetch } from '@/lib/fetch-wrapper';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import ConnectionTracker from '@/components/utils/ConnectionTracker';
 // Ajout des hooks de tracking
 import { usePageTracking, usePageDuration, useInteractionTracking } from '@/hooks/usePageTracking';
 import { generateFingerprint } from '@/lib/fingerprint';
@@ -549,6 +550,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </section>
               {!pathname?.startsWith('/admin') && <Footer />}
               {!pathname?.startsWith('/admin') && <ScrollToTopButton />}
+              <ConnectionTracker />
               <ToastContainer 
                 position="top-center" 
                 autoClose={2000} 

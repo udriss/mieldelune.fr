@@ -78,6 +78,11 @@ export async function POST(request: Request) {
     // Sauvegarder l'image originale
     await writeFile(filePath, buffer);
 
+    // Extraire les dimensions de l'image avec Sharp
+    const metadata = await sharp(buffer).metadata();
+    const width = metadata.width || 0;
+    const height = metadata.height || 0;
+
     // Générer et sauvegarder le thumbnail avec Sharp
     await sharp(buffer)
       .resize(300, 300, { 
@@ -87,13 +92,15 @@ export async function POST(request: Request) {
       .jpeg({ quality: 40 })
       .toFile(thumbPath);
 
-    // Create new image object with thumbnail
+    // Create new image object with thumbnail and dimensions
     const newImage: Image = {
       id: imageId,
       fileUrl: fileUrl,
       fileType: isCover === 'true' ? 'coverStorage' : 'storage',
       fileUrlThumbnail: thumbUrl,
-      description: ''
+      description: '',
+      width,
+      height
     };
 
     const wedding = isCover === 'true' 

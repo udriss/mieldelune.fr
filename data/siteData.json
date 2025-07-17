@@ -6,22 +6,22 @@
   "fontSizePx": "13",
   "pageSettings": {
     "Accueil": {
-      "fontFamily": "Pacifico",
-      "fontSize": 19,
-      "titleFontSize": 29
+      "fontFamily": "Great Vibes",
+      "fontSize": 25,
+      "titleFontSize": 49
     },
     "Contact": {
       "fontFamily": "Lora",
       "fontSize": 16
     },
     "Profil": {
-      "fontFamily": "Satisfy",
-      "fontSize": 20,
+      "fontFamily": "Playfair Display",
+      "fontSize": 14,
       "artistNameFontSize": 49
     },
     "Albums": {
-      "fontFamily": "Allura",
-      "fontSize": 71
+      "fontFamily": "Great Vibes",
+      "fontSize": 58
     }
   },
   "gradientType": "granular",
@@ -82,7 +82,7 @@
     "type2": "fade",
     "type3": "fade"
   },
-  "granularGranuleSize": "7.5",
+  "granularGranuleSize": "19",
   "granularDensity": "80",
   "granularVariation": "90",
   "granularBaseColor": "rgba(230, 11, 182, 0.14)",

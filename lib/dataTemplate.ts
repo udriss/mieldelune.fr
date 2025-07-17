@@ -6,6 +6,8 @@ export interface Image {
   description?: string;
   descriptionVisibility?: boolean;
   imageVisibility?: boolean;
+  width?: number;
+  height?: number;
 }
 
 export interface Wedding {
