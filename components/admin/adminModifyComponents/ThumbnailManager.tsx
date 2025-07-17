@@ -42,6 +42,7 @@ interface CompressionStat {
   finalSize: number;
   compressionRate: number;
   targetSize: number;
+  error?: string;
 }
 
 interface ThumbnailManagerProps {
@@ -85,8 +86,11 @@ export function ThumbnailManager({
     const processId = `thumb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     setCurrentProcessId(processId);
 
-    // Démarrer le polling du progrès
-    const progressInterval = setInterval(async () => {
+    let progressInterval: NodeJS.Timeout | null = null;
+
+    // Fonction pour démarrer le polling du progrès
+    const startProgressPolling = () => {
+      progressInterval = setInterval(async () => {
       try {
         const progressResponse = await fetch(`/api/thumbnail-progress?processId=${processId}`);
         if (progressResponse.ok) {
@@ -95,22 +99,49 @@ export function ThumbnailManager({
             console.log(`📊 Progrès reçu: ${progressData.progress}% (${progressData.processedImages}/${progressData.totalImages})`);
             setThumbnailProgress(progressData.progress);
             
+            // Mettre à jour les statistiques en temps réel
+            if (progressData.compressionStats && Object.keys(progressData.compressionStats).length > 0) {
+              console.log(`📊 Statistiques reçues:`, progressData.compressionStats);
+              console.log(`📊 Nombre de stats: ${Object.keys(progressData.compressionStats).length}`);
+              
+              // Compter les erreurs
+              const errors = Object.values(progressData.compressionStats).filter((stat: any) => stat.error);
+              if (errors.length > 0) {
+                console.log(`❌ ${errors.length} erreurs détectées:`, errors);
+              }
+              
+              setCompressionStats(progressData.compressionStats);
+              setShowStatsTable(true);
+            }
+            
             // Arrêter le polling si le processus est terminé
             if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
               console.log(`✅ Processus terminé avec le statut: ${progressData.status}`);
-              clearInterval(progressInterval);
+              if (progressInterval) clearInterval(progressInterval);
             }
           }
         } else {
           console.warn(`⚠️ Erreur API progrès: ${progressResponse.status} - ${progressResponse.statusText}`);
+          // Si le processus n'est plus trouvé (404), arrêter le polling
+          if (progressResponse.status === 404) {
+            console.log(`🔍 Processus ${processId} non trouvé - arrêt du polling`);
+            if (progressInterval) clearInterval(progressInterval);
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la récupération du progrès:', error);
       }
-    }, 500); // Interroger toutes les 500ms
+      }, 500); // Interroger toutes les 500ms
+    };
 
     try {
       console.log(`🚀 Démarrage du processus batch avec ID: ${processId}`);
+      
+      // Démarrer le polling avec un petit délai pour laisser le temps au serveur d'initialiser
+      setTimeout(() => {
+        startProgressPolling();
+      }, 100);
+      
       const response = await fetch('/api/thumbnail-batch/', {
         method: 'POST',
         headers: {
@@ -170,7 +201,7 @@ export function ThumbnailManager({
         style: { width: '400px' }
       });
     } finally {
-      clearInterval(progressInterval);
+      if (progressInterval) clearInterval(progressInterval);
       setIsProcessingThumbnails(false);
       setThumbnailProgress(100); // S'assurer que la barre de progrès atteint 100%
       
@@ -253,7 +284,7 @@ export function ThumbnailManager({
         <Box sx={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column' }}>
           <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CompressOutlined fontSize="small" />
-            Compression adaptative : {resizeValue}%
+            Taille finale à conserver : {resizeValue}% (compression : {100 - resizeValue}%)
           </Typography>
           <Slider.Root
             className="relative flex items-center select-none touch-none w-full h-5 mt-1"
@@ -273,7 +304,7 @@ export function ThumbnailManager({
           </Slider.Root>
         </Box>
         
-        <Box sx={{ gridColumn: 'span 3' }}>
+        <Box sx={{ gridColumn: 'span 5' }}>
           <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 1 }}>
             Stratégie de compression
           </Typography>
@@ -293,7 +324,7 @@ export function ThumbnailManager({
           </ToggleButtonGroup>
         </Box>
         
-        <Box sx={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Button 
             onClick={handleProcessThumbnails}
             disabled={isProcessingThumbnails}
@@ -325,29 +356,37 @@ export function ThumbnailManager({
             </Button>
           )}
         </Box>
-
-        {/* Indicateur de progression des vignettes */}
-        {isProcessingThumbnails && (
-          <Box sx={{ gridColumn: 'span 3', p: 2, bgcolor: 'rgba(194, 194, 194, 0.29)', borderRadius: 1, border: '1px solid', borderColor: 'primary.main' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin text-blue-600" />
-                <Typography variant="body2" color="primary.dark" fontWeight={500}>
-                  Production : {Math.round(thumbnailProgress)} %
-                </Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={thumbnailProgress} 
-                sx={{ width: '100%', height: 8, borderRadius: 1 }}
-              />
-            </Box>
-          </Box>
-        )}
       </Box>
       
+      {/* Indicateur de progression des vignettes */}
+      {isProcessingThumbnails && (
+        <Box sx={{ 
+          mt: 2, 
+          p: 2, 
+          bgcolor: 'rgba(194, 194, 194, 0.29)', 
+          borderRadius: 1, 
+          border: '1px solid', 
+          borderColor: 'primary.main',
+          width: '100%'
+        }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin text-blue-600" />
+              <Typography variant="body2" color="primary.dark" fontWeight={500}>
+                Production : {Math.round(thumbnailProgress)} %
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={thumbnailProgress} 
+              sx={{ width: '100%', height: 8, borderRadius: 1 }}
+            />
+          </Box>
+        </Box>
+      )}
+      
       {/* Affichage des statistiques de compression */}
-      {Object.keys(compressionStats).length > 0 && (
+      {(Object.keys(compressionStats).length > 0 || isProcessingThumbnails) && (
         <Box sx={{ 
           mt: 2, 
           p: 2, 
@@ -376,7 +415,14 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Taille cible moyenne :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.targetSize, 0) / Object.values(compressionStats).length / 1024).toFixed(1)}KB`}
+                  label={(() => {
+                    const validStats = Object.values(compressionStats).filter(stat => !stat.error);
+                    const totalStats = Object.values(compressionStats);
+                    console.log(`📊 Calcul taille cible: ${totalStats.length} total, ${validStats.length} valides`);
+                    if (totalStats.length === 0) return "En cours...";
+                    if (validStats.length === 0) return "Aucune valide";
+                    return `${(validStats.reduce((acc, curr) => acc + curr.targetSize, 0) / validStats.length / 1024).toFixed(1)}KB`;
+                  })()}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="success"
                   variant="outlined"
@@ -388,7 +434,13 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Taille réelle moyenne :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.finalSize, 0) / Object.values(compressionStats).length / 1024).toFixed(1)}KB`}
+                  label={(() => {
+                    const validStats = Object.values(compressionStats).filter(stat => !stat.error);
+                    const totalStats = Object.values(compressionStats);
+                    if (totalStats.length === 0) return "En cours...";
+                    if (validStats.length === 0) return "Aucune valide";
+                    return `${(validStats.reduce((acc, curr) => acc + curr.finalSize, 0) / validStats.length / 1024).toFixed(1)}KB`;
+                  })()}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="success"
                   variant="outlined"
@@ -400,7 +452,13 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Taux de compression moyen :</Typography>
                 <Chip 
                   size="small" 
-                  label={`${(Object.values(compressionStats).reduce((acc, curr) => acc + curr.compressionRate, 0) / Object.values(compressionStats).length).toFixed(1)}%`}
+                  label={(() => {
+                    const validStats = Object.values(compressionStats).filter(stat => !stat.error);
+                    const totalStats = Object.values(compressionStats);
+                    if (totalStats.length === 0) return "En cours...";
+                    if (validStats.length === 0) return "Aucune valide";
+                    return `${(validStats.reduce((acc, curr) => acc + curr.compressionRate, 0) / validStats.length).toFixed(1)}%`;
+                  })()}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="info"
                   variant="outlined"
@@ -412,9 +470,18 @@ export function ThumbnailManager({
                 <Typography variant="caption" color="success.dark">Images traitées :</Typography>
                 <Chip 
                   size="small" 
-                  label={Object.keys(compressionStats).length}
+                  label={(() => {
+                    const total = Object.keys(compressionStats).length;
+                    const errors = Object.values(compressionStats).filter(stat => stat.error).length;
+                    const success = total - errors;
+                    if (total === 0) return "En cours...";
+                    if (isProcessingThumbnails) {
+                      return `${success}/${total} ${errors > 0 ? `(${errors} erreurs)` : ''}`;
+                    }
+                    return `${success}/${total}${errors > 0 ? ` (${errors} erreurs)` : ''}`;
+                  })()}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
-                  color="primary"
+                  color={Object.values(compressionStats).some(stat => stat.error) ? 'warning' : 'primary'}
                   variant="outlined"
                 />
               </Box>
@@ -461,25 +528,57 @@ export function ThumbnailManager({
                     {displayedStats.map((stat, index) => (
                       <TableRow key={stat.url} sx={{ '&:nth-of-type(odd)': { bgcolor: 'success.50' } }}>
                         <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                          {stat.imageName}
-                        </TableCell>
-                        <TableCell align="center" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                            <span>{(stat.originalSize / 1024).toFixed(1)}KB</span>
-                            <ArrowForwardOutlined fontSize="small" sx={{ color: 'success.dark' }} />
-                            <span style={{ color: stat.finalSize < stat.originalSize ? 'green' : 'orange' }}>
-                              {(stat.finalSize / 1024).toFixed(1)}KB
-                            </span>
+                          <Box sx={{ 
+                            maxWidth: '150px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {stat.imageName}
+                            {stat.error && (
+                              <Chip
+                                size="small"
+                                label="ERREUR"
+                                color="error"
+                                variant="filled"
+                                sx={{ ml: 1, fontSize: '0.6rem', height: 16 }}
+                              />
+                            )}
                           </Box>
                         </TableCell>
+                        <TableCell align="center" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                          {stat.error ? (
+                            <Typography variant="caption" color="error" sx={{ fontStyle: 'italic' }}>
+                              {stat.error}
+                            </Typography>
+                          ) : (
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                              <span>{(stat.originalSize / 1024).toFixed(1)}KB</span>
+                              <ArrowForwardOutlined fontSize="small" sx={{ color: 'success.dark' }} />
+                              <span style={{ color: stat.finalSize < stat.originalSize ? 'green' : 'orange' }}>
+                                {(stat.finalSize / 1024).toFixed(1)}KB
+                              </span>
+                            </Box>
+                          )}
+                        </TableCell>
                         <TableCell align="center">
-                          <Chip
-                            size="small"
-                            label={`${stat.compressionRate}%`}
-                            color={stat.compressionRate > 50 ? 'success' : stat.compressionRate > 20 ? 'warning' : 'error'}
-                            variant="outlined"
-                            sx={{ fontFamily: 'monospace', fontSize: '0.7rem', minWidth: 60 }}
-                          />
+                          {stat.error ? (
+                            <Chip
+                              size="small"
+                              label="ECHEC"
+                              color="error"
+                              variant="outlined"
+                              sx={{ fontFamily: 'monospace', fontSize: '0.7rem', minWidth: 60 }}
+                            />
+                          ) : (
+                            <Chip
+                              size="small"
+                              label={`${stat.compressionRate}%`}
+                              color={stat.compressionRate > 50 ? 'success' : stat.compressionRate > 20 ? 'warning' : 'error'}
+                              variant="outlined"
+                              sx={{ fontFamily: 'monospace', fontSize: '0.7rem', minWidth: 60 }}
+                            />
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

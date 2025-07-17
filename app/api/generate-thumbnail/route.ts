@@ -22,7 +22,7 @@ interface ThumbnailGenerationResult {
 async function calculateTargetSize(baseDir: string, images: string[], targetPercentage: number, strategy: 'best' | 'worst' = 'worst'): Promise<{ [imageUrl: string]: number }> {
   const imageSizes: { [imageUrl: string]: number } = {};
   
-  // Collecter les tailles de toutes les images
+  // Collecter les tailles des images existantes seulement
   for (const imageUrl of images) {
     try {
       const fileName = imageUrl.split('/').pop();
@@ -33,37 +33,54 @@ async function calculateTargetSize(baseDir: string, images: string[], targetPerc
       imageSizes[imageUrl] = stats.size;
     } catch (error) {
       console.warn(`Unable to get size for ${imageUrl}:`, error);
+      // Ne pas ajouter l'image si elle n'existe pas
     }
   }
   
-  if (Object.keys(imageSizes).length === 0) {
+  const existingImages = Object.keys(imageSizes);
+  if (existingImages.length === 0) {
+    console.warn('⚠️ Aucune image valide trouvée pour le calcul de taille cible');
     return Object.fromEntries(images.map(url => [url, 50 * 1024])); // Fallback: 50KB par défaut
   }
   
   const sizes = Object.values(imageSizes);
   const targetSizes: { [imageUrl: string]: number } = {};
   
+  // Cas spécial : une seule image (généralement pour la couverture)
+  if (existingImages.length === 1) {
+    const singleImageUrl = existingImages[0];
+    const originalSize = imageSizes[singleImageUrl];
+    const targetSizeBytes = originalSize * (targetPercentage / 100);
+    targetSizes[singleImageUrl] = Math.max(10 * 1024, targetSizeBytes);
+    
+    console.log(`🎯 Image unique: ${singleImageUrl}`);
+    console.log(`🎯 Taille originale: ${(originalSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Taille cible (${targetPercentage}%): ${(targetSizes[singleImageUrl] / 1024).toFixed(1)}KB`);
+    
+    return targetSizes;
+  }
+  
+  // Traitement multi-images avec stratégies
   if (strategy === 'worst') {
     // Stratégie "Moins bonne qualité" : se baser sur l'image la plus petite
     const minSize = Math.min(...sizes);
     const targetSizeBytes = minSize * (targetPercentage / 100);
     
-    for (const imageUrl of images) {
+    for (const imageUrl of existingImages) {
       targetSizes[imageUrl] = Math.max(10 * 1024, targetSizeBytes);
     }
     
-    console.log(`🎯 Stratégie: ${strategy}, Taille de référence: ${(minSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, Taille de référence: ${(minSize / 1024).toFixed(1)}KB`);
   } else {
     // Stratégie "Meilleure qualité" : algorithme intelligent
     const maxSize = Math.max(...sizes);
     const baseTargetSizeBytes = maxSize * (targetPercentage / 100);
     
-    console.log(`🎯 Stratégie: ${strategy}, Taille de référence maximale: ${(maxSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, Taille de référence maximale: ${(maxSize / 1024).toFixed(1)}KB`);
     console.log(`🎯 Taille cible de base: ${(baseTargetSizeBytes / 1024).toFixed(1)}KB`);
     
-    for (const imageUrl of images) {
+    for (const imageUrl of existingImages) {
       const originalSize = imageSizes[imageUrl];
-      if (!originalSize) continue;
       
       // Si l'image brute est plus petite que la taille cible calculée,
       // utiliser la taille brute comme limite
@@ -162,7 +179,7 @@ async function handleThumbnailGeneration({
 
     // Ajustement itératif de la qualité
     let attempt = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 8; // Augmenter le nombre de tentatives
     
     while (attempt < maxAttempts) {
       try {
@@ -183,10 +200,10 @@ async function handleThumbnailGeneration({
         const thumbStats = await stat(thumbPath);
         const actualSizeKB = thumbStats.size / 1024;
         
-        console.log(`📊 Tentative ${attempt + 1}: ${actualSizeKB.toFixed(1)}KB (cible: ${targetSizeKB}KB, qualité: ${quality})`);
+        console.log(`📊 Tentative ${attempt + 1}: ${actualSizeKB.toFixed(1)}KB (cible: ${targetSizeKB}KB, qualité: ${quality}, dims: ${width}x${height})`);
         
-        // Si la taille est dans la plage acceptable (±20%), on accepte
-        if (actualSizeKB <= targetSizeKB * 1.2 && actualSizeKB >= targetSizeKB * 0.8) {
+        // Tolérance plus stricte : 5% au lieu de 20%
+        if (actualSizeKB <= targetSizeKB * 1.05 || attempt === maxAttempts - 1) {
           const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
           return { 
             success: true, 
@@ -199,11 +216,26 @@ async function handleThumbnailGeneration({
           };
         }
         
-        // Ajuster la qualité pour la prochaine tentative
-        if (actualSizeKB > targetSizeKB * 1.2) {
-          quality = Math.max(10, quality - 15);
+        // Ajuster la qualité et les dimensions pour la prochaine tentative
+        const ratio = targetSizeKB / actualSizeKB;
+        
+        if (actualSizeKB > targetSizeKB * 1.05) {
+          if (ratio < 0.6) {
+            // Si on est très loin de la cible, réduire aussi les dimensions
+            const scale = Math.sqrt(ratio);
+            width = Math.max(200, Math.round(width * scale));
+            height = Math.max(150, Math.round(height * scale));
+            quality = Math.max(15, Math.round(quality * 0.8));
+          } else if (ratio < 0.8) {
+            // Réduction drastique de qualité
+            quality = Math.max(15, quality - 20);
+          } else {
+            // Ajustement fin
+            quality = Math.max(15, quality - 10);
+          }
         } else {
-          quality = Math.min(95, quality + 10);
+          // Si on est en dessous de la cible, augmenter légèrement
+          quality = Math.min(95, quality + 5);
         }
         
         attempt++;
@@ -289,11 +321,16 @@ export async function POST(request: Request) {
     }
 
     // Calculer les tailles cibles adaptatives avec la stratégie
-    const allImageUrls = wedding.images.map(img => img.fileUrl);
+    let allImageUrls: string[];
     
-    // Pour les images de couverture, s'assurer qu'elle est incluse dans le calcul
-    if (isCover && wedding.coverImage && !allImageUrls.includes(imageUrl)) {
-      allImageUrls.push(imageUrl);
+    if (isCover) {
+      // Pour l'image de couverture, ne traiter que cette image
+      allImageUrls = [imageUrl];
+      console.log(`🖼️ Mode couverture: traitement de l'image seule ${imageUrl}`);
+    } else {
+      // Pour les images normales, traiter toutes les images du mariage
+      allImageUrls = wedding.images.map(img => img.fileUrl);
+      console.log(`📸 Mode galerie: traitement de ${allImageUrls.length} images`);
     }
     
     const targetSizes = await calculateTargetSize(baseDir, allImageUrls, resizePercentage, compressionStrategy);

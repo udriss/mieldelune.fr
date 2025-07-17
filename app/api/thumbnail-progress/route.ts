@@ -23,6 +23,14 @@ export async function GET(request: Request) {
       ? (progress.processedImages / progress.totalImages) * 100 
       : 0;
 
+    // Log pour debug - statistiques
+    console.log(`🔄 Progress poll pour ${processId}:`, {
+      percentage: Math.round(progressPercentage),
+      statsCount: progress.compressionStats ? Object.keys(progress.compressionStats).length : 0,
+      errorsCount: progress.compressionStats ? Object.values(progress.compressionStats).filter((stat: any) => stat.error).length : 0,
+      stats: progress.compressionStats
+    });
+
     return NextResponse.json({
       success: true,
       processId,

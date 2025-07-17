@@ -4,6 +4,7 @@ interface CompressionStat {
   finalSize: number;
   compressionRate: number;
   targetSize: number;
+  error?: string;
 }
 
 interface ProgressData {
