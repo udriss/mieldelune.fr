@@ -49,7 +49,11 @@ export function SortableEvent({ wedding }: PropsEvent) {
   const getCoverImageUrl = (coverImage: Wedding["coverImage"]) => {
     if (!coverImage) return '/placeholder.jpg';
     if (coverImage.fileType === 'storage' || coverImage.fileType === 'coverStorage') {
-      return `/api/images?fileUrl=${coverImage.fileUrl}`;
+      // Utiliser la thumbnail si elle existe, sinon l'image originale
+      const url = coverImage.fileUrlThumbnail ? 
+        coverImage.fileUrlThumbnail : 
+        coverImage.fileUrl;
+      return `/api/images?fileUrl=${url}&isCachingTriggle=true`;
     }
     return coverImage.fileUrl || '/placeholder.jpg';
   };
@@ -76,7 +80,7 @@ const getImageUrl = (image: myImage, thumbnail: boolean = true) => {
     const url = thumbnail && image.fileUrlThumbnail ? 
       image.fileUrlThumbnail : 
       image.fileUrl;
-    return `/api/images?fileUrl=${url}`|| '/placeholder.jpg';
+    return `/api/images?fileUrl=${url}&isCachingTriggle=true` || '/placeholder.jpg';
   }
   return image.fileUrl;
 }

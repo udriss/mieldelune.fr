@@ -125,9 +125,14 @@ const AdminClientWrapper: React.FC<AdminClientWrapperProps> = ({ weddings, onWed
                     items={items.map(item => item.id)}
                     strategy={verticalListSortingStrategy}
                 >
-                    {items.map((wedding) => (
-                        <SortableEvent key={wedding.id} wedding={wedding} />
-                    ))}
+                    {items.map((wedding) => {
+                        // Créer une clé unique qui inclut l'URL de thumbnail pour forcer la mise à jour
+                        const coverThumbnail = wedding.coverImage?.fileUrlThumbnail || '';
+                        const uniqueKey = `${wedding.id}-${coverThumbnail.split('_THUMBEL_')[1] || 'no-thumb'}`;
+                        return (
+                            <SortableEvent key={uniqueKey} wedding={wedding} />
+                        );
+                    })}
                 </SortableContext>
                 <DragOverlay dropAnimation={dropAnimationConfig}>
                     {activeId ? (

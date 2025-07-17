@@ -271,7 +271,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
       
             <Box className="mt-4 flex flex-col items-center justify-center w-full">
               {activeTab === 'nouveau' && <NewEventButton onEventCreated={handleEventCreated} />}
-              {activeTab === 'modification' && <AdminWeddings weddings={weddingsToTransfer} setWeddings={setWeddingsForTransfer} />}
+              {activeTab === 'modification' && <AdminWeddings weddings={weddingsToTransfer} setWeddings={setWeddingsForTransfer} onDataRefresh={fetchWeddings} />}
               {activeTab === 'profil' &&  <AdminProfil profile={profileToTransfer[0]} setProfile={setProfileForTransfer} />}
               {activeTab === 'disponibilites' && <AdminAvailability />}
               {activeTab === 'parameters' && <AdminSiteSettings ref={siteSettingsRef} onPendingInsertionsChange={setHasPendingChanges} />}

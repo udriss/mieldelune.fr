@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,8 +54,10 @@ interface CoverImageSectionProps {
   resizeValueCover: number;
   setResizeValueCover: React.Dispatch<React.SetStateAction<number>>;
   updateKey: number;
+  setUpdateKey: React.Dispatch<React.SetStateAction<number>>;
   selectedWedding: string;
   isProcessingCoverThumbnails: boolean;
+  clearCompressionStats?: boolean;
 }
 
 export function CoverImageSection({
@@ -75,13 +77,23 @@ export function CoverImageSection({
   resizeValueCover,
   setResizeValueCover,
   updateKey,
+  setUpdateKey,
   selectedWedding,
   isProcessingCoverThumbnails,
+  clearCompressionStats = false,
 }: CoverImageSectionProps) {
   const [isProcessingCoverThumbnail, setIsProcessingCoverThumbnail] = useState(false);
   const [compressionStats, setCompressionStats] = useState<CompressionStat | null>(null);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
   const [thumbnailProgress, setThumbnailProgress] = useState(0);
+
+  // Effacer les statistiques de compression lors du changement de mariage
+  useEffect(() => {
+    if (clearCompressionStats) {
+      setCompressionStats(null);
+      setShowStatsDetails(false);
+    }
+  }, [clearCompressionStats]);
 
   const generateCoverThumbnail = async () => {
     if (!editedWedding?.coverImage) return;
@@ -178,6 +190,9 @@ export function CoverImageSection({
           }
         };
       });
+
+      // Force une mise à jour de l'image en incrémentant updateKey
+      setUpdateKey(prev => prev + 1);
   
       const durationInSeconds = (data.duration / 1000).toFixed(1);
       toast.success(`✨ Miniature produite en ${durationInSeconds} s`, {
@@ -387,7 +402,7 @@ export function CoverImageSection({
                       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
                         <Typography variant="body2" color="text.secondary">
                           <CompressOutlined fontSize="small" sx={{ mr: 1 }} />
-                          Compression : {resizeValueCover}%
+                          Taille finale à conserver : {resizeValueCover} % (compression : {100 - resizeValueCover}%)
                         </Typography>
                         <Slider.Root
                           className="relative flex items-center w-[200px] h-5"

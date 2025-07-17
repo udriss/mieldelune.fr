@@ -26,6 +26,7 @@ interface WeddingFields {
 interface AdminWeddingsProps {
   weddings: Wedding[];
   setWeddings: React.Dispatch<React.SetStateAction<Wedding[]>>;
+  onDataRefresh?: () => Promise<void>;
 }
 
 interface WeddingFieldState {
@@ -34,7 +35,7 @@ interface WeddingFieldState {
   timer?: NodeJS.Timeout;
 }
 
-export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
+export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWeddingsProps) {
   const [selectedWedding, setSelectedWedding] = useState<string>("");
   const [editedWedding, setEditedWedding] = useState<any>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
@@ -54,6 +55,7 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
   const [resizeValue, setResizeValue] = useState(20); // Default 20%
   const [resizeValueCover, setResizeValueCover] = useState<number>(20);
   const [updateKey, setUpdateKey] = useState(0);
+  const [clearCompressionStats, setClearCompressionStats] = useState(false);
   const [isValidUrlCover, setIsValidUrlCover] = useState(false);
   const [isValidUrl, setIsValidUrl] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -245,10 +247,22 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
     fetchWeddings();
   }, [shouldRefetch]); // Re-run when shouldRefetch changes
 
+  // Effet pour déclencher le rafraîchissement des données quand updateKey change (après génération de thumbnails)
+  useEffect(() => {
+    if (updateKey > 0 && onDataRefresh) {
+      onDataRefresh();
+    }
+  }, [updateKey, onDataRefresh]);
+
   const handleWeddingSelect = (value: string) => {
     setSelectedWedding(value);
     const selectedWedding = weddings.find(w => w.id === Number(value));
     setEditedWedding(selectedWedding);
+    
+    // Effacer les statistiques de compression lors du changement de mariage
+    setClearCompressionStats(true);
+    // Remettre immédiatement à false pour permettre de futurs effacements
+    setTimeout(() => setClearCompressionStats(false), 100);
     
     // Sauvegarder la sélection dans un cookie
     document.cookie = `lastWeddingId=${value}; path=/; max-age=31536000`; // 1 year
@@ -550,8 +564,10 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
               resizeValueCover={resizeValueCover}
               setResizeValueCover={setResizeValueCover}
               updateKey={updateKey}
+              setUpdateKey={setUpdateKey}
               selectedWedding={selectedWedding}
               isProcessingCoverThumbnails={isProcessingCoverThumbnails}
+              clearCompressionStats={clearCompressionStats}
             />
 
             {/* ThumbnailManager pour la génération des miniatures */}
@@ -564,6 +580,8 @@ export function AdminWeddings({ weddings, setWeddings }: AdminWeddingsProps) {
               setIsProcessingThumbnails={setIsProcessingThumbnails}
               thumbnailProgress={thumbnailProgress}
               setThumbnailProgress={setThumbnailProgress}
+              setUpdateKey={setUpdateKey}
+              clearCompressionStats={clearCompressionStats}
             />
 
             <ImageGallery 

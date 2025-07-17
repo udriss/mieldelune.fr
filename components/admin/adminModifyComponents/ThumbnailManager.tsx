@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import * as Slider from '@radix-ui/react-slider';
@@ -54,6 +54,8 @@ interface ThumbnailManagerProps {
   setIsProcessingThumbnails: React.Dispatch<React.SetStateAction<boolean>>;
   thumbnailProgress: number;
   setThumbnailProgress: React.Dispatch<React.SetStateAction<number>>;
+  setUpdateKey: React.Dispatch<React.SetStateAction<number>>;
+  clearCompressionStats?: boolean;
 }
 
 export function ThumbnailManager({
@@ -64,7 +66,9 @@ export function ThumbnailManager({
   isProcessingThumbnails,
   setIsProcessingThumbnails,
   thumbnailProgress,
-  setThumbnailProgress
+  setThumbnailProgress,
+  setUpdateKey,
+  clearCompressionStats = false,
 }: ThumbnailManagerProps) {
   const [failedThumbnails, setFailedThumbnails] = useState<string[]>([]);
   const [compressionStats, setCompressionStats] = useState<{ [key: string]: CompressionStat }>({});
@@ -74,6 +78,15 @@ export function ThumbnailManager({
   const [tablePage, setTablePage] = useState(1);
   const [showStatsTable, setShowStatsTable] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Effacer les statistiques de compression lors du changement de mariage
+  useEffect(() => {
+    if (clearCompressionStats) {
+      setCompressionStats({});
+      setShowStatsTable(false);
+      setFailedThumbnails([]);
+    }
+  }, [clearCompressionStats]);
 
   const processThumbnailsBatch = async () => {
     setIsProcessingThumbnails(true);
@@ -248,6 +261,8 @@ export function ThumbnailManager({
         const updatedWedding = data.weddings.find((w: Wedding) => w.id === editedWedding.id);
         if (updatedWedding) {
           setEditedWedding(updatedWedding);
+          // Incrémenter updateKey pour forcer la mise à jour des images dans la galerie
+          setUpdateKey(prev => prev + 1);
         }
       }
     } catch (error) {
@@ -269,7 +284,6 @@ export function ThumbnailManager({
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
       <Typography variant="h6" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ImageOutlined />
         Miniatures
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
