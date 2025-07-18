@@ -58,7 +58,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
   const fetchWeddings = async () => {
     // Protection contre les appels multiples simultanés
     if (isFetchingRef.current) {
-      console.log('🚫 Appel fetchWeddings ignoré - déjà en cours');
+      
       return;
     }
 
@@ -69,12 +69,12 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
 
     fetchDebounceRef.current = setTimeout(async () => {
       if (isFetchingRef.current) {
-        console.log('🚫 Appel fetchWeddings ignoré - déjà en cours (debounced)');
+        
         return;
       }
 
       isFetchingRef.current = true;
-      console.log('🔄 Chargement des mariages depuis la page AdminPageClient - DEBUT');
+      
 
       try {
         const res = await myFetch('/api/mariages', {
@@ -91,7 +91,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         
         if (data.weddings) {
           setWeddingsForTransfer(data.weddings);
-          console.log('✅ Mariages rechargés avec succès');
+          
         }
       } catch (error) {
         console.error('❌ Erreur lors du chargement des mariages:', error);
@@ -107,7 +107,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         // Libérer le verrou après un délai pour éviter les appels trop rapprochés
         setTimeout(() => {
           isFetchingRef.current = false;
-          console.log('🔓 Verrou fetchWeddings libéré');
+          
         }, 1000);
       }
     }, 800); // Augmenter le délai de débouncing à 800ms

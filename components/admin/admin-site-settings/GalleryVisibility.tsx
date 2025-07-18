@@ -69,7 +69,7 @@ export function GalleryVisibility({
   // Écouter les événements de succès pour ce composant
   useEffect(() => {
     const handleGallerySuccess = () => {
-      console.log('Événement de succès reçu pour GalleryVisibility');
+      
       setShowSuccessOverlay(true);
       setOverlayAnimation('enter');
       

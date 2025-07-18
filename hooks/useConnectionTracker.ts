@@ -45,7 +45,7 @@ export function useConnectionTracker() {
         if (response.ok) {
           // Marquer la connexion comme enregistrée
           localStorage.setItem(trackingKey, 'true');
-          console.log('Connexion enregistrée avec succès');
+          
         } else {
           console.error('Erreur lors de l\'enregistrement de la connexion');
         }

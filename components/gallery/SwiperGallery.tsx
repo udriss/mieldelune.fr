@@ -127,7 +127,7 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
       setTimeout(() => {
         const currentIndex = mainSwiperRef.current.swiper.activeIndex;
         const realIndex = mainSwiperRef.current.swiper.realIndex;
-        console.log('[THUMBS] Forcing update after zoom-out, activeIndex:', currentIndex, 'realIndex:', realIndex);
+        
         
         // Force complete thumbs update
         thumbsSwiper.update && thumbsSwiper.update();
@@ -151,7 +151,7 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
             });
             // Add active class to current thumb
             thumbsSwiper.slides[targetIndex].classList.add('swiper-slide-thumb-active');
-            console.log('[THUMBS] Applied active class to thumb index:', targetIndex);
+            
           }
         }, 10);
       }, 50);
@@ -538,7 +538,7 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
           speed={400}
           onAutoplayTimeLeft={handleAutoplayTimeLeft}
           onSlideChange={swiper => {
-            console.log('[SLIDE CHANGE] activeIndex:', swiper.activeIndex, 'realIndex:', swiper.realIndex);
+            
             if (thumbsSwiper && !thumbsSwiper.destroyed) {
               const targetIndex = swiper.params.loop ? swiper.realIndex : swiper.activeIndex;
               thumbsSwiper.slideTo(targetIndex, 400, false);
@@ -555,29 +555,29 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
             }
           }}
           onZoomChange={(swiper, scale, imageEl, slideEl) => {
-            console.log('[ZOOM] scale:', scale, 'isZoomed:', isZoomed, 'isPaused:', isPaused, 'wasPausedBeforeZoomRef:', wasPausedBeforeZoomRef.current);
+            
             if (scale > 1) {
               // Zoom-in : masquer les thumbs
               if (!isZoomed) {
                 setIsZoomed(true);
-                console.log('[ZOOM] Zoom-in: setIsZoomed(true)');
+                
               }
             } else if (scale === 1) {
               // Dézoom : réafficher les thumbs et reprendre autoplay si besoin
               if (isZoomed) {
                 setIsZoomed(false);
-                console.log('[ZOOM] Zoom-out: setIsZoomed(false)');
+                
                 // if (!wasPausedBeforeZoomRef.current) {
                 if (1 === 1) {
                   setIsPaused(false);
                   setShowProgress(true);
                   if (mainSwiperRef.current) {
                     mainSwiperRef.current.swiper.autoplay.start();
-                    console.log('[ZOOM] Autoplay started after zoom-out');
+                    
                   }
-                  console.log('[ZOOM] Progress circle set to true after zoom-out');
+                  
                 } else {
-                  console.log('[ZOOM] No autoplay restart: wasPausedBeforeZoomRef = true');
+                  
                 }
               }
             }

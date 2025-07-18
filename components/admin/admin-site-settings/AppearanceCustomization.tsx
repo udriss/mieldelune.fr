@@ -705,7 +705,7 @@ export function AppearanceCustomization({
   // Écouter les événements de succès pour ce composant
   useEffect(() => {
     const handlePageSettingsSuccess = () => {
-      console.log('Événement de succès reçu pour Page Settings');
+      
       setShowPageSettingsOverlay(true);
       setPageSettingsAnimation('enter');
       
@@ -720,7 +720,7 @@ export function AppearanceCustomization({
     };
 
     const handleAppearanceSuccess = () => {
-      console.log('Événement de succès reçu pour Appearance Settings');
+      
       setShowAppearanceOverlay(true);
       setAppearanceAnimation('enter');
       

@@ -15,7 +15,7 @@ class AutoScrollRegistry {
   registerAutoScroll(element: Element): (() => void) | null {
     // Check if already registered
     if (this.registeredElements.has(element)) {
-      console.log('Auto-scroll already registered for element:', element.className);
+      
       return null;
     }
 
@@ -28,7 +28,7 @@ class AutoScrollRegistry {
       return null;
     }
 
-    console.log('Registering auto-scroll for element:', element.className);
+    
 
     // Register the element
     this.registeredElements.add(element);
@@ -62,7 +62,7 @@ class AutoScrollRegistry {
       return;
     }
 
-    console.log('Unregistering auto-scroll for element:', element.className);
+    
 
     // Call cleanup function
     const cleanup = this.cleanupFunctions.get(element);
@@ -79,7 +79,7 @@ class AutoScrollRegistry {
    * Clean up all registered auto-scrolls
    */
   cleanupAll(): void {
-    console.log('Cleaning up all auto-scroll registrations');
+    
     
     for (const [element, cleanup] of this.cleanupFunctions) {
       cleanup();

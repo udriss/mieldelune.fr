@@ -255,7 +255,7 @@ export const AdminSiteSettings = forwardRef<AdminSiteSettingsRef, AdminSiteSetti
   }, []);
 
   const updateField = useCallback(async (field: string, value: string, showToast = false) => {
-    console.log('🔄 Mise à jour du champ:', field, 'avec la valeur:', value);
+    
     
     const data = field === 'dynamicElements' || field === 'dynamicElements1' || field === 'dynamicElements2' || field === 'dynamicElements3' || field === 'animationStyles'
       ? { [field]: field.includes('Elements') ? JSON.parse(value) : (field === 'animationStyles' ? value : value) }
@@ -296,7 +296,7 @@ export const AdminSiteSettings = forwardRef<AdminSiteSettingsRef, AdminSiteSetti
                    field === 'animationStyles') {
           window.dispatchEvent(new CustomEvent('dynamicElementsSuccess'));
         } else if (field === 'pageSettings') {
-          console.log('📝 Déclenchement événement paramètres de page pour le champ:', field);
+          
           window.dispatchEvent(new CustomEvent('pageSettingsSuccess'));
         } else if (field.includes('color') || field.includes('Color') || 
                    field.includes('background') || field.includes('Background') ||
@@ -308,7 +308,7 @@ export const AdminSiteSettings = forwardRef<AdminSiteSettingsRef, AdminSiteSetti
                    field === 'gradientColors' || field === 'granularBaseColor' ||
                    field === 'granularGranuleSize' || field === 'granularDensity' ||
                    field === 'granularVariation') {
-          console.log('🎨 Déclenchement événement apparence pour le champ:', field);
+          
           window.dispatchEvent(new CustomEvent('appearanceCustomizationSuccess'));
         }
         

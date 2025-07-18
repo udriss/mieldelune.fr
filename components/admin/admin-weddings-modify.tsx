@@ -233,7 +233,7 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
           tags: ['weddings']
         }
       });
-      console.log('🔄 Chargement des mariages depuis la page ADMIN principale');
+      
       const data = await res.json();
       if (data.weddings) {
         setWeddings(data.weddings);
@@ -266,7 +266,7 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
     
     // Log pour debug
     if (previousWeddingId !== value && previousWeddingId !== "") {
-      console.log(`🔄 Changement de mariage: ${previousWeddingId} → ${value}`);
+      
     }
     
     // Sauvegarder la sélection dans un cookie

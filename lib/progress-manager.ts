@@ -58,7 +58,7 @@ export function updateProgress(
   status: 'running' | 'completed' | 'cancelled' | 'error' = 'running',
   compressionStats?: { [key: string]: CompressionStat }
 ) {
-  console.log(`📊 Mise à jour progrès ${processId}: ${processedImages}/${totalImages} (${Math.round((processedImages/totalImages)*100)}%)`);
+  
   const currentProgress = processProgress.get(processId) || {
     totalImages,
     processedImages: 0,
@@ -77,14 +77,14 @@ export function updateProgress(
 
 // Fonction utilitaire pour nettoyer le progrès
 export function clearProgress(processId: string) {
-  console.log(`🧹 Nettoyage progrès ${processId}`);
+  
   processProgress.delete(processId);
   saveProgressToDisk(processProgress);
 }
 
 // Fonction utilitaire pour initialiser le progrès
 export function initProgress(processId: string, totalImages: number) {
-  console.log(`🚀 Initialisation progrès ${processId}: ${totalImages} images`);
+  
   processProgress.set(processId, {
     totalImages,
     processedImages: 0,
@@ -101,13 +101,13 @@ export function getProgress(processId: string): ProgressData | undefined {
       const raw = fs.readFileSync(PROGRESS_FILE, 'utf-8');
       const obj = JSON.parse(raw);
       const progress = obj[processId];
-      console.log(`📋 Récupération progrès ${processId}:`, progress ? `${progress.processedImages}/${progress.totalImages}` : 'non trouvé');
+      
       return progress;
     }
   } catch (e) {
     console.warn('⚠️ Impossible de charger le progrès depuis le disque (getProgress):', e);
   }
-  console.log(`📋 Récupération progrès ${processId}: non trouvé`);
+  
   return undefined;
 }
 
@@ -122,13 +122,13 @@ export function addCompressionStat(processId: string, imageUrl: string, stat: Co
       compressionStats
     });
     saveProgressToDisk(processProgress);
-    console.log(`📈 Ajout statistique compression pour ${processId}: ${stat.imageName}`);
+    
   }
 }
 
 // Fonction pour lister tous les processus (debug)
 export function listAllProcesses(): string[] {
   const processes = Array.from(processProgress.keys());
-  console.log('📝 Processus actifs:', processes);
+  
   return processes;
 }

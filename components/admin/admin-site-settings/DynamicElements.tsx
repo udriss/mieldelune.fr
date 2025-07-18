@@ -83,7 +83,7 @@ export const DynamicElements = forwardRef<DynamicElementsRef, DynamicElementsPro
   // Écouter les événements de succès pour ce composant
   useEffect(() => {
     const handleDynamicElementsSuccess = () => {
-      console.log('Événement de succès reçu pour DynamicElements');
+      
       setShowSuccessOverlay(true);
       setOverlayAnimation('enter');
 
@@ -98,7 +98,7 @@ export const DynamicElements = forwardRef<DynamicElementsRef, DynamicElementsPro
     };
 
     const handleBasicInfoSuccess = () => {
-      console.log('Événement de succès reçu pour BasicSiteInfo');
+      
       setShowSuccessOverlay(true);
       setOverlayAnimation('enter');
       

@@ -84,7 +84,7 @@ export function ThumbnailManager({
   
   useEffect(() => {
     if (editedWedding && editedWedding.id !== lastWeddingId) {
-      console.log('🧹 Effacement des statistiques de compression (changement de mariage)');
+      
       setCompressionStats({});
       setShowStatsTable(false);
       setFailedThumbnails([]);
@@ -127,7 +127,7 @@ export function ThumbnailManager({
 
     // Fonction pour démarrer le polling du progrès
     const startProgressPolling = () => {
-      console.log(`🔄 Démarrage du polling pour le processus: ${processId}`);
+      
       
       progressInterval = setInterval(async () => {
         if (!pollingActive || processCompleted) {
@@ -147,19 +147,19 @@ export function ThumbnailManager({
             const progressData = await progressResponse.json();
             
             if (progressData.success) {
-              console.log(`📊 Progrès reçu: ${progressData.progress}% (${progressData.processedImages}/${progressData.totalImages})`);
+              
               setThumbnailProgress(progressData.progress || 0);
               
               // Mettre à jour les statistiques en temps réel
               if (progressData.compressionStats && Object.keys(progressData.compressionStats).length > 0) {
-                console.log(`📊 Statistiques reçues: ${Object.keys(progressData.compressionStats).length} images`);
+                
                 setCompressionStats(progressData.compressionStats);
                 setShowStatsTable(true);
               }
               
               // Arrêter le polling si le processus est terminé
               if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
-                console.log(`✅ Processus terminé avec le statut: ${progressData.status}`);
+                
                 processCompleted = true;
                 pollingActive = false;
                 if (progressInterval) {
@@ -181,7 +181,7 @@ export function ThumbnailManager({
                   // Utiliser le callback fourni par le parent pour rafraîchir les données
                   // Délai plus long pour éviter les conflits avec d'autres refreshs
                   setTimeout(() => {
-                    console.log('🔄 Demande de rechargement des données via onDataRefresh (ThumbnailManager)');
+                    
                     if (onDataRefresh) {
                       onDataRefresh();
                     }
@@ -203,7 +203,7 @@ export function ThumbnailManager({
             
             // Arrêter seulement après beaucoup d'erreurs 404
             if (consecutive404s >= max404sBeforeGiveUp) {
-              console.log(`🔍 Trop d'erreurs 404 consécutives - arrêt du polling`);
+              
               processCompleted = true;
               pollingActive = false;
               if (progressInterval) {
@@ -223,7 +223,7 @@ export function ThumbnailManager({
             console.warn(`⚠️ Erreur API progrès: ${progressResponse.status}`);
             
             if (consecutiveErrors >= maxConsecutiveErrors) {
-              console.log(`❌ Trop d'erreurs consécutives - arrêt du polling`);
+              
               processCompleted = true;
               pollingActive = false;
               if (progressInterval) {
@@ -238,7 +238,7 @@ export function ThumbnailManager({
           console.error('Erreur lors de la récupération du progrès:', error);
           
           if (consecutiveErrors >= maxConsecutiveErrors) {
-            console.log(`❌ Erreur réseau persistante - arrêt du polling`);
+            
             processCompleted = true;
             pollingActive = false;
             if (progressInterval) {
@@ -252,7 +252,7 @@ export function ThumbnailManager({
     };
 
     try {
-      console.log(`🚀 Démarrage du processus batch avec ID: ${processId}`);
+      
 
       const response = await fetch('/api/thumbnail-batch/', {
         method: 'POST',
@@ -316,7 +316,7 @@ export function ThumbnailManager({
   const handleCancelThumbnails = async () => {
     if (currentProcessId) {
       try {
-        console.log(`🛑 Annulation du processus: ${currentProcessId}`);
+        
         
         const response = await fetch(`/api/thumbnail-batch?processId=${currentProcessId}`, {
           method: 'DELETE',
@@ -324,7 +324,7 @@ export function ThumbnailManager({
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`✅ Processus annulé côté serveur:`, data);
+          
         } else {
           console.warn(`⚠️ Erreur lors de l'annulation côté serveur: ${response.status}`);
         }

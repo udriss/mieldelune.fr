@@ -117,7 +117,7 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
     }
     
     // Debug: afficher l'état du registry
-    console.log('Auto-scroll registry status:', autoScrollRegistry.getDebugInfo());
+    
   }, [editedPage, initialPage, onUnsavedChanges]);
 
   // Nettoyer le registry d'auto-scroll au démontage du composant

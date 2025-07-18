@@ -35,7 +35,7 @@ export function WeddingOrder({
   // Écouter les événements de succès pour ce composant
   useEffect(() => {
     const handleOrderSuccess = () => {
-      console.log('Événement de succès reçu pour WeddingOrder');
+      
       setShowSuccessOverlay(true);
       setOverlayAnimation('enter');
 
