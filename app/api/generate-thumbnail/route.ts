@@ -23,7 +23,7 @@ interface ThumbnailGenerationResult {
   finalSizeKB?: number;
 }
 
-// Fonction pour calculer la taille cible adaptive
+// Fonction pour calculer la taille cible adaptative
 async function calculateTargetSize(baseDir: string, images: string[], targetPercentage: number, strategy: 'best' | 'worst' = 'worst'): Promise<{ [imageUrl: string]: number }> {
   const imageSizes: { [imageUrl: string]: number } = {};
 
@@ -50,45 +50,28 @@ async function calculateTargetSize(baseDir: string, images: string[], targetPerc
   const sizes = Object.values(imageSizes);
   const targetSizes: { [imageUrl: string]: number } = {};
 
-  // Cas spécial : une seule image (généralement pour la couverture)
-  if (existingImages.length === 1) {
-    const singleImageUrl = existingImages[0];
-    const originalSize = imageSizes[singleImageUrl];
-    const targetSizeBytes = originalSize * (targetPercentage / 100);
-    targetSizes[singleImageUrl] = Math.max(10 * 1024, targetSizeBytes);
+  console.log(`🎯 Calcul des tailles cibles avec ${targetPercentage}% de compression`);
+  console.log(`🎯 Stratégie: ${strategy}`);
 
-    console.log(`🎯 Image unique: ${singleImageUrl}`);
-    console.log(`🎯 Taille originale: ${(originalSize / 1024).toFixed(1)}KB`);
-    console.log(`🎯 Taille cible (${targetPercentage}%): ${(targetSizes[singleImageUrl] / 1024).toFixed(1)}KB`);
-
-    return targetSizes;
-  }
-
-  // Traitement multi-images avec stratégies
   if (strategy === 'worst') {
-    // Stratégie "Moins bonne qualité" : se baser sur l'image la plus petite
+    // Stratégie "Moins bonne qualité" : uniformiser à la plus petite cible
     const minSize = Math.min(...sizes);
-    const targetSizeBytes = minSize * (targetPercentage / 100);
+    const targetSizeBytes = Math.round(minSize * (targetPercentage / 100));
 
     for (const imageUrl of existingImages) {
       targetSizes[imageUrl] = Math.max(10 * 1024, targetSizeBytes);
     }
 
-    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, Taille de référence: ${(minSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Image de référence: ${(minSize / 1024).toFixed(1)}KB`);
+    console.log(`🎯 Taille cible uniforme: ${(targetSizeBytes / 1024).toFixed(1)}KB`);
   } else {
-    // Stratégie "BEST" :
-    // 1. Pour chaque image, calculer taille * pourcentage
-    // 2. Prendre le max de ces valeurs (targetSizeTEMP)
-    // 3. Pour chaque image, la cible = min(targetSizeTEMP, taille d'origine)
-    const perImageTargets = sizes.map(size => size * (targetPercentage / 100));
-    const targetSizeTEMP = Math.max(...perImageTargets);
-    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, targetSizeTEMP: ${(targetSizeTEMP / 1024).toFixed(1)}KB`);
-
+    // Stratégie "Meilleure qualité" : chaque image garde son ratio individuel
     for (const imageUrl of existingImages) {
       const originalSize = imageSizes[imageUrl];
-      // La cible est le min entre targetSizeTEMP et la taille d'origine
-      targetSizes[imageUrl] = Math.max(10 * 1024, Math.min(targetSizeTEMP, originalSize));
-      console.log(`📏 ${imageUrl}: cible = min(${(targetSizeTEMP / 1024).toFixed(1)}KB, ${(originalSize / 1024).toFixed(1)}KB) = ${(targetSizes[imageUrl] / 1024).toFixed(1)}KB`);
+      const targetSizeBytes = Math.round(originalSize * (targetPercentage / 100));
+      targetSizes[imageUrl] = Math.max(10 * 1024, targetSizeBytes);
+      
+      console.log(`📏 ${imageUrl.split('/').pop()}: ${(originalSize / 1024).toFixed(1)}KB → ${(targetSizeBytes / 1024).toFixed(1)}KB`);
     }
   }
 
@@ -156,50 +139,81 @@ async function handleThumbnailGeneration({
     }
 
     // Algorithme adaptatif pour atteindre la taille cible
-    let quality = 80;
+    let quality = 85;
     let width = metadata.width;
     let height = metadata.height;
     const targetSizeBytes = targetSizeKB * 1024;
     
-    // Première estimation : réduire les dimensions si nécessaire
+    // Première estimation : réduire les dimensions si la compression est très forte
     const originalStats = await stat(originalPath);
     const compressionRatio = targetSizeBytes / originalStats.size;
     
-    if (compressionRatio < 0.5) {
-      // Si la compression est très forte, réduire aussi les dimensions
+    console.log(`🔍 Image originale: ${(originalStats.size / 1024).toFixed(1)}KB, Cible: ${targetSizeKB}KB, Ratio: ${compressionRatio.toFixed(2)}`);
+    
+    // Ajustement initial basé sur le ratio de compression
+    if (compressionRatio < 0.2) {
+      // Compression très agressive : réduire drastiquement
       const scaleFactor = Math.sqrt(compressionRatio * 2);
-      width = Math.round(metadata.width * scaleFactor);
-      height = Math.round(metadata.height * scaleFactor);
+      width = Math.max(300, Math.round(metadata.width * scaleFactor));
+      height = Math.max(225, Math.round(metadata.height * scaleFactor));
+      quality = 50;
+    } else if (compressionRatio < 0.4) {
+      // Compression forte : réduire modérément
+      const scaleFactor = Math.sqrt(compressionRatio * 1.5);
+      width = Math.max(400, Math.round(metadata.width * scaleFactor));
+      height = Math.max(300, Math.round(metadata.height * scaleFactor));
+      quality = 65;
+    } else if (compressionRatio < 0.7) {
+      // Compression modérée : ajuster principalement la qualité
+      quality = 75;
     }
 
     // Ajustement itératif de la qualité
     let attempt = 0;
-    const maxAttempts = 8; // Augmenter le nombre de tentatives
+    const maxAttempts = 8; // Plus d'attempts pour un meilleur ciblage
+    let bestResult = null;
+    let bestDifference = Infinity;
     
     while (attempt < maxAttempts) {
       try {
-        await sharp(originalPath)
-          .resize(width, height, {
-            fit: 'contain',
+        // Construire le pipeline Sharp
+        let pipeline = sharp(originalPath);
+        
+        // Redimensionner seulement si nécessaire
+        if (width < metadata.width || height < metadata.height) {
+          pipeline = pipeline.resize(width, height, {
+            fit: 'inside',
             withoutEnlargement: true
-          })
-          .jpeg({
-            quality: Math.round(quality),
-            chromaSubsampling: '4:2:0',
-            mozjpeg: true,
-            force: true
-          })
-          .toFile(thumbPath);
+          });
+        }
+        
+        // Compression JPEG optimisée
+        pipeline = pipeline.jpeg({
+          quality: Math.max(5, Math.min(95, Math.round(quality))),
+          progressive: true,
+          mozjpeg: true
+        });
+        
+        await pipeline.toFile(thumbPath);
 
         // Vérifier la taille du fichier généré
         const thumbStats = await stat(thumbPath);
         const actualSizeKB = thumbStats.size / 1024;
+        const difference = Math.abs(actualSizeKB - targetSizeKB);
+        const percentageDifference = (difference / targetSizeKB) * 100;
         
-        console.log(`📊 Tentative ${attempt + 1}: ${actualSizeKB.toFixed(1)}KB (cible: ${targetSizeKB}KB, qualité: ${quality}, dims: ${width}x${height})`);
+        console.log(`📊 Tentative ${attempt + 1}: ${actualSizeKB.toFixed(1)}KB (cible: ${targetSizeKB}KB, diff: ${percentageDifference.toFixed(1)}%, qualité: ${quality}, dims: ${width}x${height})`);
         
-        // Tolérance plus stricte : 5% au lieu de 20%
-        if (actualSizeKB <= targetSizeKB * 1.05 || attempt === maxAttempts - 1) {
+        // Garder le meilleur résultat
+        if (difference < bestDifference) {
+          bestDifference = difference;
+          bestResult = { actualSizeKB, thumbPath };
+        }
+        
+        // Succès si on est dans la tolérance de 10% ou moins
+        if (percentageDifference <= 10) {
           const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
+          console.log(`✅ Objectif atteint en ${attempt + 1} tentatives: ${actualSizeKB.toFixed(1)}KB (${percentageDifference.toFixed(1)}% de différence)`);
           return { 
             success: true, 
             thumbUrlPath,
@@ -211,26 +225,26 @@ async function handleThumbnailGeneration({
           };
         }
         
-        // Ajuster la qualité et les dimensions pour la prochaine tentative
+        // Ajuster les paramètres pour la prochaine tentative
         const ratio = targetSizeKB / actualSizeKB;
         
-        if (actualSizeKB > targetSizeKB * 1.05) {
-          if (ratio < 0.6) {
-            // Si on est très loin de la cible, réduire aussi les dimensions
-            const scale = Math.sqrt(ratio);
+        if (actualSizeKB > targetSizeKB) {
+          // Fichier trop gros
+          if (ratio < 0.7) {
+            // Très loin : réduire dimensions ET qualité
+            const scale = Math.sqrt(ratio * 0.9);
             width = Math.max(200, Math.round(width * scale));
             height = Math.max(150, Math.round(height * scale));
-            quality = Math.max(15, Math.round(quality * 0.8));
-          } else if (ratio < 0.8) {
-            // Réduction drastique de qualité
-            quality = Math.max(15, quality - 20);
+            quality = Math.max(5, quality - 20);
           } else {
-            // Ajustement fin
-            quality = Math.max(15, quality - 10);
+            // Proche : ajuster seulement la qualité
+            quality = Math.max(5, quality - 10);
           }
         } else {
-          // Si on est en dessous de la cible, augmenter légèrement
-          quality = Math.min(95, quality + 5);
+          // Fichier trop petit (rare)
+          if (quality < 90) {
+            quality = Math.min(95, quality + 5);
+          }
         }
         
         attempt++;
@@ -246,26 +260,35 @@ async function handleThumbnailGeneration({
         
       } catch (error) {
         console.error(`❌ Erreur lors de la tentative ${attempt + 1}:`, error);
-        break;
+        attempt++;
+        
+        // Si erreur, essayer avec des paramètres plus conservateurs
+        quality = Math.max(5, quality - 15);
+        width = Math.max(200, width - 50);
+        height = Math.max(150, height - 40);
       }
     }
 
-    // Si on arrive ici, utiliser le dernier résultat même s'il n'est pas parfait
-    const thumbStats = await stat(thumbPath);
-    const finalSizeKB = thumbStats.size / 1024;
-    const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
-    
-    console.log(`⚠️ Résultat final après ${attempt} tentatives: ${finalSizeKB.toFixed(1)}KB`);
-    
-    return { 
-      success: true, 
-      thumbUrlPath,
-      finalSizeKB,
-      dimensions: {
-        width: metadata.width,
-        height: metadata.height
-      }
-    };
+    // Si on arrive ici, utiliser le meilleur résultat obtenu
+    if (bestResult) {
+      const thumbUrlPath = `/${path.basename(baseDir)}/thumbnails/${thumbFileName}`;
+      const percentageDifference = (bestDifference / targetSizeKB) * 100;
+      
+      console.log(`⚠️ Meilleur résultat après ${attempt} tentatives: ${bestResult.actualSizeKB.toFixed(1)}KB (${percentageDifference.toFixed(1)}% de différence)`);
+      
+      return { 
+        success: true, 
+        thumbUrlPath,
+        finalSizeKB: bestResult.actualSizeKB,
+        dimensions: {
+          width: metadata.width,
+          height: metadata.height
+        }
+      };
+    }
+
+    // Cas d'échec complet (très rare)
+    throw new Error('Impossible de générer une miniature avec la taille cible');
 
   } catch (error) {
     console.error('❌ Thumbnail generation error:', error);
@@ -279,7 +302,14 @@ async function handleThumbnailGeneration({
 export async function POST(request: Request) {
   const startTime = Date.now();
   try {
-    const { folderId, imageUrl, resizePercentage = 20, isCover = false, compressionStrategy = 'worst' } = await request.json();
+    const { 
+      folderId, 
+      imageUrl, 
+      resizePercentage = 20, 
+      isCover = false, 
+      compressionStrategy = 'worst',
+      targetSizeKB = null // Nouvelle option pour spécifier directement la taille cible
+    } = await request.json();
     
     // Validation
     if (!folderId || !imageUrl) {
@@ -315,32 +345,36 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    // Calculer les tailles cibles adaptatives avec la stratégie
-    let allImageUrls: string[];
-    
-    if (isCover) {
-      // Pour l'image de couverture, ne traiter que cette image
-      allImageUrls = [imageUrl];
-      console.log(`🖼️ Mode couverture: traitement de l'image seule ${imageUrl}`);
+    let finalTargetSizeKB: number;
+
+    if (targetSizeKB && targetSizeKB > 0) {
+      // Utiliser la taille cible fournie directement
+      finalTargetSizeKB = targetSizeKB;
+      console.log(`🎯 Taille cible fournie directement: ${finalTargetSizeKB}KB`);
     } else {
-      // Pour les images normales, traiter toutes les images du mariage
-      allImageUrls = wedding.images.map(img => img.fileUrl);
-      console.log(`📸 Mode galerie: traitement de ${allImageUrls.length} images`);
+      // Calculer les tailles cibles adaptatives avec la stratégie (méthode existante)
+      let allImageUrls: string[];
+      
+      if (isCover) {
+        allImageUrls = [imageUrl];
+        console.log(`🖼️ Mode couverture: traitement de l'image seule ${imageUrl}`);
+      } else {
+        allImageUrls = wedding.images.map(img => img.fileUrl);
+        console.log(`📸 Mode galerie: traitement de ${allImageUrls.length} images`);
+      }
+      
+      const targetSizes = await calculateTargetSize(baseDir, allImageUrls, resizePercentage, compressionStrategy);
+      const targetSizeBytes = targetSizes[imageUrl];
+      finalTargetSizeKB = Math.round(targetSizeBytes / 1024);
+      
+      console.log(`🎯 Taille cible calculée pour ${imageUrl}: ${finalTargetSizeKB}KB (${compressionStrategy})`);
     }
-    
-    const targetSizes = await calculateTargetSize(baseDir, allImageUrls, resizePercentage, compressionStrategy);
-    
-    // Obtenir la taille cible spécifique pour cette image
-    const targetSizeBytes = targetSizes[imageUrl];
-    const targetSizeKB = Math.round(targetSizeBytes / 1024);
-    
-    console.log(`🎯 Taille cible pour ${imageUrl}: ${targetSizeKB}KB (${compressionStrategy})`);
 
     // Generate thumbnail with adaptive sizing
     const result = await handleThumbnailGeneration({
       baseDir,
       imageUrl,
-      targetSizeKB,
+      targetSizeKB: finalTargetSizeKB,
       isCover
     });
 
@@ -391,7 +425,7 @@ export async function POST(request: Request) {
       thumbnailPath: result.thumbUrlPath,
       finalSizeKB: result.finalSizeKB,
       originalSizeKB,
-      targetSizeKB,
+      targetSizeKB: finalTargetSizeKB,
       compressionStrategy,
       duration
     });

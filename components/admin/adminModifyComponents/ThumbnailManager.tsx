@@ -73,10 +73,13 @@ export function ThumbnailManager({
   const [failedThumbnails, setFailedThumbnails] = useState<string[]>([]);
   const [compressionStats, setCompressionStats] = useState<{ [key: string]: CompressionStat }>({});
   const [compressionStrategy, setCompressionStrategy] = useState<'best' | 'worst'>('worst');
-  const [currentProcessId, setCurrentProcessId] = useState<string | null>(null);
   const [tableRowsToShow, setTableRowsToShow] = useState<5 | 11 | 15 | 'all'>(5);
   const [tablePage, setTablePage] = useState(1);
   const [showStatsTable, setShowStatsTable] = useState(false);
+  const [processingStopped, setProcessingStopped] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
+  const [targetSizeKB, setTargetSizeKB] = useState<number>(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Nettoyer les stats quand on change de mariage
@@ -84,284 +87,240 @@ export function ThumbnailManager({
   
   useEffect(() => {
     if (editedWedding && editedWedding.id !== lastWeddingId) {
-      
       setCompressionStats({});
       setShowStatsTable(false);
       setFailedThumbnails([]);
+      setCurrentImageIndex(0);
+      setTotalImages(0);
+      setTargetSizeKB(0);
       setLastWeddingId(editedWedding.id);
     }
   }, [editedWedding?.id, lastWeddingId]);
 
-  // Fonction utilitaire pour attendre que le process soit prêt côté serveur
-  const waitForProcessReady = async (processId: string, maxTries = 15, delay = 300): Promise<boolean> => {
-    for (let i = 0; i < maxTries; i++) {
-      try {
-        const res = await fetch(`/api/thumbnail-progress?processId=${processId}`);
-        if (res.ok) return true;
-      } catch (e) {
-        // ignore
-      }
-      await new Promise(r => setTimeout(r, delay));
-    }
-    return false;
-  };
-
-  const processThumbnailsBatch = async () => {
+  // Traitement image par image
+  const processThumbnailsSequentially = async () => {
     setIsProcessingThumbnails(true);
     setFailedThumbnails([]);
     setCompressionStats({});
     setTablePage(1);
     setThumbnailProgress(0);
+    setProcessingStopped(false);
+    setCurrentImageIndex(0);
     
-    // Générer un ID unique pour ce processus
-    const processId = `thumb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setCurrentProcessId(processId);
-
-    let progressInterval: NodeJS.Timeout | null = null;
-    let consecutiveErrors = 0;
-    let consecutive404s = 0;
-    const maxConsecutiveErrors = 20; // Plus tolérant
-    const max404sBeforeGiveUp = 30; // Permettre beaucoup plus d'erreurs 404 au début
-    let pollingActive = true;
-    let processCompleted = false;
-
-    // Fonction pour démarrer le polling du progrès
-    const startProgressPolling = () => {
-      
-      
-      progressInterval = setInterval(async () => {
-        if (!pollingActive || processCompleted) {
-          if (progressInterval) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-          }
-          return;
-        }
-
-        try {
-          const progressResponse = await fetch(`/api/thumbnail-progress?processId=${processId}`);
-          
-          if (progressResponse.ok) {
-            consecutiveErrors = 0; // Reset le compteur d'erreurs
-            consecutive404s = 0; // Reset le compteur 404
-            const progressData = await progressResponse.json();
-            
-            if (progressData.success) {
-              
-              setThumbnailProgress(progressData.progress || 0);
-              
-              // Mettre à jour les statistiques en temps réel
-              if (progressData.compressionStats && Object.keys(progressData.compressionStats).length > 0) {
-                
-                setCompressionStats(progressData.compressionStats);
-                setShowStatsTable(true);
-              }
-              
-              // Arrêter le polling si le processus est terminé
-              if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
-                
-                processCompleted = true;
-                pollingActive = false;
-                if (progressInterval) {
-                  clearInterval(progressInterval);
-                  progressInterval = null;
-                }
-                
-                // Finaliser le processus côté UI
-                setIsProcessingThumbnails(false);
-                setThumbnailProgress(100);
-                
-                // Réinitialiser après un délai
-                setTimeout(() => {
-                  setThumbnailProgress(0);
-                  setCurrentProcessId(null);
-                }, 3000);
-                
-                if (progressData.status === 'completed') {
-                  // Utiliser le callback fourni par le parent pour rafraîchir les données
-                  // Délai plus long pour éviter les conflits avec d'autres refreshs
-                  setTimeout(() => {
-                    
-                    if (onDataRefresh) {
-                      onDataRefresh();
-                    }
-                    setUpdateKey(prev => prev + 1);
-                  }, 2000); // Augmenter le délai à 2 secondes
-                  
-                  toast.success(`🎉 Compression terminée avec succès !`, {
-                    position: "top-center",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    theme: "dark",
-                  });
-                }
-              }
-            }
-          } else if (progressResponse.status === 404) {
-            consecutive404s++;
-            console.warn(`⚠️ Processus non trouvé (${consecutive404s}/${max404sBeforeGiveUp}) - Le serveur initialise peut-être encore...`);
-            
-            // Arrêter seulement après beaucoup d'erreurs 404
-            if (consecutive404s >= max404sBeforeGiveUp) {
-              
-              processCompleted = true;
-              pollingActive = false;
-              if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
-              }
-              setIsProcessingThumbnails(false);
-              
-              toast.warning('⚠️ Impossible de suivre le progrès. Le traitement continue côté serveur.', {
-                position: "top-center",
-                autoClose: 5000,
-                theme: "dark",
-              });
-            }
-          } else {
-            consecutiveErrors++;
-            console.warn(`⚠️ Erreur API progrès: ${progressResponse.status}`);
-            
-            if (consecutiveErrors >= maxConsecutiveErrors) {
-              
-              processCompleted = true;
-              pollingActive = false;
-              if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
-              }
-              setIsProcessingThumbnails(false);
-            }
-          }
-        } catch (error) {
-          consecutiveErrors++;
-          console.error('Erreur lors de la récupération du progrès:', error);
-          
-          if (consecutiveErrors >= maxConsecutiveErrors) {
-            
-            processCompleted = true;
-            pollingActive = false;
-            if (progressInterval) {
-              clearInterval(progressInterval);
-              progressInterval = null;
-            }
-            setIsProcessingThumbnails(false);
-          }
-        }
-      }, 1000); // Réduction de l'intervalle à 1 seconde pour être très réactif
-    };
-
-    try {
-      
-
-      const response = await fetch('/api/thumbnail-batch/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          folderId: editedWedding.folderId,
-          resizePercentage: resizeValue,
-          compressionStrategy: compressionStrategy,
-          processId: processId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Erreur lors du traitement en lot');
-      }
-
-      // Attendre que le process soit prêt côté serveur avant de démarrer le polling
-      const found = await waitForProcessReady(processId, 15, 300);
-      if (!found) {
-        toast.warning('Le suivi du progrès n\'a pas pu démarrer (process non trouvé). Le traitement continue côté serveur.', {
-          position: "top-center",
-          autoClose: 5000,
-          theme: "dark",
-        });
-      } else {
-        // Démarrer le polling normalement
-        if (!processCompleted) {
-          startProgressPolling();
-        }
-      }
-
-      // Afficher un message de démarrage
-      toast.info(`🚀 Traitement de ${editedWedding.images.length} images démarré`, {
+    // Créer un nouveau AbortController pour ce processus
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
+    const images = editedWedding.images;
+    setTotalImages(images.length);
+    
+    if (images.length === 0) {
+      setIsProcessingThumbnails(false);
+      toast.warning('Aucune image à traiter', {
         position: "top-center",
         autoClose: 2000,
-        hideProgressBar: false,
         theme: "dark",
       });
-
-    } catch (error) {
-      console.error('Erreur lors du traitement en lot:', error);
-      processCompleted = true;
-      pollingActive = false;
-      setIsProcessingThumbnails(false);
-      setCurrentProcessId(null);
-
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        theme: "dark",
-        style: { width: '400px' }
-      });
+      return;
     }
-  };
 
-  const handleCancelThumbnails = async () => {
-    if (currentProcessId) {
+    // Calculer la taille cible moyenne basée sur le pourcentage de réduction
+    let estimatedTargetKB = 50; // Valeur par défaut
+    
+    // Estimer la taille cible en se basant sur les tailles d'images existantes
+    try {
+      if (images.length > 0) {
+        // Utiliser une estimation simple basée sur le pourcentage
+        const sampleImage = images[0];
+        const imageName = sampleImage.fileUrl.split('/').pop();
+        if (imageName) {
+          // Estimation simple : taille cible = resizeValue% de la taille moyenne estimée
+          // Pour une image typique de 1MB, 20% = 200KB
+          const averageImageSizeKB = 1000; // Estimation moyenne
+          estimatedTargetKB = Math.round((averageImageSizeKB * resizeValue) / 100);
+          estimatedTargetKB = Math.max(30, Math.min(500, estimatedTargetKB)); // Entre 30KB et 500KB
+        }
+      }
+    } catch (error) {
+      console.warn('Impossible d\'estimer la taille cible:', error);
+    }
+    
+    setTargetSizeKB(estimatedTargetKB);
+    setShowStatsTable(true);
+
+    toast.info(`🚀 Traitement de ${images.length} images démarré (cible: ${estimatedTargetKB}KB)`, {
+      position: "top-center",
+      autoClose: 3000,
+      theme: "dark",
+    });
+
+    // Traiter chaque image séquentiellement
+    for (let i = 0; i < images.length; i++) {
+      // Vérifier l'annulation au début de chaque itération
+      if (processingStopped || abortController.signal.aborted) {
+        console.log('🛑 Traitement arrêté par l\'utilisateur');
+        break;
+      }
+
+      const image = images[i];
+      setCurrentImageIndex(i + 1);
+      
+      // Mettre à jour la progression
+      const progressPercent = (i / images.length) * 100;
+      setThumbnailProgress(progressPercent);
+
       try {
-        
-        
-        const response = await fetch(`/api/thumbnail-batch?processId=${currentProcessId}`, {
-          method: 'DELETE',
+        const response = await fetch('/api/generate-thumbnail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            folderId: editedWedding.folderId,
+            imageUrl: image.fileUrl,
+            resizePercentage: resizeValue,
+            compressionStrategy: compressionStrategy,
+            targetSizeKB: estimatedTargetKB, // Passer la taille cible explicitement
+            isCover: false
+          }),
+          signal: abortController.signal // Permettre l'annulation de la requête
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
+
+        const data = await response.json();
+
+        if (data.success) {
+          const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+          const compressionRate = data.originalSizeKB ? 
+            Math.round(((data.originalSizeKB - data.finalSizeKB) / data.originalSizeKB) * 100) : 0;
+
+          // Ajouter les statistiques en temps réel
+          setCompressionStats(prev => ({
+            ...prev,
+            [image.fileUrl]: {
+              imageName,
+              originalSize: (data.originalSizeKB || 0) * 1024,
+              finalSize: (data.finalSizeKB || 0) * 1024,
+              compressionRate,
+              targetSize: (data.targetSizeKB || estimatedTargetKB) * 1024
+            }
+          }));
+
+          console.log(`✅ Image ${i + 1}/${images.length} traitée: ${imageName} (${data.finalSizeKB}KB)`);
         } else {
-          console.warn(`⚠️ Erreur lors de l'annulation côté serveur: ${response.status}`);
+          // Ajouter l'erreur aux statistiques
+          const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+          setCompressionStats(prev => ({
+            ...prev,
+            [image.fileUrl]: {
+              imageName,
+              originalSize: 0,
+              finalSize: 0,
+              compressionRate: 0,
+              targetSize: estimatedTargetKB * 1024,
+              error: data.error || 'Erreur inconnue'
+            }
+          }));
+
+          setFailedThumbnails(prev => [...prev, image.fileUrl]);
+          console.error(`❌ Erreur image ${i + 1}/${images.length}: ${data.error}`);
+        }
+      } catch (error) {
+        // Vérifier si c'est une annulation
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('🛑 Requête annulée pour l\'image:', image.fileUrl);
+          break; // Sortir de la boucle
         }
         
-        // Forcer l'arrêt côté client
-        setIsProcessingThumbnails(false);
-        setThumbnailProgress(0);
-        setCurrentProcessId(null);
-        
-        toast.info('🛑 Génération de miniatures annulée', {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          theme: "dark",
-          style: { width: '400px' }
-        });
-        
-      } catch (error) {
-        console.error('Erreur lors de l\'annulation:', error);
-        
-        // Même en cas d'erreur, forcer l'arrêt côté client
-        setIsProcessingThumbnails(false);
-        setThumbnailProgress(0);
-        setCurrentProcessId(null);
-        
-        toast.warning('⚠️ Arrêt forcé côté client. Le processus peut continuer côté serveur.', {
-          position: "top-center",
-          autoClose: 3000,
-          theme: "dark",
-        });
+        const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+        setCompressionStats(prev => ({
+          ...prev,
+          [image.fileUrl]: {
+            imageName,
+            originalSize: 0,
+            finalSize: 0,
+            compressionRate: 0,
+            targetSize: estimatedTargetKB * 1024,
+            error: error instanceof Error ? error.message : 'Erreur réseau'
+          }
+        }));
+
+        setFailedThumbnails(prev => [...prev, image.fileUrl]);
+        console.error(`❌ Erreur réseau image ${i + 1}/${images.length}:`, error);
       }
     }
+
+    // Finalisation
+    setThumbnailProgress(100);
+    setIsProcessingThumbnails(false);
+    
+    // Nettoyer l'AbortController
+    abortControllerRef.current = null;
+    
+    // Calculer le résumé final avec les stats actuelles
+    const currentStats = Object.values(compressionStats);
+    const failed = currentStats.filter(stat => stat.error).length;
+    const success = currentStats.length - failed;
+    
+    // Rafraîchir les données si non arrêté
+    if (!processingStopped && !abortController.signal.aborted) {
+      setTimeout(() => {
+        if (onDataRefresh) {
+          onDataRefresh();
+        }
+        setUpdateKey(prev => prev + 1);
+      }, 1500);
+
+      toast.success(`🎉 Compression terminée ! ${success}/${images.length} images traitées avec succès`, {
+        position: "top-center",
+        autoClose: 4000,
+        theme: "dark",
+      });
+    } else {
+      // Afficher un résumé même en cas d'annulation
+      toast.info(`🛑 Traitement annulé. ${success} images traitées avant l'arrêt.`, {
+        position: "top-center",
+        autoClose: 4000,
+        theme: "dark",
+      });
+    }
+
+    // Réinitialiser après un délai
+    setTimeout(() => {
+      setThumbnailProgress(0);
+      setCurrentImageIndex(0);
+    }, 3000);
+  };
+
+  const handleCancelThumbnails = () => {
+    console.log('🚨 EMERGENCY STOP - Annulation du traitement');
+    
+    // Arrêt immédiat des requêtes en cours
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Mise à jour immédiate de l'état
+    setProcessingStopped(true);
+    setIsProcessingThumbnails(false);
+    
+    // Calculer le résumé avec les stats actuelles
+    const currentStats = Object.values(compressionStats);
+    const failed = currentStats.filter(stat => stat.error).length;
+    const success = currentStats.length - failed;
+    
+    toast.error(`🛑 Traitement annulé ! ${success} images traitées avant l'arrêt.`, {
+      position: "top-center",
+      autoClose: 3000,
+      theme: "dark",
+    });
+    
+    // Réinitialiser après un court délai
+    setTimeout(() => {
+      setThumbnailProgress(0);
+      setCurrentImageIndex(0);
+    }, 1000);
   };
 
   const handleProcessThumbnails = async () => {
-    await processThumbnailsBatch();
-    // Le rechargement des données se fait maintenant dans processThumbnailsBatch
+    await processThumbnailsSequentially();
   };
 
   // Calculer les données pour le tableau
@@ -481,9 +440,15 @@ export function ThumbnailManager({
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Loader2 className="w-5 h-5 mr-2 animate-spin text-blue-600" />
               <Typography variant="body2" color="primary.dark" fontWeight={500}>
-                {thumbnailProgress === 100 ? 'Finalisation...' : `Compression : ${Math.round(thumbnailProgress)} %`}
+                {thumbnailProgress === 100 ? 'Finalisation...' : 
+                 `Compression : ${currentImageIndex}/${totalImages} images (${Math.round(thumbnailProgress)}%)`}
               </Typography>
             </Box>
+            {targetSizeKB > 0 && (
+              <Typography variant="caption" color="text.secondary">
+                Taille cible : {targetSizeKB}KB
+              </Typography>
+            )}
             <LinearProgress 
               variant="determinate" 
               value={thumbnailProgress} 
@@ -524,6 +489,10 @@ export function ThumbnailManager({
                 <Chip 
                   size="small" 
                   label={(() => {
+                    if (isProcessingThumbnails && targetSizeKB > 0) {
+                      return `${targetSizeKB}KB`;
+                    }
+                    
                     const validStats = Object.values(compressionStats).filter(stat => !stat.error);
                     const totalStats = Object.values(compressionStats);
                     
