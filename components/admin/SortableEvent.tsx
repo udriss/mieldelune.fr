@@ -22,6 +22,8 @@ import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SettingsIcon from '@mui/icons-material/Settings';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 interface PropsEvent {
   wedding: Wedding;
@@ -388,7 +390,7 @@ export function SortableWeddingImage({
             size="small" 
             variant="outlined"
             onClick={() => setIsModalOpen(true)}
-            sx={{ fontSize: '0.75rem', px: 1, minWidth: 0 }}
+            sx={{ fontSize: '0.75rem', px: .5, minWidth: 0 }}
             >
               <SettingsIcon fontSize='small' sx={{ color: '#888' }} />
             </MuiButton>
@@ -396,7 +398,7 @@ export function SortableWeddingImage({
             size="small"
             variant="text"
             onClick={handleToggleDescriptionVisibility}
-            sx={{ px: 1, minWidth: 0 }}
+            sx={{ px: .5, minWidth: 0 }}
             title={descriptionVisible ? "Masquer la description" : "Afficher la description"}
           >
             {descriptionVisible ? (
@@ -405,22 +407,27 @@ export function SortableWeddingImage({
               <SpeakerNotesOffIcon fontSize='small' sx={{ color: '#888' }} />
             )}
           </MuiButton>
+        {/* Bouton de visibilité d'image */}
+          <MuiButton
+            size="small"
+            variant="text"
+            onClick={handleToggleImageVisibility}
+            sx={{ px: .5, minWidth: 0 }}
+            title={imageVisible ? "Masquer l'image" : "Afficher l'image"}
+          >
+            {imageVisible ? (
+              <VisibilityIcon fontSize='small' sx={{ color: '#888' }} />
+            ) : (
+              <VisibilityOffIcon fontSize='small' sx={{ color: '#888' }} />
+            )}
+          </MuiButton>
           {/* Bouton de suppression d'image */}
         <IconButton
-          sx={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, bgcolor: 'white', border: '1px solid #e0e0e0', boxShadow: 1, zIndex: 10, p: 0, '&:hover': { bgcolor: '#ffeaea' } }}
+          sx={{ width: 32, height: 32, bgcolor: 'white', border: '1px solid #e0e0e0', boxShadow: 1, zIndex: 10, p: 0, '&:hover': { bgcolor: '#ffeaea' } }}
           size="small"
           onClick={() => setIsDeleteModalOpen(true)}
         >
-          <X style={{ width: 18, height: 18, color: '#d32f2f' }} />
-        </IconButton>
-        {/* Bouton de visibilité d'image */}
-        <IconButton
-          sx={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, bgcolor: 'white', border: '1px solid #e0e0e0', boxShadow: 1, zIndex: 10, p: 0, '&:hover': { bgcolor: '#f5f5f5' } }}
-          size="small"
-          onClick={handleToggleImageVisibility}
-          title={imageVisible ? "Masquer l'image" : "Afficher l'image"}
-        >
-          {imageVisible ? <Eye style={{ width: 18, height: 18, color: '#666' }} /> : <EyeOff style={{ width: 18, height: 18, color: '#666' }} />}
+          <X fontSize='small' style={{ color: '#d32f2f' }} />
         </IconButton>
         </Box>
       )}

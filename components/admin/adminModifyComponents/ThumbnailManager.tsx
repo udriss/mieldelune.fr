@@ -457,7 +457,7 @@ export function ThumbnailManager({
         </Box>
         
         <Box sx={{ gridColumn: 'span 5' }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 1 }}>
+          <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ mb: 1 }}>
             Stratégie de compression
           </Typography>
           <ToggleButtonGroup

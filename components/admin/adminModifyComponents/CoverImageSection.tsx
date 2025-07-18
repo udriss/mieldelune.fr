@@ -445,11 +445,11 @@ export function CoverImageSection({
                   {editedWedding.coverImage && editedWedding.coverImage.fileType === 'coverStorage' && (
                     <Box display="flex" flexDirection="column" justifyContent="center" gap={2}>
                       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant='overline' color="text.secondary">
                           <CompressOutlined fontSize="small" sx={{ mr: 1 }} />
                           Taille finale à conserver : {resizeValueCover} %
                           <br />
-                          compression : {100 - resizeValueCover}%
+                          compression à {100 - resizeValueCover} %
                         </Typography>
                         <Slider.Root
                           className="relative flex items-center w-[200px] h-5"
