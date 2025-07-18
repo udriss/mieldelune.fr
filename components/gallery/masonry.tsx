@@ -1,4 +1,4 @@
-// import LightGallery from 'lightgallery/react';
+import LightGallery from 'lightgallery/react';
 import { useRouter } from 'next/navigation';
 import { Wedding, Image as WeddingImage } from '@/lib/dataTemplate';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -12,8 +12,26 @@ import type { ComponentType } from 'react';
 import type { SwiperGalleryProps } from './SwiperGallery';
 import { Loader2 } from "lucide-react";
 import Masonry from 'react-masonry-css';
-import { Skeleton, Box } from '@mui/material';
+import { Skeleton, Box, useMediaQuery } from '@mui/material';
 import { Heart } from 'lucide-react';
+
+// Plugins for LightGallery
+import lgZoom from 'lightgallery/plugins/zoom';
+import lgThumbnail from 'lightgallery/plugins/thumbnail';
+import lgShare from 'lightgallery/plugins/share';
+import lgAutoplay from 'lightgallery/plugins/autoplay';
+import lgFullscreen from 'lightgallery/plugins/fullscreen';
+import lgPager from 'lightgallery/plugins/pager';
+
+// Styles
+import 'lightgallery/css/lightgallery.css';
+import 'lightgallery/css/lg-zoom.css';
+import 'lightgallery/css/lg-thumbnail.css';
+import 'lightgallery/css/lg-share.css';
+import 'lightgallery/css/lg-autoplay.css';
+import 'lightgallery/css/lg-fullscreen.css';
+import 'lightgallery/css/lg-rotate.css';
+import 'lightgallery/css/lg-pager.css';
 
 
 
@@ -76,6 +94,7 @@ const socialSettings: SocialSettings = {
 export function MasonryGallery({ wedding }: { wedding: Wedding }) {
   const router = useRouter();
   const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Filtrer les images pour n'afficher que celles qui sont visibles
   const visibleWeddingImages = useMemo(() => {
@@ -127,112 +146,216 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
         </div>
 
         {/* Gallery grid */}
-      
-        <div className="max-w-[2800px] flex justify-center items-center mx-auto">
-          <Masonry
-            breakpointCols={{
-              default: 2,
-              1100: 2,
-              700: 2,
-              500: 1
-            }}
-            className="masonry-grid p-4"
-            columnClassName="masonry-grid_column"
-          >
-            {visibleWeddingImages.map((image: WeddingImage, index: number) => {
-              const isImageLoading = loadingImages[image.id] !== false;
-              const caption = getImageCaption(index);
+        {isMobile ? (
+          // LightGallery pour mobile avec les mêmes configurations que timeline.tsx
+          <div className="gallery-container max-w-[1200px] mx-auto">
+            <LightGallery
+              selector=".gallery-item"
+              plugins={[lgZoom, lgThumbnail, lgShare, lgAutoplay, lgFullscreen]}
+              mode="lg-fade"
+              speed={500}
+              counter={true}
+              download={false}
+              autoplay={false}
+              zoom={true}
+              thumbnail={true}
+              slideShowInterval={3000}
+              progressBar={true}
+            >
+              <div className="grid grid-cols-1 gap-4 p-4">
+                {visibleWeddingImages.map((image: WeddingImage, index: number) => {
+                  const isImageLoading = loadingImages[image.id] !== false;
+                  const caption = getImageCaption(index);
 
-              return (
-                <div key={image.id}>
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setSwiperIndex(index);
-                      setSwiperOpen(true);
-                    }}
-                  >
-                    <div className="relative w-full overflow-hidden rounded-[5px]">
-                      {/* Conteneur avec aspect-ratio pour éviter le layout shift */}
-                      <div
-                        className="relative w-full"
-                        style={{
-                          aspectRatio: image.width && image.height
-                            ? `${image.width}/${image.height}`
-                            : '3/4' // Fallback ratio
-                        }}
+                  return (
+                    <div key={image.id}>
+                      <a
+                        className="gallery-item block cursor-pointer"
+                        data-src={getImageUrl(image, false)}
+                        data-sub-html={`<h4>${caption}</h4><p>${wedding.title}</p>`}
+                        data-facebook-title={`${wedding.title} - ${caption}`}
+                        data-twitter-title={`${wedding.title} - ${caption}`}
+                        data-pinterest-text={`${wedding.title} - ${caption}`}
                       >
-                        {isImageLoading && (
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              inset: 0,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: 'rgba(254, 226, 226, 0.2)',
-                              backdropFilter: 'blur(16px)',
-                              zIndex: 1
+                        <div className="relative w-full overflow-hidden rounded-lg">
+                          <div
+                            className="relative w-full"
+                            style={{
+                              aspectRatio: image.width && image.height
+                                ? `${image.width}/${image.height}`
+                                : '3/4'
                             }}
                           >
-                            <Heart
-                              className="text-red-400 animate-pulse"
-                              style={{
-                                width: '80%',
-                                height: '80%'
+                            {isImageLoading && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  background: 'linear-gradient(to top right, rgba(251, 207, 232, 0.3), rgba(199, 210, 254, 0.3))',
+                                  backdropFilter: 'blur(16px)',
+                                  zIndex: 1
+                                }}
+                              >
+                                <Heart
+                                  className="text-red-400 animate-pulse"
+                                  style={{
+                                    width: '80%',
+                                    height: '80%'
+                                  }}
+                                />
+                              </Box>
+                            )}
+                            <LazyLoadImage
+                              src={getImageUrl(image)}
+                              alt={`${wedding.title} - ${caption}`}
+                              className="w-full h-full object-cover transition-transform duration-300"
+                              effect="blur"
+                              placeholder={
+                                <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                                  <Heart className="text-red-300 animate-pulse w-12 h-12" />
+                                </div>
+                              }
+                              onLoad={() => {
+                                setLoadingImages(prev => ({
+                                  ...prev,
+                                  [image.id]: false
+                                }));
+                              }}
+                              beforeLoad={() => {
+                                setLoadingImages(prev => ({
+                                  ...prev,
+                                  [image.id]: true
+                                }));
                               }}
                             />
-                          </Box>
-                        )}
-                        <LazyLoadImage
-                          src={getImageUrl(image)}
-                          alt={`${wedding.title} - ${caption}`}
-                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          effect="blur"
-                          placeholder={
-                            <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                              <Heart className="text-red-300 animate-pulse w-12 h-12" />
-                            </div>
-                          }
-                          onLoad={() => {
-                            setLoadingImages(prev => ({
-                              ...prev,
-                              [image.id]: false
-                            }));
-                          }}
-                          beforeLoad={() => {
-                            setLoadingImages(prev => ({
-                              ...prev,
-                              [image.id]: true
-                            }));
-                          }}
-                        />
-                      </div>
-                      {/* Caption overlay on hover - only show if description is visible */}
-                      {visibleWeddingImages[index]?.descriptionVisibility !== false && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                          <div className="absolute bottom-4 left-4 right-4 text-white">
-                            <h3 className="text-lg font-semibold">{caption}</h3>
+                            {/* Caption overlay on hover - only show if description is visible */}
+                            {visibleWeddingImages[index]?.descriptionVisibility !== false && (
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                <div className="absolute bottom-4 left-4 right-4 text-white">
+                                  <h3 className="text-lg font-semibold">{caption}</h3>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            </LightGallery>
+          </div>
+        ) : (
+          // Masonry pour desktop avec Swiper
+          <div className="max-w-[2800px] flex justify-center items-center mx-auto">
+            <Masonry
+              breakpointCols={{
+                default: 2,
+                1100: 2,
+                700: 2,
+                500: 1
+              }}
+              className="masonry-grid p-4"
+              columnClassName="masonry-grid_column"
+            >
+              {visibleWeddingImages.map((image: WeddingImage, index: number) => {
+                const isImageLoading = loadingImages[image.id] !== false;
+                const caption = getImageCaption(index);
+
+                return (
+                  <div key={image.id}>
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSwiperIndex(index);
+                        setSwiperOpen(true);
+                      }}
+                    >
+                      <div className="relative w-full overflow-hidden rounded-[5px]">
+                        {/* Conteneur avec aspect-ratio pour éviter le layout shift */}
+                        <div
+                          className="relative w-full"
+                          style={{
+                            aspectRatio: image.width && image.height
+                              ? `${image.width}/${image.height}`
+                              : '3/4' // Fallback ratio
+                          }}
+                        >
+                          {isImageLoading && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                inset: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'rgba(254, 226, 226, 0.2)',
+                                backdropFilter: 'blur(16px)',
+                                zIndex: 1
+                              }}
+                            >
+                              <Heart
+                                className="text-red-400 animate-pulse"
+                                style={{
+                                  width: '80%',
+                                  height: '80%'
+                                }}
+                              />
+                            </Box>
+                          )}
+                          <LazyLoadImage
+                            src={getImageUrl(image)}
+                            alt={`${wedding.title} - ${caption}`}
+                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                            effect="blur"
+                            placeholder={
+                              <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                                <Heart className="text-red-300 animate-pulse w-12 h-12" />
+                              </div>
+                            }
+                            onLoad={() => {
+                              setLoadingImages(prev => ({
+                                ...prev,
+                                [image.id]: false
+                              }));
+                            }}
+                            beforeLoad={() => {
+                              setLoadingImages(prev => ({
+                                ...prev,
+                                [image.id]: true
+                              }));
+                            }}
+                          />
+                        </div>
+                        {/* Caption overlay on hover - only show if description is visible */}
+                        {visibleWeddingImages[index]?.descriptionVisibility !== false && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute bottom-4 left-4 right-4 text-white">
+                              <h3 className="text-lg font-semibold">{caption}</h3>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-            {/* Swiper modal */}
-            {swiperOpen && (
-          <SwiperGallery
-            images={swiperImages}
-            initialIndex={swiperIndex}
-            onClose={() => setSwiperOpen(false)}
-            weddingTitle={wedding.title}
-            getImageCaption={getImageCaption}
-          />
-            )}
-          </Masonry>
-        </div>
+                );
+              })}
+              {/* Swiper modal */}
+              {swiperOpen && (
+                <SwiperGallery
+                  images={swiperImages}
+                  initialIndex={swiperIndex}
+                  onClose={() => setSwiperOpen(false)}
+                  weddingTitle={wedding.title}
+                  getImageCaption={getImageCaption}
+                />
+              )}
+            </Masonry>
+          </div>
+        )}
       </div>
       <style jsx global>{`
         @keyframes fadeIn {
@@ -260,6 +383,24 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
         
         .masonry-grid_column > div {
           margin-bottom: 16px;
+        }
+
+        /* Fix pour LightGallery */
+        .lg-backdrop {
+          z-index: 1050;
+        }
+        .lg-outer {
+          z-index: 1060;
+        }
+
+        /* Amélioration des transitions LightGallery */
+        .lg-css3.lg-fade .lg-item {
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+        }
+        
+        .lg-css3.lg-fade .lg-item.lg-current {
+          opacity: 1;
         }
       `}</style>
       

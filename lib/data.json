@@ -14,7 +14,7 @@
         "id": "1736899059204",
         "fileUrl": "/1736284401300/1736899298693-N 1.O.jpg",
         "fileType": "coverStorage",
-        "fileUrlThumbnail": "/1736284401300/thumbnails/1736899298693-N 1.O_THUMBEL_1752775143708.jpg",
+        "fileUrlThumbnail": "/1736284401300/thumbnails/1736899298693-N 1.O_THUMBEL_1752845162998.jpg",
         "description": "",
         "width": 2770,
         "height": 4921
@@ -27,7 +27,7 @@
           "fileUrlThumbnail": "/1736284401300/thumbnails/1736899023653-N 6_THUMBEL.jpg",
           "description": "",
           "descriptionVisibility": true,
-          "imageVisibility": true,
+          "imageVisibility": false,
           "width": 3512,
           "height": 6240
         },
@@ -38,7 +38,8 @@
           "fileUrlThumbnail": "/1736284401300/thumbnails/1736898996907-N 1.O_THUMBEL.jpg",
           "description": "",
           "width": 2770,
-          "height": 4921
+          "height": 4921,
+          "imageVisibility": true
         },
         {
           "id": "1736898980864",
@@ -195,7 +196,7 @@
           "height": 2997
         }
       ],
-      "templateType": "masonry"
+      "templateType": "timeline"
     },
     {
       "id": 3,
@@ -204,7 +205,7 @@
         "id": "1745348003817",
         "fileUrl": "/1736326837983/1745417229237-Sans titre 2.png",
         "fileType": "coverStorage",
-        "fileUrlThumbnail": "/1736326837983/thumbnails/1745417229237-Sans titre 2_THUMBEL_1752775376805.png",
+        "fileUrlThumbnail": "/1736326837983/thumbnails/1745417229237-Sans titre 2_THUMBEL_1752842526005.png",
         "description": "",
         "width": 702,
         "height": 644
@@ -915,7 +916,7 @@
         "id": "1752617017328",
         "fileUrl": "/1752697999425/1752700971503-Kd 450.jpeg",
         "fileType": "coverStorage",
-        "fileUrlThumbnail": "/1752697999425/thumbnails/1752700971503-Kd 450_THUMBEL.jpeg",
+        "fileUrlThumbnail": "/1752697999425/thumbnails/1752700971503-Kd 450_THUMBEL_1752842456317.jpeg",
         "description": "",
         "width": 5756,
         "height": 3837

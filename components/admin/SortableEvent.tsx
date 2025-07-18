@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Button as MuiButton, IconButton, Chip, Divider } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Wedding, Image as myImage } from '@/lib/dataTemplate';
@@ -19,6 +20,8 @@ import { toast } from 'react-toastify';
 import { myFetch } from '@/lib/fetch-wrapper';
 import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SettingsIcon from '@mui/icons-material/Settings';
 
 interface PropsEvent {
   wedding: Wedding;
@@ -59,19 +62,21 @@ export function SortableEvent({ wedding }: PropsEvent) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Image
-        src={getCoverImageUrl(wedding.coverImage)}
-        alt={wedding.title}
-        width={75}
-        height={75}
-        style={{ marginRight: '10px' }}
-      />
-      <div>
-        <h4 className="font-bold text-lg">{wedding.title}</h4>
-        <p className="text-base">{wedding.date}</p>
-      </div>
-    </div>
+    <Paper ref={setNodeRef} style={style} {...attributes} {...listeners} elevation={2}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Image
+          src={getCoverImageUrl(wedding.coverImage)}
+          alt={wedding.title}
+          width={75}
+          height={75}
+          style={{ marginRight: '10px', borderRadius: '8px' }}
+        />
+        <Box>
+          <Typography variant="h6" fontWeight={700}>{wedding.title}</Typography>
+          <Typography variant="body2" color="text.secondary">{wedding.date}</Typography>
+        </Box>
+      </Box>
+    </Paper>
   );
 }
 
@@ -336,126 +341,198 @@ export function SortableWeddingImage({
   };
 
   return (
-    <div
+    <Paper
       ref={setNodeRef}
       style={style}
-      className="min-w-[160px] max-w-[160px] relative aspect-auto overflow-hidden rounded-lg py-2 border border-gray-300 shadow-sm
-      justify-center flex flex-col items-center bg-white hover:shadow-lg transition-all duration-200"
+      sx={{ minWidth: 160, maxWidth: 160, position: 'relative', aspectRatio: 'auto', overflow: 'hidden', borderRadius: 2, py: 2, border: '1px solid #e0e0e0', boxShadow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: 'white', transition: 'box-shadow 0.2s' }}
+      elevation={2}
     >
-      {/* Bouton de visibilité d'image en haut à gauche */}
-      {!selectionMode && (
-        <Button
-          className="absolute top-3 left-3 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white 
-          border border-gray-300 shadow-sm z-10"
-          size="sm"
-          variant="ghost"
-          onClick={handleToggleImageVisibility}
-          title={imageVisible ? "Masquer l'image" : "Afficher l'image"}
-        >
-          {imageVisible ? (
-            <Eye className="h-4 w-4 text-gray-600" />
-          ) : (
-            <EyeOff className="h-4 w-4 text-gray-600" />
-          )}
-        </Button>
-      )}
-
+      
       {/* Bouton de suppression ou de sélection en haut à droite */}
-      {selectionMode ? (
-        <div
-          className={`absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center
-          cursor-pointer transition-all duration-300 z-10 ${
-            isSelected 
-              ? 'bg-green-500 transform scale-110 shadow-md' 
-              : 'bg-white border border-gray-300'
-          }`}
+      {selectionMode && (
+        <IconButton
+          sx={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, bgcolor: isSelected ? 'green.500' : 'white', border: isSelected ? 'none' : '1px solid #e0e0e0', boxShadow: isSelected ? 3 : 1, zIndex: 10, p: 0, transform: isSelected ? 'scale(1.1)' : 'none', transition: 'all 0.2s' }}
           onClick={handleToggleSelect}
         >
-          {isSelected ? (
-            <Check className="h-5 w-5 text-white animate-in zoom-in-50 duration-150" />
-          ) : (
-            <div className="h-3 w-3 rounded-full border-2 border-gray-400"></div>
-          )}
-        </div>
-      ) : (
-        <Button
-          className="absolute top-3 right-3 h-8 w-8 rounded-full p-0 bg-white hover:bg-red-100 
-          border border-gray-300 shadow-sm z-10"
-          size="sm"
-          variant="ghost"
-          onClick={() => setIsDeleteModalOpen(true)}
-        >
-          <X className="h-4 w-4 text-gray-600 hover:text-red-600" />
-        </Button>
+          {isSelected ? <Check style={{ width: 22, height: 22, color: 'white' }} /> : <Box sx={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #aaa' }} />}
+        </IconButton>
       )}
 
-      <div 
-        {...attributes} 
+      <Box
+        {...attributes}
         {...listeners}
-        className={`cursor-move w-full ${selectionMode ? 'cursor-pointer' : ''}`}
+        sx={{ cursor: selectionMode ? 'pointer' : 'move', width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+         }}
         onClick={selectionMode ? handleToggleSelect : undefined}
       >
-        <div className={`relative w-32 h-32 mx-auto rounded-2xl overflow-hidden ${isSelected ? 'opacity-95' : 'opacity-100'} transition-opacity duration-200`}>
+        <Box sx={{ position: 'relative', width: 128, height: 128, mx: 'auto', borderRadius: 3, overflow: 'hidden', opacity: isSelected ? 0.95 : 1, transition: 'opacity 0.2s' }}>
           <Image
             src={getImageUrl(image) || '/placeholder.jpg'}
-            className="object-contain"
+            style={{ objectFit: 'contain' }}
             fill
             alt={`Wedding image ${image.id}`}
             sizes="128px"
             priority={false}
             quality={25}
           />
-        </div>
-        <p className="text-sm mt-1 text-center">
-          {image.fileType === 'storage' 
-            ? '(Stockage local)'
-            : '(URL externe)'}
-        </p>
-      </div>
-      
+        </Box>
+        <Typography variant="caption" sx={{ mt: 1, textAlign: 'center', width: '100%' }}>
+          {image.fileType === 'storage' ? '(Stockage local)' : '(URL externe)'}
+        </Typography>
+      </Box>
+
       {!selectionMode && (
-        <div className="flex mt-2 space-x-2">
-          <Button 
-            size="sm" 
-            variant="outline"
+        <Box sx={{ display: 'flex', mt: 2, gap: .5, width: '100%', justifyContent: 'center' }}>
+            <MuiButton 
+            size="small" 
+            variant="outlined"
             onClick={() => setIsModalOpen(true)}
-            className="text-xs"
-          >
-            Description
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
+            sx={{ fontSize: '0.75rem', px: 1, minWidth: 0 }}
+            >
+              <SettingsIcon fontSize='small' sx={{ color: '#888' }} />
+            </MuiButton>
+          <MuiButton
+            size="small"
+            variant="text"
             onClick={handleToggleDescriptionVisibility}
-            className="px-2"
+            sx={{ px: 1, minWidth: 0 }}
             title={descriptionVisible ? "Masquer la description" : "Afficher la description"}
           >
             {descriptionVisible ? (
-              <SpeakerNotesIcon fontSize='small' className="h-2 w-2 text-gray-400" />
+              <SpeakerNotesIcon fontSize='small' sx={{ color: '#888' }} />
             ) : (
-              <SpeakerNotesOffIcon fontSize='small' className="h-2 w-2 text-gray-600" />
+              <SpeakerNotesOffIcon fontSize='small' sx={{ color: '#888' }} />
             )}
-          </Button>
-        </div>
+          </MuiButton>
+          {/* Bouton de suppression d'image */}
+        <IconButton
+          sx={{ position: 'absolute', top: 12, right: 12, width: 32, height: 32, bgcolor: 'white', border: '1px solid #e0e0e0', boxShadow: 1, zIndex: 10, p: 0, '&:hover': { bgcolor: '#ffeaea' } }}
+          size="small"
+          onClick={() => setIsDeleteModalOpen(true)}
+        >
+          <X style={{ width: 18, height: 18, color: '#d32f2f' }} />
+        </IconButton>
+        {/* Bouton de visibilité d'image */}
+        <IconButton
+          sx={{ position: 'absolute', top: 12, left: 12, width: 32, height: 32, bgcolor: 'white', border: '1px solid #e0e0e0', boxShadow: 1, zIndex: 10, p: 0, '&:hover': { bgcolor: '#f5f5f5' } }}
+          size="small"
+          onClick={handleToggleImageVisibility}
+          title={imageVisible ? "Masquer l'image" : "Afficher l'image"}
+        >
+          {imageVisible ? <Eye style={{ width: 18, height: 18, color: '#666' }} /> : <EyeOff style={{ width: 18, height: 18, color: '#666' }} />}
+        </IconButton>
+        </Box>
       )}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md font-roboto">
-          <DialogHeader>
-            <DialogTitle className="font-roboto">Description de l'image</DialogTitle>
-            <DialogDescription>
-              Modifiez la description de l'image et gérez sa visibilité.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col space-y-4 py-4">
-        <div className="flex justify-center mb-4">
-          <Image
-            src={getImageUrl(image, false) || '/placeholder.jpg'} 
-            alt={`Image preview ${image.id}`}
-            width={300}
-            height={300}
-            className="object-contain max-h-[300px] rounded-md"
-          />
-        </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}
+      >
+        <DialogContent 
+          className="font-roboto"
+          style={{
+            marginTop: 32,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            justifyContent: 'flex-start',
+            padding: 0,
+            background: 'white',
+            maxWidth: '90vw',
+            width: 'auto',
+            maxHeight: '90vh',
+            height: 'auto',
+            overflow: 'hidden',
+          }}
+        >
+          <Box sx={{ flexShrink: 0, p: 2.5, pb: 0, background: 'white', zIndex: 2 }}>
+            <DialogHeader>
+                <DialogTitle className="font-roboto">Configuration de l'image</DialogTitle>
+              <DialogDescription>
+                Modifiez la description de l'image et gérez sa visibilité.
+              </DialogDescription>
+            </DialogHeader>
+          </Box>
+          <Box sx={{ flex: '1 1 auto', overflow: 'auto', p: 2.5, pt: 1.25 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 2 }}>
+            <Tabs defaultValue="original" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="original">Image originale</TabsTrigger>
+                <TabsTrigger 
+                  value="thumbnail" 
+                  disabled={!image.fileUrlThumbnail}
+                >
+                  Miniature
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="original" className="flex justify-center mt-0">
+                <Box sx={{ width: '100%', display: 'flex', 
+                  justifyContent: 'center', alignItems: 'center', 
+                  minHeight: 300, minWidth: 300, p: 2, boxSizing: 'border-box' 
+                  }}>
+                  <Image
+                    src={getImageUrl(image, false) || '/placeholder.jpg'}
+                    alt={`Image preview ${image.id}`}
+                    width={image.width || 800}
+                    height={image.height || 600}
+                    style={{
+                      display: 'block',
+                      margin: '0 auto',
+                      maxWidth: '90vw',
+                      maxHeight: '70vh',
+                      width: 'auto',
+                      height: 'auto',
+                      aspectRatio: image.width && image.height ? `${image.width} / ${image.height}` : undefined,
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                      background: '#fff',
+                      overflow: 'hidden',
+                    }}
+                    className="bg-white"
+                  />
+                </Box>
+              </TabsContent>
+              <TabsContent value="thumbnail" className="flex justify-center mt-0">
+                {image.fileUrlThumbnail ? (
+                  <Box sx={{ width: '100%', display: 'flex', 
+                  justifyContent: 'center', alignItems: 'center', 
+                  minHeight: 300, minWidth: 300, p: 2, boxSizing: 'border-box' 
+                  }}>
+                    <Image
+                      src={getImageUrl(image, true) || '/placeholder.jpg'}
+                      alt={`Thumbnail preview ${image.id}`}
+                      width={image.width || 800}
+                      height={image.height || 600}
+                      style={{
+                        display: 'block',
+                        margin: '0 auto',
+                        maxWidth: '90vw',
+                        maxHeight: '70vh',
+                        width: 'auto',
+                        height: 'auto',
+                        aspectRatio: image.width && image.height ? `${image.width} / ${image.height}` : undefined,
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                        background: '#fff',
+                        overflow: 'hidden',
+                      }}
+                      className="bg-white"
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'text.secondary' }}>
+                    Aucune miniature disponible
+                  </Box>
+                )}
+              </TabsContent>
+            </Tabs>
+
+        <Box sx={{ 
+          mt: 2, display: 'flex',
+         flexDirection: 'column', 
+          gap: 1, 
+          maxWidth: 600,
+          width: '100%',
+          margin: '0 auto',
+           }}>
         <Input 
           placeholder="Ajouter une description..." 
           value={description} 
@@ -463,10 +540,14 @@ export function SortableWeddingImage({
           className="mb-2 font-roboto"
           autoFocus
         />
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500 font-roboto">
-            Visibilité de la description :
-          </span>
+        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'Roboto', fontWeight: 500 }}>
+          {description.length} caractères
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', mt: 2,
+          maxWidth: 600,
+          width: '100%',
+          margin: '0 auto',
+         }}>
           <Button
             onClick={handleToggleDescriptionVisibility}
             variant="outline"
@@ -476,20 +557,15 @@ export function SortableWeddingImage({
             {descriptionVisible ? (
           <>
             <SpeakerNotesIcon fontSize='small' className="h-4 w-4 text-gray-400" />
-            <span className="font-roboto">Visible</span>
+            <Typography variant='overline' sx={{ fontFamily: 'Roboto', fontWeight: 500, ml: 1, display: 'inline' }}>Description visible</Typography>
           </>
             ) : (
           <>
             <SpeakerNotesOffIcon fontSize='small' className="h-4 w-4 text-gray-600" />
-            <span className="font-roboto">Masquée</span>
+            <Typography variant='overline' sx={{ fontFamily: 'Roboto', fontWeight: 500, ml: 1, display: 'inline' }}>Description masquée</Typography>
           </>
             )}
           </Button>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500 font-roboto">
-            Visibilité de l'image :
-          </span>
           <Button
             onClick={handleToggleImageVisibility}
             variant="outline"
@@ -499,23 +575,28 @@ export function SortableWeddingImage({
             {imageVisible ? (
           <>
             <Eye className="h-4 w-4 text-gray-400" />
-            <span className="font-roboto">Visible</span>
+            <Typography variant="overline" sx={{ fontFamily: 'Roboto', fontWeight: 500, ml: 1, display: 'inline' }}>Image visible</Typography>
           </>
             ) : (
           <>
             <EyeOff className="h-4 w-4 text-gray-600" />
-            <span className="font-roboto">Masquée</span>
+            <Typography variant="overline" sx={{ fontFamily: 'Roboto', fontWeight: 500, ml: 1, display: 'inline' }}>Image masquée</Typography>
           </>
             )}
           </Button>
-        </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Annuler</Button>
-            </DialogClose>
-            <Button onClick={handleSaveDescription}>Enregistrer</Button>
-          </DialogFooter>
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'Roboto', fontWeight: 500 }}>
+          Cliquez sur l'icône pour modifier la visibilité de la description ou de l'image.
+        </Typography>
+        </Box>
+          </Box>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Annuler</Button>
+              </DialogClose>
+              <Button onClick={handleSaveDescription}>Enregistrer</Button>
+            </DialogFooter>
+          </Box>
         </DialogContent>
       </Dialog>
 
@@ -535,7 +616,7 @@ export function SortableWeddingImage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Paper>
   );
 }
 

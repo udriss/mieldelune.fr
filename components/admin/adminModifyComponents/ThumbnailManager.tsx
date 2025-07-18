@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Divide, Loader2 } from "lucide-react";
 import * as Slider from '@radix-ui/react-slider';
 import { Image, Wedding } from '@/lib/dataTemplate';
 import { toast } from 'react-toastify';
+import Masonry from 'react-masonry-css';
 import { 
   Paper, 
   Typography, 
@@ -25,6 +26,15 @@ import {
   FormControl,
   FormLabel,
   FormControlLabel,
+  Button as MuiButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Checkbox,
+  Card,
+  CardMedia,
+  Divider
 } from '@mui/material';
 import { 
   ImageOutlined, 
@@ -33,7 +43,12 @@ import {
   StopOutlined,
   ArrowForwardOutlined,
   ExpandMoreOutlined,
-  ExpandLessOutlined
+  ExpandLessOutlined,
+  ZoomInOutlined,
+  CheckBoxOutlined,
+  CheckBoxOutlineBlankOutlined,
+  SelectAllOutlined,
+  DeselectOutlined
 } from '@mui/icons-material';
 
 interface CompressionStat {
@@ -80,6 +95,9 @@ export function ThumbnailManager({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [totalImages, setTotalImages] = useState(0);
   const [targetSizeKB, setTargetSizeKB] = useState<number>(0);
+  const [showImageSelection, setShowImageSelection] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Nettoyer les stats quand on change de mariage
@@ -93,12 +111,15 @@ export function ThumbnailManager({
       setCurrentImageIndex(0);
       setTotalImages(0);
       setTargetSizeKB(0);
+      setSelectedImages([]);
+      setShowImageSelection(false);
+      setPreviewImage(null);
       setLastWeddingId(editedWedding.id);
     }
   }, [editedWedding?.id, lastWeddingId]);
 
   // Traitement image par image
-  const processThumbnailsSequentially = async () => {
+  const processThumbnailsSequentially = async (imagesToProcess?: string[]) => {
     setIsProcessingThumbnails(true);
     setFailedThumbnails([]);
     setCompressionStats({});
@@ -111,7 +132,12 @@ export function ThumbnailManager({
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     
-    const images = editedWedding.images;
+    // Utiliser les images sélectionnées ou toutes les images
+    const allImages = editedWedding.images;
+    const images = imagesToProcess 
+      ? allImages.filter(img => imagesToProcess.includes(img.fileUrl))
+      : allImages;
+    
     setTotalImages(images.length);
     
     if (images.length === 0) {
@@ -187,7 +213,7 @@ export function ThumbnailManager({
         const data = await response.json();
 
         if (data.success) {
-          const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+          const imageName = cleanImageName(image.fileUrl.split('/').pop() || image.fileUrl);
           const compressionRate = data.originalSizeKB ? 
             Math.round(((data.originalSizeKB - data.finalSizeKB) / data.originalSizeKB) * 100) : 0;
 
@@ -206,7 +232,7 @@ export function ThumbnailManager({
           console.log(`✅ Image ${i + 1}/${images.length} traitée: ${imageName} (${data.finalSizeKB}KB)`);
         } else {
           // Ajouter l'erreur aux statistiques
-          const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+          const imageName = cleanImageName(image.fileUrl.split('/').pop() || image.fileUrl);
           setCompressionStats(prev => ({
             ...prev,
             [image.fileUrl]: {
@@ -229,7 +255,7 @@ export function ThumbnailManager({
           break; // Sortir de la boucle
         }
         
-        const imageName = image.fileUrl.split('/').pop() || image.fileUrl;
+        const imageName = cleanImageName(image.fileUrl.split('/').pop() || image.fileUrl);
         setCompressionStats(prev => ({
           ...prev,
           [image.fileUrl]: {
@@ -268,11 +294,11 @@ export function ThumbnailManager({
         setUpdateKey(prev => prev + 1);
       }, 1500);
 
-      toast.success(`🎉 Compression terminée ! ${success}/${images.length} images traitées avec succès`, {
-        position: "top-center",
-        autoClose: 4000,
-        theme: "dark",
-      });
+      // toast.success(`🎉 Compression terminée ! ${success}/${images.length} images traitées avec succès`, {
+      //   position: "top-center",
+      //   autoClose: 4000,
+      //   theme: "dark",
+      // });
     } else {
       // Afficher un résumé même en cas d'annulation
       toast.info(`🛑 Traitement annulé. ${success} images traitées avant l'arrêt.`, {
@@ -321,6 +347,65 @@ export function ThumbnailManager({
 
   const handleProcessThumbnails = async () => {
     await processThumbnailsSequentially();
+  };
+
+  const handleSelectiveProcess = () => {
+    setSelectedImages([]);
+    setShowImageSelection(true);
+  };
+
+  const handleImageSelection = (imageUrl: string) => {
+    setSelectedImages(prev => 
+      prev.includes(imageUrl) 
+        ? prev.filter(url => url !== imageUrl)
+        : [...prev, imageUrl]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedImages(editedWedding.images.map(img => img.fileUrl));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedImages([]);
+  };
+
+  const handleProcessSelectedImages = async () => {
+    if (selectedImages.length === 0) {
+      toast.warning('Aucune image sélectionnée', {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "dark",
+      });
+      return;
+    }
+    
+    setShowImageSelection(false);
+    await processThumbnailsSequentially(selectedImages);
+  };
+
+  const getImageUrl = (image: Image, thumbnail: boolean = true) => {
+    if (image.fileType === 'storage') {
+      const url = thumbnail && image.fileUrlThumbnail ? 
+        image.fileUrlThumbnail : 
+        image.fileUrl;
+      return `/api/images?fileUrl=${url}`;
+    }
+    return image.fileUrl;
+  };
+
+  // Fonction pour nettoyer le nom d'image (enlever timestamp)
+  const cleanImageName = (imageName: string): string => {
+    // Si le nom contient un tiret, on cherche le premier tiret et on garde ce qui suit
+    const dashIndex = imageName.indexOf('-');
+    if (dashIndex !== -1 && dashIndex < imageName.length - 1) {
+      // Vérifier si la partie avant le tiret ressemble à un timestamp (que des chiffres)
+      const beforeDash = imageName.substring(0, dashIndex);
+      if (/^\d+$/.test(beforeDash)) {
+        return imageName.substring(dashIndex + 1);
+      }
+    }
+    return imageName;
   };
 
   // Calculer les données pour le tableau
@@ -392,22 +477,55 @@ export function ThumbnailManager({
         </Box>
         
         <Box sx={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Button 
+          <MuiButton 
             onClick={handleProcessThumbnails}
             disabled={isProcessingThumbnails}
-            variant="outline"
-            size="sm"
-            className="bg-white border-gray-300 text-black hover:bg-green-100 w-full"
+            variant="outlined"
+            size="small"
+            startIcon={isProcessingThumbnails ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageOutlined />}
+            sx={{
+              bgcolor: 'white',
+              borderColor: 'gray.300',
+              color: 'black',
+              '&:hover': {
+                bgcolor: 'green.100',
+                borderColor: 'gray.300',
+              },
+              '&:disabled': {
+                bgcolor: 'gray.100',
+                borderColor: 'gray.300',
+                color: 'gray.500',
+              },
+              width: '100%'
+            }}
           >
-            {isProcessingThumbnails ? (
-              <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> En cours...</span>
-            ) : (
-              <span className="flex items-center">
-                <ImageOutlined className="w-4 h-4 mr-1" />
-                Générer
-              </span>
-            )}
-          </Button>
+            {isProcessingThumbnails ? 'En cours...' : 'Générer tout'}
+          </MuiButton>
+          
+          <MuiButton 
+            onClick={handleSelectiveProcess}
+            disabled={isProcessingThumbnails}
+            variant="outlined"
+            size="small"
+            startIcon={<CheckBoxOutlined />}
+            sx={{
+              bgcolor: 'white',
+              borderColor: 'blue.300',
+              color: 'blue.700',
+              '&:hover': {
+                bgcolor: 'blue.50',
+                borderColor: 'blue.400',
+              },
+              '&:disabled': {
+                bgcolor: 'gray.100',
+                borderColor: 'gray.300',
+                color: 'gray.500',
+              },
+              width: '100%'
+            }}
+          >
+            Sélectionner
+          </MuiButton>
           
           {isProcessingThumbnails && (
             <Button 
@@ -681,6 +799,307 @@ export function ThumbnailManager({
           </Collapse>
         </Box>
       )}
+
+      {/* Dialog de sélection d'images */}
+      <Dialog 
+        open={showImageSelection} 
+        onClose={() => setShowImageSelection(false)}
+        maxWidth="lg"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { 
+              height: '90vh',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          textAlign: 'center',
+          fontWeight: 600,
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+            <ImageOutlined />
+            Sélection des images pour la compression
+          </Box>
+        </DialogTitle>
+        
+        {/* Barre d'outils sticky */}
+        <Box sx={{ 
+          position: 'sticky',
+          top: 0,
+          zIndex: 9,
+          background: 'rgba(248, 250, 252, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid #e2e8f0',
+          p: 2,
+          display: 'flex', 
+          flexDirection: 'row',
+          gap: 1,
+          alignItems: 'center',
+          justifyContent: 'space-around',
+        }}>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+            <MuiButton
+              variant="outlined"
+              startIcon={<SelectAllOutlined />}
+              onClick={handleSelectAll}
+              sx={{ 
+                borderRadius: 2,
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(5px)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                '&:hover': {
+                  background: 'rgba(239, 246, 255, 0.9)',
+                }
+              }}
+            >
+              Tout sélectionner
+            </MuiButton>
+            <MuiButton
+              variant="outlined"
+              startIcon={<DeselectOutlined />}
+              onClick={handleDeselectAll}
+              sx={{ 
+                borderRadius: 2,
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(5px)',
+                border: '1px solid rgba(107, 114, 128, 0.3)',
+                '&:hover': {
+                  background: 'rgba(249, 250, 251, 0.9)',
+                }
+              }}
+            >
+              Tout désélectionner
+            </MuiButton>
+            <Chip 
+              label={`${selectedImages.length} / ${editedWedding.images.length} images`}
+              sx={{ 
+                background: 'rgba(34, 197, 94, 0.1)',
+                backdropFilter: 'blur(5px)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                fontWeight: 600
+              }}
+              color="success"
+              variant="outlined"
+            />
+          </Box>
+          <Divider orientation="vertical" flexItem />
+          {/* Bouton de validation */}
+        <DialogActions sx={{ 
+          p: 1, 
+          bgcolor: 'rgba(248, 250, 252, 0.95)',
+          backdropFilter: 'blur(10px)',
+          // borderLeft: '1px solid #e2e8f0',
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10,
+          gap: 2 
+        }}>
+          <MuiButton 
+            onClick={() => setShowImageSelection(false)}
+            variant="outlined"
+            sx={{ 
+              borderRadius: 2,
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(5px)'
+            }}
+          >
+            Annuler
+          </MuiButton>
+          <MuiButton 
+            onClick={handleProcessSelectedImages}
+            variant="contained"
+            disabled={selectedImages.length === 0}
+            startIcon={<ImageOutlined />}
+            sx={{ 
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              }
+            }}
+          >
+            Lancer {selectedImages.length} miniature{selectedImages.length > 1 ? 's' : ''}
+          </MuiButton>
+        </DialogActions>
+        </Box>
+        
+        <DialogContent sx={{ 
+          flexGrow: 1,
+          overflow: 'auto',
+          p: 3, 
+          bgcolor: '#f8fafc'
+        }}>
+          <Masonry
+            breakpointCols={{
+              default: 4,
+              1100: 3,
+              700: 2,
+              500: 1
+            }}
+            className="masonry-grid"
+            columnClassName="masonry-grid_column"
+          >
+            {editedWedding.images.map((image, index) => {
+              const isSelected = selectedImages.includes(image.fileUrl);
+              const imageName = cleanImageName(image.fileUrl.split('/').pop() || '');
+              
+              return (
+                <div key={image.fileUrl} style={{ marginBottom: '16px' }}>
+                  <Card 
+                    sx={{ 
+                      position: 'relative',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      border: isSelected ? '3px solid #4CAF50' : '2px solid transparent',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'scale(1.02)',
+                        boxShadow: 3
+                      }
+                    }}
+                    onClick={() => handleImageSelection(image.fileUrl)}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={getImageUrl(image, true)}
+                      alt={imageName}
+                      sx={{ 
+                        objectFit: 'cover',
+                        width: '100%',
+                        height: 'auto',
+                        aspectRatio: image.width && image.height 
+                          ? `${image.width}/${image.height}` 
+                          : '4/3'
+                      }}
+                    />
+                    
+                    {/* Checkbox en haut à gauche */}
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        backgroundColor: isSelected ? '#4CAF50' : 'rgba(255, 255, 255, 0.9)',
+                        color: isSelected ? 'white' : '#666',
+                        width: 32,
+                        height: 32,
+                        backdropFilter: 'blur(5px)',
+                        '&:hover': {
+                          backgroundColor: isSelected ? '#45a049' : 'rgba(255, 255, 255, 1)',
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageSelection(image.fileUrl);
+                      }}
+                    >
+                      {isSelected ? (
+                        <CheckBoxOutlined sx={{ fontSize: 18 }} />
+                      ) : (
+                        <CheckBoxOutlineBlankOutlined sx={{ fontSize: 18 }} />
+                      )}
+                    </IconButton>
+                    
+                    {/* Bouton loupe en haut à droite */}
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        color: '#3b82f6',
+                        width: 32,
+                        height: 32,
+                        backdropFilter: 'blur(5px)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 1)',
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewImage(getImageUrl(image, false));
+                      }}
+                    >
+                      <ZoomInOutlined sx={{ fontSize: 18 }} />
+                    </IconButton>
+                    
+                    {/* Nom de l'image */}
+                    <Box sx={{ 
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                      color: 'white',
+                      p: 1.5,
+                      fontSize: '0.85rem',
+                      textAlign: 'center',
+                      fontWeight: 500
+                    }}>
+                      {imageName.length > 20 ? `${imageName.substring(0, 17)}...` : imageName}
+                    </Box>
+                  </Card>
+                </div>
+              );
+            })}
+          </Masonry>
+        </DialogContent>
+        
+
+      </Dialog>
+
+      {/* Dialog d'aperçu d'image */}
+      <Dialog 
+        open={!!previewImage} 
+        onClose={() => setPreviewImage(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Aperçu"
+              style={{ 
+                maxWidth: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain'
+              }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={() => setPreviewImage(null)}>
+            Fermer
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+      
+      <style jsx global>{`
+        /* Styles pour react-masonry-css */
+        .masonry-grid {
+          display: flex;
+          margin-left: -16px; /* gutter size offset */
+          width: auto;
+        }
+        
+        .masonry-grid_column {
+          padding-left: 16px; /* gutter size */
+          background-clip: padding-box;
+        }
+      `}</style>
     </Paper>
   );
 }

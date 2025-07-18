@@ -17,7 +17,13 @@ import {
   Chip,
   LinearProgress,
   Collapse,
-  Button as MuiButton
+  Button as MuiButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { 
   BarChartOutlined, 
@@ -25,7 +31,8 @@ import {
   StopOutlined,
   ExpandMoreOutlined,
   ExpandLessOutlined,
-  ArrowForwardOutlined
+  ArrowForwardOutlined,
+  ZoomInOutlined
 } from '@mui/icons-material';
 
 
@@ -57,6 +64,7 @@ interface CoverImageSectionProps {
   setUpdateKey: React.Dispatch<React.SetStateAction<number>>;
   selectedWedding: string;
   isProcessingCoverThumbnails: boolean;
+  onDataRefresh?: () => void;
 }
 
 export function CoverImageSection({
@@ -79,11 +87,15 @@ export function CoverImageSection({
   setUpdateKey,
   selectedWedding,
   isProcessingCoverThumbnails,
+  onDataRefresh,
 }: CoverImageSectionProps) {
   const [isProcessingCoverThumbnail, setIsProcessingCoverThumbnail] = useState(false);
   const [compressionStats, setCompressionStats] = useState<CompressionStat | null>(null);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
   const [thumbnailProgress, setThumbnailProgress] = useState(0);
+  const [imageRefreshKey, setImageRefreshKey] = useState(0);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [previewTabValue, setPreviewTabValue] = useState(0);
 
   // Nettoyer les stats quand on change de mariage (basé sur l'ID du mariage)
   const [lastWeddingId, setLastWeddingId] = useState<number | null>(null);
@@ -192,8 +204,20 @@ export function CoverImageSection({
         };
       });
 
-      // Force une mise à jour de l'image en incrémentant updateKey
+      // Force une mise à jour de l'image en incrémentant imageRefreshKey
+      setImageRefreshKey(prev => prev + 1);
       setUpdateKey(prev => prev + 1);
+      
+      // Forcer le rafraîchissement de l'état du wedding pour mettre à jour l'URL
+      if (onDataRefresh) {
+        setTimeout(() => {
+          onDataRefresh();
+          // Forcer un second refresh pour s'assurer que l'URL est bien mise à jour
+          setTimeout(() => {
+            setImageRefreshKey(prev => prev + 1);
+          }, 500);
+        }, 500);
+      }
   
       const durationInSeconds = (data.duration / 1000).toFixed(1);
       toast.success(`✨ Miniature produite en ${durationInSeconds} s`, {
@@ -222,10 +246,10 @@ export function CoverImageSection({
       const url = thumbnail && image.fileUrlThumbnail ? 
         image.fileUrlThumbnail : 
         image.fileUrl;
-      const cacheParam = disableCache ? '&isCachingTriggle=true' : '';
+      const cacheParam = disableCache ? `&isCachingTriggle=true&t=${Date.now()}` : '';
       return `/api/images?fileUrl=${url}${cacheParam}`;
     }
-    return image.fileUrl;
+    return `${image.fileUrl}${disableCache ? `?t=${Date.now()}` : ''}`;
   };
 
   return (
@@ -262,18 +286,38 @@ export function CoverImageSection({
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" height="100%">
             {editedWedding.coverImage ? (
               <>
-                <Image
-                  src={editedWedding.coverImage.fileUrlThumbnail 
-                    ? getImageUrl(editedWedding.coverImage, true, true) 
-                    : getImageUrl(editedWedding.coverImage, false, true)}
-                  alt={`Wedding image ${editedWedding.coverImage.id}`}
-                  width={128}
-                  height={128}
-                  className="w-32 h-32 object-cover rounded-2xl"
-                  priority={false}
-                  quality={25}
-                  key={`${editedWedding.coverImage.id}-${updateKey}`}
-                />
+                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                  <Image
+                    src={editedWedding.coverImage.fileUrlThumbnail 
+                      ? getImageUrl(editedWedding.coverImage, true, true) 
+                      : getImageUrl(editedWedding.coverImage, false, true)}
+                    alt={`Wedding image ${editedWedding.coverImage.id}`}
+                    width={128}
+                    height={128}
+                    className="w-32 h-32 object-cover rounded-2xl"
+                    priority={false}
+                    quality={25}
+                    key={`cover-${editedWedding.coverImage.id}-${imageRefreshKey}-${editedWedding.coverImage.fileUrlThumbnail || 'no-thumb'}`}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => setShowPreviewDialog(true)}
+                    sx={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      color: '#3b82f6',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                      },
+                      width: 24,
+                      height: 24,
+                    }}
+                  >
+                    <ZoomInOutlined sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
                   {editedWedding.coverImage.fileType === 'coverStorage' 
                     ? '(Stockage local)'  
@@ -403,7 +447,9 @@ export function CoverImageSection({
                       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
                         <Typography variant="body2" color="text.secondary">
                           <CompressOutlined fontSize="small" sx={{ mr: 1 }} />
-                          Taille finale à conserver : {resizeValueCover} % (compression : {100 - resizeValueCover}%)
+                          Taille finale à conserver : {resizeValueCover} %
+                          <br />
+                          compression : {100 - resizeValueCover}%
                         </Typography>
                         <Slider.Root
                           className="relative flex items-center w-[200px] h-5"
@@ -592,6 +638,87 @@ export function CoverImageSection({
           </Collapse>
         </Box>
       )}
+
+      {/* Dialog pour l'aperçu de l'image */}
+      <Dialog
+        open={showPreviewDialog}
+        onClose={() => {
+          setShowPreviewDialog(false);
+          setPreviewTabValue(0);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Aperçu de l'image de couverture
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <Tabs 
+            value={previewTabValue} 
+            onChange={(_, newValue) => setPreviewTabValue(newValue)}
+            variant="fullWidth"
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab label="Image originale" />
+            <Tab 
+              label="Miniature" 
+              disabled={!editedWedding.coverImage?.fileUrlThumbnail}
+            />
+          </Tabs>
+          
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+            {editedWedding.coverImage && (
+              <>
+                {previewTabValue === 0 && (
+                  <Image
+                    src={getImageUrl(editedWedding.coverImage, false, true)}
+                    alt="Aperçu image de couverture - Originale"
+                    width={600}
+                    height={400}
+                    style={{ 
+                      maxWidth: '100%',
+                      height: 'auto',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                    quality={90}
+                    key={`original-${imageRefreshKey}`}
+                  />
+                )}
+                {previewTabValue === 1 && editedWedding.coverImage.fileUrlThumbnail && (
+                  <Image
+                    src={getImageUrl(editedWedding.coverImage, true, true)}
+                    alt="Aperçu image de couverture - Miniature"
+                    width={600}
+                    height={400}
+                    style={{ 
+                      maxWidth: '100%',
+                      height: 'auto',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}
+                    quality={90}
+                    key={`thumbnail-${imageRefreshKey}`}
+                  />
+                )}
+                {previewTabValue === 1 && !editedWedding.coverImage.fileUrlThumbnail && (
+                  <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    Aucune miniature disponible
+                  </Typography>
+                )}
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={() => {
+            setShowPreviewDialog(false);
+            setPreviewTabValue(0);
+          }} color="primary">
+            Fermer
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
