@@ -424,6 +424,25 @@ export function ThumbnailManager({
       <Typography variant="h6" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         Miniatures
       </Typography>
+      <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 50 }}>
+      <Grid size={{ xs: 12 }}>
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              bgcolor: '#f3f4f6',
+              borderRadius: 1,
+              p: 2,
+              border: '1px dashed #cbd5e1',
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Une <strong>miniature&nbsp;</strong> est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
       <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
         Nivelle la qualité entre toutes les images
       </Typography>
@@ -433,10 +452,15 @@ export function ThumbnailManager({
         gap: 2, alignItems: 'center', bgcolor: 'white', 
         p: 2, borderRadius: 1, border: '1px solid #e5e7eb' }}>
         
-        <Box sx={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'center', gap: 0
+         }}>
+          <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CompressOutlined fontSize="small" />
-            Taille finale à conserver : {resizeValue}% (compression : {100 - resizeValue}%)
+            Taille finale à conserver
+          </Typography>
+          <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {resizeValue}% (compression à {100 - resizeValue} %)
           </Typography>
           <Slider.Root
             className="relative flex items-center select-none touch-none w-full h-5 mt-1"

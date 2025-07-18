@@ -111,7 +111,8 @@
           "fileUrlThumbnail": "/1736284401300/thumbnails/1736898999872-N 18_THUMBEL.jpg",
           "description": "",
           "width": 2266,
-          "height": 4027
+          "height": 4027,
+          "descriptionVisibility": true
         },
         {
           "id": "1736898980870",
@@ -120,7 +121,8 @@
           "fileUrlThumbnail": "/1736284401300/thumbnails/1736899005149-N 15_THUMBEL.jpg",
           "description": "",
           "width": 5168,
-          "height": 3314
+          "height": 3314,
+          "imageVisibility": true
         },
         {
           "id": "1736898980869",

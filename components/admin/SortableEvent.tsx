@@ -615,11 +615,19 @@ export function SortableWeddingImage({
               Êtes-vous sûr de vouloir supprimer cette image ? Cette action est irréversible.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="sm:justify-start">
+          <DialogFooter>
+            <Box sx={{ 
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: 1,
+              gap: 1,
+              width: '100%',
+            }}>
             <DialogClose asChild>
-              <Button variant="outline">Annuler</Button>
+              <MuiButton variant="outlined" color="primary">Annuler</MuiButton>
             </DialogClose>
-            <Button variant="destructive" onClick={handleImageDelete}>Supprimer</Button>
+            <MuiButton variant="contained" color="error" onClick={handleImageDelete}>Supprimer</MuiButton>
+          </Box>
           </DialogFooter>
         </DialogContent>
       </Dialog>

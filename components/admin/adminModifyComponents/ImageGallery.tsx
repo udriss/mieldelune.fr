@@ -25,7 +25,7 @@ import {
   rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { Paper, Typography, IconButton, Box } from '@mui/material';
+import { Paper, Typography, IconButton, Box, Button as MuiButton, ToggleButtonGroup, ToggleButton } from '@mui/material';
 
 import {createSnapModifier} from '@dnd-kit/modifiers';
 
@@ -571,265 +571,395 @@ export function ImageGallery({
         </Box>
       </Box>
       {/* Barre d'outils principale */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", lg: "column" },
+          justifyContent: "space-between",
+          alignItems: { xs: "space-around", lg: "space-around" },
+          gap: 1,
+          mb: 6,
+          bgcolor: "#f9fafb",
+          p: 2.5,
+          borderRadius: 2,
+          boxShadow: 1,
+          width: "100%",
+        }}
+      >
         {/* Actions sur les images */}
-        <div className="flex flex-wrap gap-3">
-          <Button
-            onClick={() => setShowAddImage(!showAddImage)}
-            variant={showAddImage ? "outline" : "outline"}
-            size="sm"
-            className={showAddImage ? "bg-blue-200 hover:bg-blue-300 text-black" : ""}
+        <Box
+          sx={{
+        display: "flex",
+        flexDirection: "column",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-around",
+        gap: 1.5,
+        width: "100%",
+        maxWidth: 600,
+        margin: "0 auto",
+          }}
+        >
+          <MuiButton
+        onClick={() => setShowAddImage(!showAddImage)}
+        variant={showAddImage ? "outlined" : "outlined"}
+        size="small"
+        sx={{
+          bgcolor: showAddImage ? "#dbeafe" : "#fff",
+          borderColor: showAddImage ? "#93c5fd" : "#d1d5db",
+          color: "black",
+          "&:hover": {
+            bgcolor: showAddImage ? "#bfdbfe" : "#dcfce7",
+            borderColor: showAddImage ? "#60a5fa" : "#d1d5db",
+          },
+          width: "100%",
+        }}
           >
-            {showAddImage ? <X className="w-4 h-4 mr-1 red-600 " color="red"/> : <Plus className="w-4 h-4 mr-1" />}
-            {showAddImage ? "Fermer l'ajout" : "Ajouter une image"}
-          </Button>
-          
-          <Button
-            onClick={toggleSelectionMode}
-            variant={selectionMode ? "secondary" : "outline"}
-            size="sm"
-            className={selectionMode ? "bg-purple-100 border-purple-300 text-purple-700" : ""}
+        {showAddImage ? (
+          <X style={{ width: 16, height: 16, marginRight: 4, color: "red" }} />
+        ) : (
+          <Plus style={{ width: 16, height: 16, marginRight: 4 }} />
+        )}
+        {showAddImage ? "Fermer l'ajout" : "Ajouter une image"}
+          </MuiButton>
+          <MuiButton
+        onClick={toggleSelectionMode}
+        variant={selectionMode ? "contained" : "outlined"}
+        size="small"
+        sx={{
+          bgcolor: selectionMode ? "#ede9fe" : "#fff",
+          borderColor: selectionMode ? "#c4b5fd" : "#d1d5db",
+          color: selectionMode ? "#7c3aed" : "black",
+          "&:hover": {
+            bgcolor: selectionMode ? "#ddd6fe" : "#dcfce7",
+            borderColor: selectionMode ? "#a78bfa" : "#d1d5db",
+          },
+          width: "100%",
+        }}
           >
-            {selectionMode ? <Check className="w-4 h-4 mr-1" /> : <Check className="w-4 h-4 mr-1" />}
-            {selectionMode ? "Quitter la sélection" : "Actions en lot sur les images"}
-          </Button>
-          
-          <Button
-            onClick={saveImagesOrder}
-            variant="outline"
-            size="sm"
-            className={`border-gray-300 ${orderChanged ? 'save-button-highlight' : ''}`}
+        <Check style={{ width: 16, height: 16, marginRight: 4 }} />
+        {selectionMode ? "Quitter la sélection" : "Actions en lot sur les images"}
+          </MuiButton>
+          <MuiButton
+        onClick={saveImagesOrder}
+        variant="outlined"
+        size="small"
+        className={`${orderChanged ? "save-button-highlight" : ""}`}
+        disabled={!orderChanged}
+        sx={{
+          bgcolor: "#fff",
+          borderColor: "#d1d5db",
+          color: "black",
+          "&:hover": {
+            bgcolor: "#dcfce7",
+            borderColor: "#d1d5db",
+          },
+          "&:disabled": {
+            bgcolor: "#f3f4f6",
+            borderColor: "#d1d5db",
+            color: "#6b7280",
+          },
+          width: "100%",
+        }}
           >
-            <Save className="w-4 h-4 mr-1" />
-            Sauvegarder l'ordre
-          </Button>
-        </div>
-      </div>
+        <Save style={{ width: 16, height: 16, marginRight: 4 }} />
+        Sauvegarder l'ordre
+          </MuiButton>
+        </Box>
+      </Box>
       
       {/* Options de sélection */}
       {selectionMode && (
-        <div className="mb-6 p-3 bg-purple-50 rounded-lg border border-purple-200 flex flex-wrap gap-2 items-center">
-          <span className="text-sm font-medium text-purple-700 mr-2">Sélection active:</span>
-          <Button
-            onClick={selectAllImages}
-            variant="outline"
-            size="sm"
-            disabled={!editedWedding?.images?.length}
-            className="bg-white border-purple-300 text-purple-700 hover:bg-purple-100"
+        <Box
+          sx={{
+            mb: 6,
+            p: 2,
+            bgcolor: "#f3e8ff",
+            borderRadius: 2,
+            border: "1px solid #e9d5ff",
+            display: "flex",
+            flexDirection: { xs: "column", sm: "column" },
+            flexWrap: "wrap",
+            gap: 2,
+            alignItems: { xs: "stretch", sm: "center" },
+          }}
+        >
+          <Box
+            sx={{
+              borderRadius: 2,
+              display: "flex",
+              flexDirection: { xs: "column", sm: "column" },
+              flexWrap: "wrap",
+              gap: 1.5,
+              alignItems: { xs: "stretch", sm: "center" },
+            }}
           >
-            Tout sélectionner
-          </Button>
-          <Button
-            onClick={deselectAllImages}
-            variant="outline"
-            size="sm"
-            disabled={selectedImages.length === 0}
-            className="bg-white border-purple-300 text-purple-700 hover:bg-purple-100"
-          >
-            Tout désélectionner
-          </Button>
-          
-          {/* Nouveaux boutons pour la visibilité des images */}
-          <Button
-            onClick={handleShowSelectedImages}
-            variant="outline"
-            size="sm"
-            disabled={selectedImages.length === 0 || isVisibilityBatchProcessing}
-            className="bg-white border-teal-300 text-teal-700 hover:bg-teal-100"
-          >
-            {isVisibilityBatchProcessing ? (
-              <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Traitement...</span>
-            ) : (
-              <span className="flex items-center"><Eye className="w-4 h-4 mr-1" /> Afficher</span>
-            )}
-          </Button>
-          <Button
-            onClick={handleHideSelectedImages}
-            variant="outline"
-            size="sm"
-            disabled={selectedImages.length === 0 || isVisibilityBatchProcessing}
-            className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
-            {isVisibilityBatchProcessing ? (
-              <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Traitement...</span>
-            ) : (
-              <span className="flex items-center"><EyeOff className="w-4 h-4 mr-1" /> Masquer</span>
-            )}
-          </Button>
-          
-          <Button
-            onClick={handleShowSelectedDescriptions}
-            variant="outline"
-            size="sm"
-            disabled={selectedImages.length === 0 || isDescVisibilityBatchProcessing}
-            className="bg-white border-teal-300 text-teal-700 hover:bg-teal-100"
-          >
-            {isDescVisibilityBatchProcessing ? (
-              <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Traitement...</span>
-            ) : (
-              <span className="flex items-center"><Eye className="w-4 h-4 mr-1" /> Afficher les descriptions</span>
-            )}
-          </Button>
-          <Button
-            onClick={handleHideSelectedDescriptions}
-            variant="outline"
-            size="sm"
-            disabled={selectedImages.length === 0 || isDescVisibilityBatchProcessing}
-            className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
-            {isDescVisibilityBatchProcessing ? (
-              <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Traitement...</span>
-            ) : (
-              <span className="flex items-center"><EyeOff className="w-4 h-4 mr-1" /> Masquer les descriptions</span>
-            )}
-          </Button>
-          
-          <div className="ml-auto">
-            <Button
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.5,
+                alignItems: "center",
+                flex: 1,
+              }}
+            >
+              {/* Box de sélection des images */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "column" },
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                  alignItems: "stretch",
+                }}
+              >
+              <MuiButton
+                onClick={selectAllImages}
+                variant="outlined"
+                size="small"
+                disabled={!editedWedding?.images?.length}
+                className="bg-white border-purple-300 text-purple-700 hover:bg-purple-100"
+              >
+                Tout sélectionner
+              </MuiButton>
+              <MuiButton
+                onClick={deselectAllImages}
+                variant="outlined"
+                size="small"
+                disabled={selectedImages.length === 0}
+                className="bg-white border-purple-300 text-purple-700 hover:bg-purple-100"
+              >
+                Tout désélectionner
+              </MuiButton>
+              </Box>
+              {/* Box de masquage des images */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "column" },
+                  gap: 1.5,
+                  alignItems: "stretch",
+                }}
+              >
+              <MuiButton
+                onClick={handleShowSelectedImages}
+                variant="outlined"
+                size="small"
+                disabled={selectedImages.length === 0 || isVisibilityBatchProcessing}
+                className="bg-white border-teal-300 text-teal-700 hover:bg-teal-100"
+              >
+                {isVisibilityBatchProcessing ? (
+                  <Box display="flex" alignItems="center">
+                    <Loader2 style={{ width: 12, height: 12, marginRight: 4 }} className="animate-spin" /> Traitement...
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center">
+                    <Eye style={{ width: 16, height: 16, marginRight: 4 }} /> Afficher
+                  </Box>
+                )}
+              </MuiButton>
+              <MuiButton
+                onClick={handleHideSelectedImages}
+                variant="outlined"
+                size="small"
+                disabled={selectedImages.length === 0 || isVisibilityBatchProcessing}
+                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                {isVisibilityBatchProcessing ? (
+                  <Box display="flex" alignItems="center">
+                    <Loader2 style={{ width: 12, height: 12, marginRight: 4 }} className="animate-spin" /> Traitement...
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center">
+                    <EyeOff style={{ width: 16, height: 16, marginRight: 4 }} /> Masquer
+                  </Box>
+                )}
+              </MuiButton>
+              </Box>
+              {/* Box de masquage des descriptions */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "column" },
+                  gap: 1.5,
+                  alignItems: "stretch",
+                }}
+              >
+              <MuiButton
+                onClick={handleShowSelectedDescriptions}
+                variant="outlined"
+                size="small"
+                disabled={selectedImages.length === 0 || isDescVisibilityBatchProcessing}
+                className="bg-white border-teal-300 text-teal-700 hover:bg-teal-100"
+              >
+                {isDescVisibilityBatchProcessing ? (
+                  <Box display="flex" alignItems="center">
+                    <Loader2 style={{ width: 12, height: 12, marginRight: 4 }} className="animate-spin" /> Traitement...
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center">
+                    <Eye style={{ width: 16, height: 16, marginRight: 4 }} /> Afficher les descriptions
+                  </Box>
+                )}
+              </MuiButton>
+              <MuiButton
+                onClick={handleHideSelectedDescriptions}
+                variant="outlined"
+                size="small"
+                disabled={selectedImages.length === 0 || isDescVisibilityBatchProcessing}
+                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                {isDescVisibilityBatchProcessing ? (
+                  <Box display="flex" alignItems="center">
+                    <Loader2 style={{ width: 12, height: 12, marginRight: 4 }} className="animate-spin" /> Traitement...
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center">
+                    <EyeOff style={{ width: 16, height: 16, marginRight: 4 }} /> Masquer les descriptions
+                  </Box>
+                )}
+              </MuiButton>
+            </Box>
+          <Box ml={{ xs: 0, sm: "auto" }} mt={{ xs: 2, sm: 0 }}>
+            <MuiButton
               onClick={handleDeleteSelectedImages}
-              variant="destructive"
-              size="sm"
+              variant="outlined"
+              size="small"
+              color="error"
               disabled={selectedImages.length === 0 || isDeleteBatchProcessing}
-              className="bg-red-500 hover:bg-red-600"
             >
               {isDeleteBatchProcessing ? (
-                <span className="flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Suppression...</span>
+          <Box display="flex" alignItems="center">
+            <Loader2 style={{ width: 12, height: 12, marginRight: 4 }} className="animate-spin" /> Suppression...
+          </Box>
               ) : (
-                <span className="flex items-center"><Trash2 className="w-4 h-4 mr-1" /> Supprimer ({selectedImages.length})</span>
+          <Box display="flex" alignItems="center">
+            <Trash2 style={{ width: 16, height: 16, marginRight: 4 }} /> Supprimer ({selectedImages.length})
+          </Box>
               )}
-            </Button>
-          </div>
-        </div>
+            </MuiButton>
+          </Box>
+          </Box>
+        </Box>
+      </Box>
       )}
       
       {/* Barre de progression pour la suppression */}
       {deleteProgress.processing && (
-        <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200 transition-opacity duration-300">
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center">
+        <Box mb={6} p={3} bgcolor="#fef2f2" borderRadius={2} border="1px solid #fecaca" sx={{ transition: 'opacity 0.3s' }}>
+          <Box display="flex" flexDirection="column" alignItems="center" gap={2.5}>
+            <Box display="flex" alignItems="center">
               {deleteProgress.error ? (
-                <div className="w-5 h-5 mr-2 rounded-full bg-red-500 flex items-center justify-center text-white">
-                  !
-                </div>
+                <Box width={20} height={20} mr={1.5} borderRadius="50%" bgcolor="#ef4444" display="flex" alignItems="center" justifyContent="center" color="#fff">!</Box>
               ) : (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin text-red-600" />
+                <Loader2 style={{ width: 20, height: 20, marginRight: 8, color: '#dc2626' }} className="animate-spin" />
               )}
-              <div className="text-sm font-medium text-red-700">
-                {deleteProgress.status}
-              </div>
-            </div>
-            
-            <div className="w-full flex flex-col gap-2">
+              <Typography variant="body2" fontWeight={500} color="#b91c1c">{deleteProgress.status}</Typography>
+            </Box>
+            <Box width="100%" display="flex" flexDirection="column" gap={1.5}>
               {/* Barre de progression principale */}
-              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    deleteProgress.error ? 'bg-red-500' : 'bg-blue-500'
-                  }`}
-                  style={{ width: `${deleteProgress.percent}%` }}
-                />
-              </div>
-              
+              <Box width="100%" height={8} bgcolor="#e5e7eb" borderRadius={4} overflow="hidden">
+                <Box height="100%" borderRadius={4} sx={{ transition: 'width 0.3s', width: `${deleteProgress.percent}%`, bgcolor: deleteProgress.error ? '#ef4444' : '#3b82f6' }} />
+              </Box>
               {/* Indicateurs d'étapes */}
-              <div className="flex justify-between w-full mt-1">
+              <Box display="flex" justifyContent="space-between" width="100%" mt={0.5}>
                 {Array.from({ length: Math.min(deleteProgress.total, 10) }).map((_, idx) => {
-                  // Si nous avons plus de 10 images, on agrège
                   const step = Math.ceil((idx + 1) * (deleteProgress.total / 10));
                   const isCompleted = deleteProgress.current >= step;
-                  const isCurrent = deleteProgress.current < step && 
-                                   deleteProgress.current >= (step - Math.ceil(deleteProgress.total / 10));
-                  
+                  const isCurrent = deleteProgress.current < step && deleteProgress.current >= (step - Math.ceil(deleteProgress.total / 10));
                   return (
-                    <div 
-                      key={idx} 
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                        isCompleted 
-                          ? 'bg-green-500 text-white' 
-                          : isCurrent 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-200'
-                      }`}
+                    <Box
+                      key={idx}
+                      width={16}
+                      height={16}
+                      borderRadius="50%"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      fontSize={12}
+                      bgcolor={isCompleted ? '#22c55e' : isCurrent ? '#3b82f6' : '#e5e7eb'}
+                      color={isCompleted || isCurrent ? '#fff' : '#000'}
                     >
                       {isCompleted && (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={12} height={12} viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       )}
-                    </div>
+                    </Box>
                   );
                 })}
-              </div>
-            </div>
-          </div>
-        </div>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       )}
       
       {/* Formulaire d'ajout d'images */}
       {showAddImage && (
-        <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg space-y-4 mb-6">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-blue-700">Ajouter une nouvelle image</h4>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="text-gray-500 hover:text-gray-700 h-8 w-8 p-0 rounded-full"
-              onClick={() => setShowAddImage(false)}
+        <Box p={3} border="1px solid #bfdbfe" bgcolor="#eff6ff" borderRadius={2} mb={6}>
+          <Box 
+          sx={{ display: "flex",
+           alignItems: "center", 
+           justifyContent: "flex-end",
+           width: "100%",
+           }}>
+            <IconButton color="error" size="large" 
+              onClick={() => setShowAddImage(false)} sx={{ color: 'error' }}>
+              <X style={{ width: 24, height: 24 }} />
+            </IconButton>
+          </Box>
+          <Box width="100%" mt={2}>
+            <ToggleButtonGroup
+              value={uploadType}
+              exclusive
+              onChange={(_, newType) => newType && setUploadType(newType)}
+              size="small"
+              sx={{ width: '100%' }}
             >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="flex gap-4">
-            <Button
-              onClick={() => setUploadType('url')}
-              variant={uploadType === 'url' ? "default" : "outline"}
-              className={uploadType === 'url' ? "bg-blue-600 hover:bg-blue-700" : "bg-white"}
-            >
-              <Link className="w-4 h-4 mr-1" />
-              Lien web
-            </Button>
-            <Button
-              onClick={() => setUploadType('regularFile')}
-              variant={uploadType === 'regularFile' ? "default" : "outline"}
-              className={uploadType === 'regularFile' ? "bg-blue-600 hover:bg-blue-700" : "bg-white"}
-            >
-              <Upload className="w-4 h-4 mr-1" />
-              Upload de fichier
-            </Button>
-          </div>
-
+              <ToggleButton value="url" sx={{ flex: 1, fontSize: '0.85rem', py: 0.5 }}>
+                <Link style={{ width: 16, height: 16, marginRight: 4 }} />
+                Lien web
+              </ToggleButton>
+              <ToggleButton value="regularFile" sx={{ flex: 1, fontSize: '0.85rem', py: 0.5 }}>
+                <Upload style={{ width: 16, height: 16, marginRight: 4 }} />
+                Upload de fichier
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
           {uploadType === 'url' && (
-            <div className="flex gap-2">
-              <Input 
-                type="text" 
+            <Box display="flex" gap={1.5} mt={2}>
+              <Input
+                type="text"
                 placeholder="Entrez l'URL de l'image"
                 value={newImageUrl}
                 onChange={handleUrlChange}
                 className={`flex-1 ${isValidUrl ? 'border-green-500 bg-green-50' : 'border-red-300 bg-red-50'}`}
               />
-              <Button
+              <MuiButton
                 className="bg-green-600 hover:bg-green-700 text-white"
                 disabled={!isValidUrl}
+                variant='outlined'
+                size="small"
                 onClick={() => handleAddImageByUrl('link')}
               >
-                <Plus className="w-4 h-4 mr-1" />
+                <Plus style={{ width: 16, height: 16, marginRight: 4 }} />
                 Ajouter
-              </Button>
-            </div>
+              </MuiButton>
+            </Box>
           )}
-
           {uploadType === 'regularFile' && (
             <FileUploader
               selectedWedding={selectedWedding}
-              uploadType={uploadType} 
+              uploadType={uploadType}
               onUploadComplete={handleUploadComplete}
             />
           )}
-        </div>
+        </Box>
       )}
       
       {/* Galerie d'images */}
-      <div className="mt-6">
-        <div className='flex flex-row justify-center items-center w-full'>
+      <Box mt={6}>
+        <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center" width="100%">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -838,13 +968,13 @@ export function ImageGallery({
             modifiers={[snapToGridModifier]}
           >
             <SortableContext
-              items={sortedImages.map((img) => img.fileUrl)} 
+              items={sortedImages.map((img) => img.fileUrl)}
               strategy={rectSortingStrategy}
             >
-              <div className='grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full maw-w-[200px]'>
+              <Box display="grid" gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={2} width="100%" maxWidth={900}>
                 {sortedImages.map((image) => (
-                  <SortableWeddingImage 
-                    key={`${image.id}-${updateKey}`} 
+                  <SortableWeddingImage
+                    key={`${image.id}-${updateKey}`}
                     image={image}
                     onDescriptionChange={handleImageDescriptionChange}
                     selectedWedding={selectedWedding}
@@ -854,28 +984,50 @@ export function ImageGallery({
                     setEditedWedding={setEditedWedding}
                   />
                 ))}
-              </div>
+              </Box>
             </SortableContext>
-            
             {/* Drag overlay for better visual feedback */}
             <DragOverlay dropAnimation={dropAnimationConfig}>
               {activeId ? (
-                <div className="min-w-[180px] max-w-[220px] relative aspect-auto overflow-hidden rounded-lg py-2 border-2 border-blue-500 shadow-lg bg-white opacity-90 flex flex-col items-center justify-center">
+                <Box
+                  sx={{
+                  minWidth: 180,
+                  maxWidth: 220,
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: 3,
+                  py: 1,
+                  border: "2px solid #3b82f6",
+                  boxShadow: 3,
+                  bgcolor: "#fff",
+                  opacity: 0.9,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center"
+                  }}
+                >
                   <Image
-                    src={sortedImages.find(img => img.fileUrl === activeId)?.fileUrl || '/placeholder.jpg'}
-                    className="w-32 h-32 object-cover rounded-2xl mx-auto"
-                    width={128}
-                    height={128}
-                    alt="Dragging image"
-                    priority={false}
-                    quality={25}
+                  src={sortedImages.find(img => img.fileUrl === activeId)?.fileUrl || '/placeholder.jpg'}
+                  style={{
+                    width: 128,
+                    height: 128,
+                    objectFit: 'cover',
+                    borderRadius: 16,
+                    margin: '0 auto'
+                  }}
+                  width={128}
+                  height={128}
+                  alt="Dragging image"
+                  priority={false}
+                  quality={25}
                   />
-                </div>
+                </Box>
               ) : null}
             </DragOverlay>
           </DndContext>
-        </div>
-      </div>
+        </Box>
+      </Box>
       <style jsx global>{`
         .save-button-highlight {
           animation: pulse-border 1.5s infinite;

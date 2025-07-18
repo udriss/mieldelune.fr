@@ -588,11 +588,11 @@ const getInputStyle = (field: string) => {
           <p className="text-sm mt-1">Pas d&apos;image de profil</p>
         )}
 
-        <div className="flex gap-4 flex-col justify-center m-4">
+        <Box display="flex" flexDirection="column" gap={2} justifyContent="center" m={2}>
           <Button 
             variant={uploadType === 'profileLink' ? 'default' : 'outline'}
             size="sm"
-            className='font-semibold border-gray-600'
+            className="font-semibold border-gray-600"
             onClick={() => {
               setUploadType('profileLink');
               setShowAddImage(true);
@@ -603,7 +603,7 @@ const getInputStyle = (field: string) => {
           <Button 
             variant={uploadType === 'profileStorage' ? 'default' : 'outline'}
             size="sm"
-            className='font-semibold border-gray-600'
+            className="font-semibold border-gray-600"
             onClick={() => {
               setUploadType('profileStorage');
               setShowAddImage(true);
@@ -611,7 +611,7 @@ const getInputStyle = (field: string) => {
           >
             Fichier
           </Button>
-        </div>
+        </Box>
 
         {showAddImage && (
         <div className="max-h-[160px] col-span-2 rounded-lg">

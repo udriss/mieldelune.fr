@@ -23,7 +23,9 @@ import {
   DialogTitle,
   DialogActions,
   Tabs,
-  Tab
+  Tab,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
 import { 
   BarChartOutlined, 
@@ -342,44 +344,35 @@ export function CoverImageSection({
             height: '100%',
             maxHeight: 150,
           }}>
-            <Button 
-              variant={uploadType === 'coverUrl' ? 'default' : 'outline'}
-              size="sm"
-              className='font-semibold border-gray-300'
-              onClick={() => {
-                setUploadType('coverUrl');
-                setShowAddCoverImage(true);
-              }}
-            >
-              Lien web
-            </Button>
-            <Button 
-              variant={uploadType === 'coverFile' ? 'default' : 'outline'}
-              size="sm" 
-              className='font-semibold border-gray-300'
-              onClick={() => {
-                setUploadType('coverFile');
-                setShowAddCoverImage(true);
-              }}
-            >
-              Upload de fichier
-            </Button>
-            <Button 
-              variant={uploadType === 'coverThumbnail' ? 'default' : 'outline'}
-              size="sm"
-              className='font-semibold border-gray-300'
-              onClick={() => {
-                setUploadType('coverThumbnail');
-                setShowAddCoverImage(true);
-              }}
-              disabled={isProcessingCoverThumbnails}
-            >
-              Produire la vignette
-            </Button>
+            {/* ToggleButtonGroup pour le choix du type d'upload */}
+            <Box width="100%">
+              <ToggleButtonGroup
+                orientation="vertical"
+                value={uploadType}
+                exclusive
+                onChange={(_, newType) => {
+                  if (newType) {
+                    setUploadType(newType);
+                    setShowAddCoverImage(true);
+                  }
+                }}
+                size="small"
+                sx={{ width: '100%' }}
+              >
+                <ToggleButton value="coverUrl" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                  Lien web
+                </ToggleButton>
+                <ToggleButton value="coverFile" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                  Upload de fichier
+                </ToggleButton>
+                <ToggleButton value="coverThumbnail" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }} disabled={isProcessingCoverThumbnails}>
+                  Produire la vignette
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
           </Box>
           </Box>
         </Grid>
-
         {showAddCoverImage && (
           <Grid size={{ xs: 6 }}>
             <Box sx={{ height: '100%', p: 2, bgcolor: '#f9fafb', borderRadius: 1 }}>
@@ -444,12 +437,21 @@ export function CoverImageSection({
                   
                   {editedWedding.coverImage && editedWedding.coverImage.fileType === 'coverStorage' && (
                     <Box display="flex" flexDirection="column" justifyContent="center" gap={2}>
-                      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
-                        <Typography variant='overline' color="text.secondary">
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 0,
+                        }}
+                      >
+                        <Typography variant="overline" color="text.secondary">
                           <CompressOutlined fontSize="small" sx={{ mr: 1 }} />
-                          Taille finale à conserver : {resizeValueCover} %
-                          <br />
-                          compression à {100 - resizeValueCover} %
+                          Taille finale à conserver
+                        </Typography>
+                        <Typography variant="overline" color="text.secondary">
+                          {resizeValueCover} % (compression à {100 - resizeValueCover} %)
                         </Typography>
                         <Slider.Root
                           className="relative flex items-center w-[200px] h-5"
@@ -520,7 +522,23 @@ export function CoverImageSection({
           </Grid>
         )}
       </Grid>
-
+      <Grid size={{ xs: 12 }}>
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              bgcolor: '#f3f4f6',
+              borderRadius: 1,
+              p: 2,
+              border: '1px dashed #cbd5e1',
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Une <strong>miniature&nbsp;</strong> est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
+            </Typography>
+          </Box>
+        </Grid>
       {/* Statistiques de compression */}
       {compressionStats && (
         <Box sx={{ 
