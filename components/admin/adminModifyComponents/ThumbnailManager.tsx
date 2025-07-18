@@ -55,7 +55,7 @@ interface ThumbnailManagerProps {
   thumbnailProgress: number;
   setThumbnailProgress: React.Dispatch<React.SetStateAction<number>>;
   setUpdateKey: React.Dispatch<React.SetStateAction<number>>;
-  clearCompressionStats?: boolean;
+  onDataRefresh?: () => void;
 }
 
 export function ThumbnailManager({
@@ -68,7 +68,7 @@ export function ThumbnailManager({
   thumbnailProgress,
   setThumbnailProgress,
   setUpdateKey,
-  clearCompressionStats = false,
+  onDataRefresh,
 }: ThumbnailManagerProps) {
   const [failedThumbnails, setFailedThumbnails] = useState<string[]>([]);
   const [compressionStats, setCompressionStats] = useState<{ [key: string]: CompressionStat }>({});
@@ -79,14 +79,32 @@ export function ThumbnailManager({
   const [showStatsTable, setShowStatsTable] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Effacer les statistiques de compression lors du changement de mariage
+  // Nettoyer les stats quand on change de mariage
+  const [lastWeddingId, setLastWeddingId] = useState<number | null>(null);
+  
   useEffect(() => {
-    if (clearCompressionStats) {
+    if (editedWedding && editedWedding.id !== lastWeddingId) {
+      console.log('🧹 Effacement des statistiques de compression (changement de mariage)');
       setCompressionStats({});
       setShowStatsTable(false);
       setFailedThumbnails([]);
+      setLastWeddingId(editedWedding.id);
     }
-  }, [clearCompressionStats]);
+  }, [editedWedding?.id, lastWeddingId]);
+
+  // Fonction utilitaire pour attendre que le process soit prêt côté serveur
+  const waitForProcessReady = async (processId: string, maxTries = 15, delay = 300): Promise<boolean> => {
+    for (let i = 0; i < maxTries; i++) {
+      try {
+        const res = await fetch(`/api/thumbnail-progress?processId=${processId}`);
+        if (res.ok) return true;
+      } catch (e) {
+        // ignore
+      }
+      await new Promise(r => setTimeout(r, delay));
+    }
+    return false;
+  };
 
   const processThumbnailsBatch = async () => {
     setIsProcessingThumbnails(true);
@@ -100,61 +118,142 @@ export function ThumbnailManager({
     setCurrentProcessId(processId);
 
     let progressInterval: NodeJS.Timeout | null = null;
+    let consecutiveErrors = 0;
+    let consecutive404s = 0;
+    const maxConsecutiveErrors = 20; // Plus tolérant
+    const max404sBeforeGiveUp = 30; // Permettre beaucoup plus d'erreurs 404 au début
+    let pollingActive = true;
+    let processCompleted = false;
 
     // Fonction pour démarrer le polling du progrès
     const startProgressPolling = () => {
+      console.log(`🔄 Démarrage du polling pour le processus: ${processId}`);
+      
       progressInterval = setInterval(async () => {
-      try {
-        const progressResponse = await fetch(`/api/thumbnail-progress?processId=${processId}`);
-        if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
-          if (progressData.success) {
-            console.log(`📊 Progrès reçu: ${progressData.progress}% (${progressData.processedImages}/${progressData.totalImages})`);
-            setThumbnailProgress(progressData.progress);
+        if (!pollingActive || processCompleted) {
+          if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+          }
+          return;
+        }
+
+        try {
+          const progressResponse = await fetch(`/api/thumbnail-progress?processId=${processId}`);
+          
+          if (progressResponse.ok) {
+            consecutiveErrors = 0; // Reset le compteur d'erreurs
+            consecutive404s = 0; // Reset le compteur 404
+            const progressData = await progressResponse.json();
             
-            // Mettre à jour les statistiques en temps réel
-            if (progressData.compressionStats && Object.keys(progressData.compressionStats).length > 0) {
-              console.log(`📊 Statistiques reçues:`, progressData.compressionStats);
-              console.log(`📊 Nombre de stats: ${Object.keys(progressData.compressionStats).length}`);
+            if (progressData.success) {
+              console.log(`📊 Progrès reçu: ${progressData.progress}% (${progressData.processedImages}/${progressData.totalImages})`);
+              setThumbnailProgress(progressData.progress || 0);
               
-              // Compter les erreurs
-              const errors = Object.values(progressData.compressionStats).filter((stat: any) => stat.error);
-              if (errors.length > 0) {
-                console.log(`❌ ${errors.length} erreurs détectées:`, errors);
+              // Mettre à jour les statistiques en temps réel
+              if (progressData.compressionStats && Object.keys(progressData.compressionStats).length > 0) {
+                console.log(`📊 Statistiques reçues: ${Object.keys(progressData.compressionStats).length} images`);
+                setCompressionStats(progressData.compressionStats);
+                setShowStatsTable(true);
               }
               
-              setCompressionStats(progressData.compressionStats);
-              setShowStatsTable(true);
+              // Arrêter le polling si le processus est terminé
+              if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
+                console.log(`✅ Processus terminé avec le statut: ${progressData.status}`);
+                processCompleted = true;
+                pollingActive = false;
+                if (progressInterval) {
+                  clearInterval(progressInterval);
+                  progressInterval = null;
+                }
+                
+                // Finaliser le processus côté UI
+                setIsProcessingThumbnails(false);
+                setThumbnailProgress(100);
+                
+                // Réinitialiser après un délai
+                setTimeout(() => {
+                  setThumbnailProgress(0);
+                  setCurrentProcessId(null);
+                }, 3000);
+                
+                if (progressData.status === 'completed') {
+                  // Utiliser le callback fourni par le parent pour rafraîchir les données
+                  // Délai plus long pour éviter les conflits avec d'autres refreshs
+                  setTimeout(() => {
+                    console.log('🔄 Demande de rechargement des données via onDataRefresh (ThumbnailManager)');
+                    if (onDataRefresh) {
+                      onDataRefresh();
+                    }
+                    setUpdateKey(prev => prev + 1);
+                  }, 2000); // Augmenter le délai à 2 secondes
+                  
+                  toast.success(`🎉 Compression terminée avec succès !`, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    theme: "dark",
+                  });
+                }
+              }
             }
+          } else if (progressResponse.status === 404) {
+            consecutive404s++;
+            console.warn(`⚠️ Processus non trouvé (${consecutive404s}/${max404sBeforeGiveUp}) - Le serveur initialise peut-être encore...`);
             
-            // Arrêter le polling si le processus est terminé
-            if (progressData.status === 'completed' || progressData.status === 'cancelled' || progressData.status === 'error') {
-              console.log(`✅ Processus terminé avec le statut: ${progressData.status}`);
-              if (progressInterval) clearInterval(progressInterval);
+            // Arrêter seulement après beaucoup d'erreurs 404
+            if (consecutive404s >= max404sBeforeGiveUp) {
+              console.log(`🔍 Trop d'erreurs 404 consécutives - arrêt du polling`);
+              processCompleted = true;
+              pollingActive = false;
+              if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+              }
+              setIsProcessingThumbnails(false);
+              
+              toast.warning('⚠️ Impossible de suivre le progrès. Le traitement continue côté serveur.', {
+                position: "top-center",
+                autoClose: 5000,
+                theme: "dark",
+              });
+            }
+          } else {
+            consecutiveErrors++;
+            console.warn(`⚠️ Erreur API progrès: ${progressResponse.status}`);
+            
+            if (consecutiveErrors >= maxConsecutiveErrors) {
+              console.log(`❌ Trop d'erreurs consécutives - arrêt du polling`);
+              processCompleted = true;
+              pollingActive = false;
+              if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+              }
+              setIsProcessingThumbnails(false);
             }
           }
-        } else {
-          console.warn(`⚠️ Erreur API progrès: ${progressResponse.status} - ${progressResponse.statusText}`);
-          // Si le processus n'est plus trouvé (404), arrêter le polling
-          if (progressResponse.status === 404) {
-            console.log(`🔍 Processus ${processId} non trouvé - arrêt du polling`);
-            if (progressInterval) clearInterval(progressInterval);
+        } catch (error) {
+          consecutiveErrors++;
+          console.error('Erreur lors de la récupération du progrès:', error);
+          
+          if (consecutiveErrors >= maxConsecutiveErrors) {
+            console.log(`❌ Erreur réseau persistante - arrêt du polling`);
+            processCompleted = true;
+            pollingActive = false;
+            if (progressInterval) {
+              clearInterval(progressInterval);
+              progressInterval = null;
+            }
+            setIsProcessingThumbnails(false);
           }
         }
-      } catch (error) {
-        console.error('Erreur lors de la récupération du progrès:', error);
-      }
-      }, 500); // Interroger toutes les 500ms
+      }, 1000); // Réduction de l'intervalle à 1 seconde pour être très réactif
     };
 
     try {
       console.log(`🚀 Démarrage du processus batch avec ID: ${processId}`);
-      
-      // Démarrer le polling avec un petit délai pour laisser le temps au serveur d'initialiser
-      setTimeout(() => {
-        startProgressPolling();
-      }, 100);
-      
+
       const response = await fetch('/api/thumbnail-batch/', {
         method: 'POST',
         headers: {
@@ -174,38 +273,36 @@ export function ThumbnailManager({
         throw new Error(data.error || 'Erreur lors du traitement en lot');
       }
 
-      // Mettre à jour les statistiques de compression
-      if (data.compressionStats) {
-        setCompressionStats(data.compressionStats);
-        setShowStatsTable(true);
-      }
-
-      // Gérer les échecs
-      if (data.failedImages && data.failedImages.length > 0) {
-        setFailedThumbnails(data.failedImages);
-      }
-
-      // Afficher le résultat
-      if (data.processedImages === data.totalImages) {
-        toast.success(`${data.processedImages} miniatures optimisées avec compression adaptative`, {
+      // Attendre que le process soit prêt côté serveur avant de démarrer le polling
+      const found = await waitForProcessReady(processId, 15, 300);
+      if (!found) {
+        toast.warning('Le suivi du progrès n\'a pas pu démarrer (process non trouvé). Le traitement continue côté serveur.', {
           position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
+          autoClose: 5000,
           theme: "dark",
-          style: { width: '500px' }
         });
       } else {
-        toast.warning(`${data.processedImages}/${data.totalImages} miniatures générées`, {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          theme: "dark",
-          style: { width: '300px' }
-        });
+        // Démarrer le polling normalement
+        if (!processCompleted) {
+          startProgressPolling();
+        }
       }
+
+      // Afficher un message de démarrage
+      toast.info(`🚀 Traitement de ${editedWedding.images.length} images démarré`, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        theme: "dark",
+      });
 
     } catch (error) {
       console.error('Erreur lors du traitement en lot:', error);
+      processCompleted = true;
+      pollingActive = false;
+      setIsProcessingThumbnails(false);
+      setCurrentProcessId(null);
+
       toast.error(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, {
         position: "top-center",
         autoClose: 3000,
@@ -213,61 +310,58 @@ export function ThumbnailManager({
         theme: "dark",
         style: { width: '400px' }
       });
-    } finally {
-      if (progressInterval) clearInterval(progressInterval);
-      setIsProcessingThumbnails(false);
-      setThumbnailProgress(100); // S'assurer que la barre de progrès atteint 100%
-      
-      // Réinitialiser après un délai
-      setTimeout(() => {
-        setThumbnailProgress(0);
-        setCurrentProcessId(null);
-      }, 2000);
     }
   };
 
   const handleCancelThumbnails = async () => {
     if (currentProcessId) {
       try {
-        await fetch(`/api/thumbnail-batch/?processId=${currentProcessId}`, {
+        console.log(`🛑 Annulation du processus: ${currentProcessId}`);
+        
+        const response = await fetch(`/api/thumbnail-batch?processId=${currentProcessId}`, {
           method: 'DELETE',
         });
         
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ Processus annulé côté serveur:`, data);
+        } else {
+          console.warn(`⚠️ Erreur lors de l'annulation côté serveur: ${response.status}`);
+        }
+        
+        // Forcer l'arrêt côté client
         setIsProcessingThumbnails(false);
         setThumbnailProgress(0);
         setCurrentProcessId(null);
         
-        toast.info('Génération de miniatures annulée', {
+        toast.info('🛑 Génération de miniatures annulée', {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
           theme: "dark",
           style: { width: '400px' }
         });
+        
       } catch (error) {
         console.error('Erreur lors de l\'annulation:', error);
+        
+        // Même en cas d'erreur, forcer l'arrêt côté client
+        setIsProcessingThumbnails(false);
+        setThumbnailProgress(0);
+        setCurrentProcessId(null);
+        
+        toast.warning('⚠️ Arrêt forcé côté client. Le processus peut continuer côté serveur.', {
+          position: "top-center",
+          autoClose: 3000,
+          theme: "dark",
+        });
       }
     }
   };
 
   const handleProcessThumbnails = async () => {
     await processThumbnailsBatch();
-    
-    // Recharger les données du mariage pour obtenir les dimensions mises à jour
-    try {
-      const response = await fetch('/api/mariages');
-      if (response.ok) {
-        const data = await response.json();
-        const updatedWedding = data.weddings.find((w: Wedding) => w.id === editedWedding.id);
-        if (updatedWedding) {
-          setEditedWedding(updatedWedding);
-          // Incrémenter updateKey pour forcer la mise à jour des images dans la galerie
-          setUpdateKey(prev => prev + 1);
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors du rechargement des données:', error);
-    }
+    // Le rechargement des données se fait maintenant dans processThumbnailsBatch
   };
 
   // Calculer les données pour le tableau
@@ -387,7 +481,7 @@ export function ThumbnailManager({
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Loader2 className="w-5 h-5 mr-2 animate-spin text-blue-600" />
               <Typography variant="body2" color="primary.dark" fontWeight={500}>
-                Production : {Math.round(thumbnailProgress)} %
+                {thumbnailProgress === 100 ? 'Finalisation...' : `Compression : ${Math.round(thumbnailProgress)} %`}
               </Typography>
             </Box>
             <LinearProgress 
@@ -426,16 +520,19 @@ export function ThumbnailManager({
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 6 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="caption" color="success.dark">Taille cible moyenne :</Typography>
+                <Typography variant="caption" color="success.dark">Taille cible :</Typography>
                 <Chip 
                   size="small" 
                   label={(() => {
                     const validStats = Object.values(compressionStats).filter(stat => !stat.error);
                     const totalStats = Object.values(compressionStats);
-                    console.log(`📊 Calcul taille cible: ${totalStats.length} total, ${validStats.length} valides`);
+                    
                     if (totalStats.length === 0) return "En cours...";
                     if (validStats.length === 0) return "Aucune valide";
-                    return `${(validStats.reduce((acc, curr) => acc + curr.targetSize, 0) / validStats.length / 1024).toFixed(1)}KB`;
+                    
+                    // Prendre la targetSize de la première stat valide (elle devrait être la même pour toutes)
+                    const targetSize = validStats[0]?.targetSize;
+                    return targetSize ? `${(targetSize / 1024).toFixed(1)}KB` : "Non définie";
                   })()}
                   sx={{ fontFamily: 'monospace', fontSize: '0.70rem', height: 20 }}
                   color="success"

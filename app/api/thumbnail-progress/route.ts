@@ -24,11 +24,14 @@ export async function GET(request: Request) {
       : 0;
 
     // Log pour debug - statistiques
+    const lastStatKey = progress.compressionStats ? Object.keys(progress.compressionStats).slice(-1)[0] : null;
+    const lastStat = lastStatKey && progress.compressionStats ? progress.compressionStats[lastStatKey] : null;
+    
     console.log(`🔄 Progress poll pour ${processId}:`, {
       percentage: Math.round(progressPercentage),
       statsCount: progress.compressionStats ? Object.keys(progress.compressionStats).length : 0,
       errorsCount: progress.compressionStats ? Object.values(progress.compressionStats).filter((stat: any) => stat.error).length : 0,
-      stats: progress.compressionStats
+      lastStat: lastStat
     });
 
     return NextResponse.json({

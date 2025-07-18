@@ -31,6 +31,8 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
   const [nextTab, setNextTab] = useState<string | null>(null);
   const siteSettingsRef = useRef<AdminSiteSettingsRef>(null);
   const mainScrollableRef = useRef<HTMLDivElement>(null);
+  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isFetchingRef = useRef<boolean>(false);
   
   const router = useRouter();
   const handleLogout = () => {
@@ -54,32 +56,61 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
   }, [hasPendingChanges, hasCustomPageChanges]);
 
   const fetchWeddings = async () => {
-    try {
-      const res = await myFetch('/api/mariages', {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        cache: 'no-store',
-      });
-      
-      const data = await res.json();
-      
-      if (data.weddings) {
-        setWeddingsForTransfer(data.weddings);
-      }
-    } catch (error) {
-      toast.error('Erreur lors du chargement des mariages sur la page principale', {
-        position: "top-center",
-        autoClose: false,
-        theme: "dark",
-        style: {
-          width: '400px',
-        },
-      });
+    // Protection contre les appels multiples simultanés
+    if (isFetchingRef.current) {
+      console.log('🚫 Appel fetchWeddings ignoré - déjà en cours');
+      return;
     }
+
+    // Débouncer les appels pour éviter les appels excessifs
+    if (fetchDebounceRef.current) {
+      clearTimeout(fetchDebounceRef.current);
+    }
+
+    fetchDebounceRef.current = setTimeout(async () => {
+      if (isFetchingRef.current) {
+        console.log('🚫 Appel fetchWeddings ignoré - déjà en cours (debounced)');
+        return;
+      }
+
+      isFetchingRef.current = true;
+      console.log('🔄 Chargement des mariages depuis la page AdminPageClient - DEBUT');
+
+      try {
+        const res = await myFetch('/api/mariages', {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          cache: 'no-store',
+        });
+        
+        const data = await res.json();
+        
+        if (data.weddings) {
+          setWeddingsForTransfer(data.weddings);
+          console.log('✅ Mariages rechargés avec succès');
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des mariages:', error);
+        toast.error('Erreur lors du chargement des mariages sur la page principale', {
+          position: "top-center",
+          autoClose: false,
+          theme: "dark",
+          style: {
+            width: '400px',
+          },
+        });
+      } finally {
+        // Libérer le verrou après un délai pour éviter les appels trop rapprochés
+        setTimeout(() => {
+          isFetchingRef.current = false;
+          console.log('🔓 Verrou fetchWeddings libéré');
+        }, 1000);
+      }
+    }, 800); // Augmenter le délai de débouncing à 800ms
   };
 
   useEffect(() => {

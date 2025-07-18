@@ -57,7 +57,6 @@ interface CoverImageSectionProps {
   setUpdateKey: React.Dispatch<React.SetStateAction<number>>;
   selectedWedding: string;
   isProcessingCoverThumbnails: boolean;
-  clearCompressionStats?: boolean;
 }
 
 export function CoverImageSection({
@@ -80,20 +79,22 @@ export function CoverImageSection({
   setUpdateKey,
   selectedWedding,
   isProcessingCoverThumbnails,
-  clearCompressionStats = false,
 }: CoverImageSectionProps) {
   const [isProcessingCoverThumbnail, setIsProcessingCoverThumbnail] = useState(false);
   const [compressionStats, setCompressionStats] = useState<CompressionStat | null>(null);
   const [showStatsDetails, setShowStatsDetails] = useState(false);
   const [thumbnailProgress, setThumbnailProgress] = useState(0);
 
-  // Effacer les statistiques de compression lors du changement de mariage
+  // Nettoyer les stats quand on change de mariage (basé sur l'ID du mariage)
+  const [lastWeddingId, setLastWeddingId] = useState<number | null>(null);
+  
   useEffect(() => {
-    if (clearCompressionStats) {
+    if (editedWedding && editedWedding.id !== lastWeddingId) {
       setCompressionStats(null);
       setShowStatsDetails(false);
+      setLastWeddingId(editedWedding.id);
     }
-  }, [clearCompressionStats]);
+  }, [editedWedding?.id, lastWeddingId]);
 
   const generateCoverThumbnail = async () => {
     if (!editedWedding?.coverImage) return;

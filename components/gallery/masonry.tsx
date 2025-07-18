@@ -1,4 +1,4 @@
-import LightGallery from 'lightgallery/react';
+// import LightGallery from 'lightgallery/react';
 import { useRouter } from 'next/navigation';
 import { Wedding, Image as WeddingImage } from '@/lib/dataTemplate';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -6,7 +6,10 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import type { ComponentType } from 'react';
+import type { SwiperGalleryProps } from './SwiperGallery';
 import { Loader2 } from "lucide-react";
 import Masonry from 'react-masonry-css';
 import { Skeleton, Box } from '@mui/material';
@@ -14,23 +17,6 @@ import { Heart } from 'lucide-react';
 
 
 
-// Plugins
-import lgZoom from 'lightgallery/plugins/zoom';
-import lgThumbnail from 'lightgallery/plugins/thumbnail';
-import lgShare from 'lightgallery/plugins/share';
-import lgAutoplay from 'lightgallery/plugins/autoplay';
-import lgFullscreen from 'lightgallery/plugins/fullscreen';
-import lgPager from 'lightgallery/plugins/pager';
-
-// Styles
-import 'lightgallery/css/lightgallery.css';
-import 'lightgallery/css/lg-zoom.css';
-import 'lightgallery/css/lg-thumbnail.css';
-import 'lightgallery/css/lg-share.css';
-import 'lightgallery/css/lg-autoplay.css';
-import 'lightgallery/css/lg-fullscreen.css';
-import 'lightgallery/css/lg-rotate.css';
-import 'lightgallery/css/lg-pager.css';
 
 
   const getImageUrl = (image: WeddingImage, thumbnail: boolean = true) => {
@@ -43,11 +29,9 @@ import 'lightgallery/css/lg-pager.css';
     return image.fileUrl;
   }
 
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-full w-full">
-    <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-  </div>
-);
+const SwiperGallery = dynamic(() => import('./SwiperGallery'), {
+  ssr: false,
+}) as React.ComponentType<SwiperGalleryProps>;
 
 interface AdditionalShareOption {
   selector: string;
@@ -95,8 +79,14 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
 
   // Filtrer les images pour n'afficher que celles qui sont visibles
   const visibleWeddingImages = useMemo(() => {
-    return wedding.images.filter(image => image.imageVisibility !== false);
+    return wedding.images.filter((image: WeddingImage) => image.imageVisibility !== false);
   }, [wedding.images]);
+
+
+
+  // Swiper modal state
+  const [swiperOpen, setSwiperOpen] = useState(false);
+  const [swiperIndex, setSwiperIndex] = useState(0);
 
   // Function to get caption for each image
   const getImageCaption = (index: number) => {
@@ -104,10 +94,16 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
     if (visibleWeddingImages[index]?.description && visibleWeddingImages[index]?.descriptionVisibility !== false) {
       return visibleWeddingImages[index].description;
     }
-    
     // For images without description or with hidden description
     return `Moment #${index + 1}`;
   };
+
+  // Prépare les images pour Swiper
+  const swiperImages = visibleWeddingImages.map((img, idx) => ({
+    src: getImageUrl(img, false),
+    thumb: getImageUrl(img, true),
+    alt: getImageCaption(idx),
+  }));
 
   return (
     <div className="min-h-screen  w-full mt-16 ">
@@ -133,23 +129,7 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
         {/* Gallery grid */}
       
         <div className="max-w-[2800px] flex justify-center items-center mx-auto">
-       
-          <LightGallery
-            selector=".gallery-item"
-            // lgPager supprimé car trop dense
-            plugins={[lgZoom, lgThumbnail, lgShare, lgAutoplay, lgFullscreen]}
-            speed={300}
-            mode="lg-fade"
-            elementClassNames="flex justify-center items-center"
-            counter={true}
-            download={false}
-            autoplay={true}
-            zoom={true}
-            thumbnail={true}
-            slideShowInterval={1000}
-            progressBar={false}
-          >
-            <Masonry
+          <Masonry
             breakpointCols={{
               default: 2,
               1100: 2,
@@ -158,34 +138,32 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
             }}
             className="masonry-grid p-4"
             columnClassName="masonry-grid_column"
-            >
-            {visibleWeddingImages.map((image, index) => {
+          >
+            {visibleWeddingImages.map((image: WeddingImage, index: number) => {
               const isImageLoading = loadingImages[image.id] !== false;
               const caption = getImageCaption(index);
 
               return (
                 <div key={image.id}>
-                  <a
-                    key={image.id}
-                    className="gallery-item h-0"
-                    data-src={getImageUrl(image, false)}
-                    data-sub-html={`<h4>${caption}</h4><p>${wedding.title}</p>`}
-                    data-facebook-title={`${wedding.title} - ${caption}`}
-                    data-twitter-title={`${wedding.title} - ${caption}`}
-                    data-pinterest-text={`${wedding.title} - ${caption}`}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSwiperIndex(index);
+                      setSwiperOpen(true);
+                    }}
                   >
                     <div className="relative w-full overflow-hidden rounded-[5px]">
                       {/* Conteneur avec aspect-ratio pour éviter le layout shift */}
-                      <div 
+                      <div
                         className="relative w-full"
-                        style={{ 
-                          aspectRatio: image.width && image.height 
-                            ? `${image.width}/${image.height}` 
+                        style={{
+                          aspectRatio: image.width && image.height
+                            ? `${image.width}/${image.height}`
                             : '3/4' // Fallback ratio
                         }}
                       >
                         {isImageLoading && (
-                          <Box 
+                          <Box
                             sx={{
                               position: 'absolute',
                               inset: 0,
@@ -206,7 +184,6 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
                             />
                           </Box>
                         )}
-                        
                         <LazyLoadImage
                           src={getImageUrl(image)}
                           alt={`${wedding.title} - ${caption}`}
@@ -218,14 +195,12 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
                             </div>
                           }
                           onLoad={() => {
-                            // Marque l'image comme chargée
                             setLoadingImages(prev => ({
                               ...prev,
                               [image.id]: false
                             }));
                           }}
                           beforeLoad={() => {
-                            // Marque l'image comme en cours de chargement
                             setLoadingImages(prev => ({
                               ...prev,
                               [image.id]: true
@@ -233,7 +208,6 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
                           }}
                         />
                       </div>
-                      
                       {/* Caption overlay on hover - only show if description is visible */}
                       {visibleWeddingImages[index]?.descriptionVisibility !== false && (
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
@@ -243,14 +217,21 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
                         </div>
                       )}
                     </div>
-                  </a>
+                  </div>
                 </div>
               );
             })}
+            {/* Swiper modal */}
+            {swiperOpen && (
+          <SwiperGallery
+            images={swiperImages}
+            initialIndex={swiperIndex}
+            onClose={() => setSwiperOpen(false)}
+            weddingTitle={wedding.title}
+            getImageCaption={getImageCaption}
+          />
+            )}
           </Masonry>
-          </LightGallery>
-          
-          
         </div>
       </div>
       <style jsx global>{`

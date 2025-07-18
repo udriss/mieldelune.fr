@@ -26,7 +26,7 @@ interface WeddingFields {
 interface AdminWeddingsProps {
   weddings: Wedding[];
   setWeddings: React.Dispatch<React.SetStateAction<Wedding[]>>;
-  onDataRefresh?: () => Promise<void>;
+  onDataRefresh?: () => void;
 }
 
 interface WeddingFieldState {
@@ -55,7 +55,6 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
   const [resizeValue, setResizeValue] = useState(20); // Default 20%
   const [resizeValueCover, setResizeValueCover] = useState<number>(20);
   const [updateKey, setUpdateKey] = useState(0);
-  const [clearCompressionStats, setClearCompressionStats] = useState(false);
   const [isValidUrlCover, setIsValidUrlCover] = useState(false);
   const [isValidUrl, setIsValidUrl] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -234,6 +233,7 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
           tags: ['weddings']
         }
       });
+      console.log('🔄 Chargement des mariages depuis la page ADMIN principale');
       const data = await res.json();
       if (data.weddings) {
         setWeddings(data.weddings);
@@ -243,37 +243,42 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
     }
   };
 
-  useEffect(() => {
-    fetchWeddings();
-  }, [shouldRefetch]); // Re-run when shouldRefetch changes
+  // Supprimé le useEffect qui causait les appels répétés à fetchWeddings
+  // useEffect(() => {
+  //   fetchWeddings();
+  // }, [shouldRefetch]); // Re-run when shouldRefetch changes
 
-  // Effet pour déclencher le rafraîchissement des données quand updateKey change (après génération de thumbnails)
-  useEffect(() => {
-    if (updateKey > 0 && onDataRefresh) {
-      onDataRefresh();
-    }
-  }, [updateKey, onDataRefresh]);
+  // Supprimer cet effet car le ThumbnailManager appelle déjà onDataRefresh directement
+  // Évite la double redondance qui causait des appels multiples à fetchWeddings
+  // useEffect(() => {
+  //   if (updateKey > 0 && onDataRefresh) {
+  //     onDataRefresh();
+  //   }
+  // }, [updateKey, onDataRefresh]);
 
   const handleWeddingSelect = (value: string) => {
-    setSelectedWedding(value);
-    const selectedWedding = weddings.find(w => w.id === Number(value));
-    setEditedWedding(selectedWedding);
+    // Ne déclencher le nettoyage que si on change vraiment de mariage
+    const previousWeddingId = selectedWedding;
     
-    // Effacer les statistiques de compression lors du changement de mariage
-    setClearCompressionStats(true);
-    // Remettre immédiatement à false pour permettre de futurs effacements
-    setTimeout(() => setClearCompressionStats(false), 100);
+    setSelectedWedding(value);
+    const foundWedding = weddings.find(w => w.id === Number(value));
+    setEditedWedding(foundWedding);
+    
+    // Log pour debug
+    if (previousWeddingId !== value && previousWeddingId !== "") {
+      console.log(`🔄 Changement de mariage: ${previousWeddingId} → ${value}`);
+    }
     
     // Sauvegarder la sélection dans un cookie
     document.cookie = `lastWeddingId=${value}; path=/; max-age=31536000`; // 1 year
     
-    if (selectedWedding) {
+    if (foundWedding) {
       setFieldValues({
-        title: selectedWedding.title,
-        date: selectedWedding.date,
-        location: selectedWedding.location,
-        description: selectedWedding.description,
-        templateType: selectedWedding.templateType || 'timeline', // valeur par défaut 'timeline'
+        title: foundWedding.title,
+        date: foundWedding.date,
+        location: foundWedding.location,
+        description: foundWedding.description,
+        templateType: foundWedding.templateType || 'timeline', // valeur par défaut 'timeline'
       });
     } else {
       setFieldValues({});
@@ -567,7 +572,6 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
               setUpdateKey={setUpdateKey}
               selectedWedding={selectedWedding}
               isProcessingCoverThumbnails={isProcessingCoverThumbnails}
-              clearCompressionStats={clearCompressionStats}
             />
 
             {/* ThumbnailManager pour la génération des miniatures */}
@@ -581,7 +585,7 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
               thumbnailProgress={thumbnailProgress}
               setThumbnailProgress={setThumbnailProgress}
               setUpdateKey={setUpdateKey}
-              clearCompressionStats={clearCompressionStats}
+              onDataRefresh={onDataRefresh}
             />
 
             <ImageGallery 

@@ -4,6 +4,11 @@ import path from 'path';
 import sharp from 'sharp';
 import { parseWeddingsData, updateWeddingsData } from '@/lib/utils/data-parser';
 
+// Vider le cache de 'data-parser' pour s'assurer que les données sont toujours fraîches
+if (require.cache[require.resolve('@/lib/utils/data-parser')]) {
+  delete require.cache[require.resolve('@/lib/utils/data-parser')];
+}
+
 interface ThumbnailGenerationParams {
   baseDir: string;
   imageUrl: string;
@@ -21,13 +26,12 @@ interface ThumbnailGenerationResult {
 // Fonction pour calculer la taille cible adaptive
 async function calculateTargetSize(baseDir: string, images: string[], targetPercentage: number, strategy: 'best' | 'worst' = 'worst'): Promise<{ [imageUrl: string]: number }> {
   const imageSizes: { [imageUrl: string]: number } = {};
-  
+
   // Collecter les tailles des images existantes seulement
   for (const imageUrl of images) {
     try {
       const fileName = imageUrl.split('/').pop();
       if (!fileName) continue;
-      
       const imagePath = path.join(baseDir, fileName);
       const stats = await stat(imagePath);
       imageSizes[imageUrl] = stats.size;
@@ -36,67 +40,58 @@ async function calculateTargetSize(baseDir: string, images: string[], targetPerc
       // Ne pas ajouter l'image si elle n'existe pas
     }
   }
-  
+
   const existingImages = Object.keys(imageSizes);
   if (existingImages.length === 0) {
     console.warn('⚠️ Aucune image valide trouvée pour le calcul de taille cible');
     return Object.fromEntries(images.map(url => [url, 50 * 1024])); // Fallback: 50KB par défaut
   }
-  
+
   const sizes = Object.values(imageSizes);
   const targetSizes: { [imageUrl: string]: number } = {};
-  
+
   // Cas spécial : une seule image (généralement pour la couverture)
   if (existingImages.length === 1) {
     const singleImageUrl = existingImages[0];
     const originalSize = imageSizes[singleImageUrl];
     const targetSizeBytes = originalSize * (targetPercentage / 100);
     targetSizes[singleImageUrl] = Math.max(10 * 1024, targetSizeBytes);
-    
+
     console.log(`🎯 Image unique: ${singleImageUrl}`);
     console.log(`🎯 Taille originale: ${(originalSize / 1024).toFixed(1)}KB`);
     console.log(`🎯 Taille cible (${targetPercentage}%): ${(targetSizes[singleImageUrl] / 1024).toFixed(1)}KB`);
-    
+
     return targetSizes;
   }
-  
+
   // Traitement multi-images avec stratégies
   if (strategy === 'worst') {
     // Stratégie "Moins bonne qualité" : se baser sur l'image la plus petite
     const minSize = Math.min(...sizes);
     const targetSizeBytes = minSize * (targetPercentage / 100);
-    
+
     for (const imageUrl of existingImages) {
       targetSizes[imageUrl] = Math.max(10 * 1024, targetSizeBytes);
     }
-    
+
     console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, Taille de référence: ${(minSize / 1024).toFixed(1)}KB`);
   } else {
-    // Stratégie "Meilleure qualité" : algorithme intelligent
-    const maxSize = Math.max(...sizes);
-    const baseTargetSizeBytes = maxSize * (targetPercentage / 100);
-    
-    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, Taille de référence maximale: ${(maxSize / 1024).toFixed(1)}KB`);
-    console.log(`🎯 Taille cible de base: ${(baseTargetSizeBytes / 1024).toFixed(1)}KB`);
-    
+    // Stratégie "BEST" :
+    // 1. Pour chaque image, calculer taille * pourcentage
+    // 2. Prendre le max de ces valeurs (targetSizeTEMP)
+    // 3. Pour chaque image, la cible = min(targetSizeTEMP, taille d'origine)
+    const perImageTargets = sizes.map(size => size * (targetPercentage / 100));
+    const targetSizeTEMP = Math.max(...perImageTargets);
+    console.log(`🎯 Stratégie: ${strategy}, ${existingImages.length} images valides, targetSizeTEMP: ${(targetSizeTEMP / 1024).toFixed(1)}KB`);
+
     for (const imageUrl of existingImages) {
       const originalSize = imageSizes[imageUrl];
-      
-      // Si l'image brute est plus petite que la taille cible calculée,
-      // utiliser la taille brute comme limite
-      if (originalSize < baseTargetSizeBytes) {
-        targetSizes[imageUrl] = originalSize * 0.9; // Garder 90% de la taille originale
-        console.log(`📏 ${imageUrl}: taille brute (${(originalSize / 1024).toFixed(1)}KB) < cible, utilisation de ${(targetSizes[imageUrl] / 1024).toFixed(1)}KB`);
-      } else {
-        targetSizes[imageUrl] = baseTargetSizeBytes;
-        console.log(`📏 ${imageUrl}: utilisation de la taille cible standard ${(baseTargetSizeBytes / 1024).toFixed(1)}KB`);
-      }
-      
-      // S'assurer d'un minimum raisonnable
-      targetSizes[imageUrl] = Math.max(10 * 1024, targetSizes[imageUrl]);
+      // La cible est le min entre targetSizeTEMP et la taille d'origine
+      targetSizes[imageUrl] = Math.max(10 * 1024, Math.min(targetSizeTEMP, originalSize));
+      console.log(`📏 ${imageUrl}: cible = min(${(targetSizeTEMP / 1024).toFixed(1)}KB, ${(originalSize / 1024).toFixed(1)}KB) = ${(targetSizes[imageUrl] / 1024).toFixed(1)}KB`);
     }
   }
-  
+
   return targetSizes;
 }
 
