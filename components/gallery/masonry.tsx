@@ -16,6 +16,7 @@ import lgShare from 'lightgallery/plugins/share';
 import lgAutoplay from 'lightgallery/plugins/autoplay';
 import lgFullscreen from 'lightgallery/plugins/fullscreen';
 import lgPager from 'lightgallery/plugins/pager';
+import { Box, Card, CardMedia, Typography, Link as MuiLink } from '@mui/material';
 
 // Styles
 import 'lightgallery/css/lightgallery.css';
@@ -87,86 +88,121 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
     if (isMobile) {
       // Pour mobile, retourner un élément LightGallery
       return (
-        <div className="mb-4">
-          <a
-            className="gallery-item block cursor-pointer"
+        <Box mb={2}>
+          <MuiLink
+            className="gallery-item"
+            href="#"
+            underline="none"
+            sx={{ display: 'block', cursor: 'pointer' }}
             data-src={getImageUrl(image, false)}
             data-sub-html={`<h4>${getImageCaption(index)}</h4><p>${wedding.title}</p>`}
             data-facebook-title={`${wedding.title} - ${getImageCaption(index)}`}
             data-twitter-title={`${wedding.title} - ${getImageCaption(index)}`}
             data-pinterest-text={`${wedding.title} - ${getImageCaption(index)}`}
           >
-            <div className="relative overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-              <img
+            <Card
+              sx={{
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: 0,
+                boxShadow: 2,
+                transition: 'box-shadow 0.3s',
+                '&:hover': { boxShadow: 6 },
+              }}
+            >
+              <CardMedia
+                component="img"
                 src={getImageUrl(image, true)}
                 alt={getImageCaption(index)}
-                style={{
+                loading="lazy"
+                sx={{
                   width: '100%',
                   height: 'auto',
+                  aspectRatio: image.width && image.height ? `${image.width}/${image.height}` : '3/4',
                   display: 'block',
-                  aspectRatio: image.width && image.height 
-                    ? `${image.width}/${image.height}` 
-                    : '3/4'
+                  borderRadius: 0,
                 }}
-                loading="lazy"
               />
-              
               {/* Overlay avec caption au hover */}
               {visibleWeddingImages[index]?.descriptionVisibility !== false && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-sm font-semibold">{getImageCaption(index)}</h3>
-                  </div>
-                </div>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                    '&:hover': { opacity: 1 },
+                  }}
+                >
+                  <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16, color: 'white' }}>
+                    <Typography variant="subtitle2" fontWeight={600}>{getImageCaption(index)}</Typography>
+                  </Box>
+                </Box>
               )}
-            </div>
-          </a>
-        </div>
+            </Card>
+          </MuiLink>
+        </Box>
       );
     }
 
     // Pour desktop, retourner l'élément Swiper classique
     return (
-      <div
-        className="cursor-pointer mb-4"
-        onClick={() => {
-          setSwiperIndex(index);
-          setSwiperOpen(true);
-        }}
-      >
-        <div className="relative overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-          <img
+      <Box mb={0} sx={{ cursor: 'pointer' }} onClick={() => {
+        setSwiperIndex(index);
+        setSwiperOpen(true);
+      }}>
+        <Card
+          sx={{
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: 1,
+            boxShadow: 2,
+            transition: 'box-shadow 0.3s',
+            '&:hover': { boxShadow: 6 },
+          }}
+        >
+          <CardMedia
+            component="img"
             src={getImageUrl(image, true)}
             alt={getImageCaption(index)}
-            style={{
+            loading="lazy"
+            sx={{
               width: '100%',
               height: 'auto',
+              aspectRatio: image.width && image.height ? `${image.width}/${image.height}` : '3/4',
               display: 'block',
-              aspectRatio: image.width && image.height 
-                ? `${image.width}/${image.height}` 
-                : '3/4' // ratio par défaut
+              borderRadius: 0,
             }}
-            loading="lazy"
-            onLoad={(e) => {
+            onLoad={(e: any) => {
               // Force reflow to ensure masonry recalculates
               const target = e.target as HTMLImageElement;
               target.style.visibility = 'visible';
             }}
-            onError={(e) => {
+            onError={() => {
               console.error('Error loading image:', getImageUrl(image, true));
             }}
           />
-          
           {/* Overlay avec caption au hover */}
           {visibleWeddingImages[index]?.descriptionVisibility !== false && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <h3 className="text-sm font-semibold">{getImageCaption(index)}</h3>
-              </div>
-            </div>
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
+                opacity: 0,
+                transition: 'opacity 0.3s',
+                '&:hover': { opacity: 1 },
+                borderRadius: 0,
+              }}
+            >
+              <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16, color: 'white' }}>
+                <Typography variant="subtitle2" fontWeight={600}>{getImageCaption(index)}</Typography>
+              </Box>
+            </Box>
           )}
-        </div>
-      </div>
+        </Card>
+      </Box>
     );
   };
 
@@ -219,7 +255,7 @@ export function MasonryGallery({ wedding }: { wedding: Wedding }) {
           />
         )}
       </div>
-
+ 
       {swiperOpen && !isMobile && (
         <SwiperGallery
           images={swiperImages}

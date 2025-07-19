@@ -282,7 +282,7 @@ export function CoverImageSection({
       </Box>
       
       <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 150 }}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={{ xs: 4, md: 3 }}>
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" height="100%">
             {editedWedding.coverImage ? (
               <>
@@ -297,7 +297,7 @@ export function CoverImageSection({
                       objectFit: 'cover',
                       borderRadius: '16px',
                       width: 128,
-                      height: 128
+                      height: 'auto'
                     }}
                     key={`cover-${editedWedding.coverImage.id}-${imageRefreshKey}-${editedWedding.coverImage.fileUrlThumbnail || 'no-thumb'}`}
                   />
@@ -334,18 +334,37 @@ export function CoverImageSection({
           </Box>
         </Grid>
         
-        <Grid size={{ xs: 3 }}>
-          <Box display="flex" flexDirection="column" gap={2} justifyContent="flex-start" height="100%"
+        <Grid size={{ xs: 8, md: 3 }}>
+          <Box 
           sx={{
             minHeight: 100,
-          }}>
-          <Box display="flex" flexDirection="column" gap={2} justifyContent="center"
-          sx={{
             height: '100%',
-            maxHeight: 150,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: {
+              xs: 'center',
+              md: 'center',
+            },
           }}>
             {/* ToggleButtonGroup pour le choix du type d'upload */}
-            <Box width="100%">
+            <Box 
+            sx ={{
+              width: {
+                xs: '100%',
+                md: '100%',
+              },
+              maxWidth: {
+                xs: 350,
+                md: '100%',
+              },
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            >
               <ToggleButtonGroup
                 orientation="vertical"
                 value={uploadType}
@@ -359,22 +378,27 @@ export function CoverImageSection({
                 size="small"
                 sx={{ width: '100%' }}
               >
-                <ToggleButton value="coverUrl" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                <ToggleButton value="coverUrl" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }}>
                   Lien web
                 </ToggleButton>
-                <ToggleButton value="coverFile" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                <ToggleButton value="coverFile" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }}>
                   Upload de fichier
                 </ToggleButton>
-                <ToggleButton value="coverThumbnail" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }} disabled={isProcessingCoverThumbnails}>
+                <ToggleButton value="coverThumbnail" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }} disabled={isProcessingCoverThumbnails}>
                   Produire la vignette
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
           </Box>
-          </Box>
         </Grid>
         {showAddCoverImage && (
-          <Grid size={{ xs: 6 }}>
+          <Grid size={{ xs: 12, md: 6, }}
+          sx={{
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center',
+          }}
+          >
             <Box sx={{ 
               height: 200, 
               maxHeight: 230, 
@@ -682,8 +706,12 @@ export function CoverImageSection({
           setShowPreviewDialog(false);
           setPreviewTabValue(0);
         }}
-        maxWidth="md"
+        maxWidth='xl'
         fullWidth
+        sx={{
+          maxWidth: '1350px',
+          margin: '0 auto',
+        }}
       >
         <DialogTitle>
           Aperçu de l'image de couverture
@@ -711,12 +739,11 @@ export function CoverImageSection({
                     src={getImageUrl(editedWedding.coverImage, false, true)}
                     alt="Aperçu image de couverture - Originale"
                     sx={{
-                      maxWidth: '100%',
+                      maxWidth: '1200px',
                       height: 'auto',
                       borderRadius: '8px',
                       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                      width: 600,
-                      maxHeight: 400
+                      maxHeight: 'auto',
                     }}
                     key={`original-${imageRefreshKey}`}
                   />
@@ -727,12 +754,11 @@ export function CoverImageSection({
                     src={getImageUrl(editedWedding.coverImage, true, true)}
                     alt="Aperçu image de couverture - Vignette"
                     sx={{
-                      maxWidth: '100%',
+                      maxWidth: '1200px',
                       height: 'auto',
                       borderRadius: '8px',
                       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                      width: 600,
-                      maxHeight: 400
+                      maxHeight: 'auto',
                     }}
                     key={`thumbnail-${imageRefreshKey}`}
                   />

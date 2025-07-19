@@ -511,7 +511,13 @@ export function ThumbnailManager({
         gap: 2, alignItems: 'center', bgcolor: 'white', 
         p: 2, borderRadius: 1, border: '1px solid #e5e7eb' }}>
         
-        <Box sx={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column',
+        <Box sx={{ 
+          gridColumn: {
+            xs: 'span 12',
+            sm: 'span 12', 
+            md: 'span 4'
+          }, 
+          display: 'flex', flexDirection: 'column',
           justifyContent: 'center', alignItems: 'center', gap: 0
          }}>
           <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -532,7 +538,13 @@ export function ThumbnailManager({
           />
         </Box>
         
-        <Box sx={{ gridColumn: 'span 5' }}>
+        <Box sx={{ 
+          gridColumn: {
+            xs: 'span 12', 
+            sm: 'span 6',
+            md: 'span 5'
+          }, 
+           }}>
           <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ mb: 1 }}>
             Stratégie de compression
           </Typography>
@@ -552,7 +564,27 @@ export function ThumbnailManager({
           </ToggleButtonGroup>
         </Box>
         
-        <Box sx={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ 
+          gridColumn: {
+            xs: 'span 12', 
+            sm: 'span 6',
+            md: 'span 3'
+          }, 
+          display: 'flex', flexDirection: 'column', gap: 1 }}>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 1,
+            maxWidth: 300,
+            width: '100%',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            margin: '0 auto',
+            flexDirection:{
+              xs: 'row',
+              sm: 'column'
+            }
+            }}>
           <MuiButton 
             onClick={handleProcessThumbnails}
             disabled={isProcessingThumbnails}
@@ -602,7 +634,7 @@ export function ThumbnailManager({
           >
             Sélectionner
           </MuiButton>
-          
+          </Box>
           {isProcessingThumbnails && (
             <Button 
               onClick={handleCancelThumbnails}
