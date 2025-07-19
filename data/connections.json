@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "timestamp": 1752940887467,
+    "id": "dfcb5f70-919d-4c21-a8c9-2c8ea568cde8",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "language": "fr-FR",
+      "screen": "2056x1329",
+      "timezone": "Europe/Paris",
+      "userIp": "176.172.69.146"
+    },
+    "pagesVisited": [
+      {
+        "page": "/mariage/1/",
+        "timestamp": 1752940887428,
+        "referrer": "https://mieldelune.fr/"
+      }
+    ],
+    "lastActivity": 1752940887467,
+    "isActive": true
+  }
+]
