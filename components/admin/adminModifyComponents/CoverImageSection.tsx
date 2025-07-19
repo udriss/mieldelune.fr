@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Image as MuiImage } from '@mui/icons-material';
 import { Loader2, ExternalLink } from "lucide-react";
 import * as Slider from '@radix-ui/react-slider';
 import { toast } from 'react-toastify';
@@ -145,7 +143,7 @@ export function CoverImageSection({
       const data = await response.json();
       
       if (!response.ok || !data.success) {
-        toast.error(`Échec de la génération de la miniature : ${data.error || 'Erreur inconnue'}`, {
+        toast.error(`Échec de la génération de la vignette : ${data.error || 'Erreur inconnue'}`, {
           position: "top-center",
           autoClose: 2000,
           style: {
@@ -222,7 +220,7 @@ export function CoverImageSection({
       }
   
       const durationInSeconds = (data.duration / 1000).toFixed(1);
-      toast.success(`✨ Miniature produite en ${durationInSeconds} s`, {
+      toast.success(`✨ Vignette produite en ${durationInSeconds} s`, {
         position: "top-center",
         autoClose: 1500,
       });
@@ -289,16 +287,18 @@ export function CoverImageSection({
             {editedWedding.coverImage ? (
               <>
                 <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                  <Image
+                  <Box
+                    component="img"
                     src={editedWedding.coverImage.fileUrlThumbnail 
                       ? getImageUrl(editedWedding.coverImage, true, true) 
                       : getImageUrl(editedWedding.coverImage, false, true)}
                     alt={`Wedding image ${editedWedding.coverImage.id}`}
-                    width={128}
-                    height={128}
-                    className="w-32 h-32 object-cover rounded-2xl"
-                    priority={false}
-                    quality={25}
+                    sx={{
+                      objectFit: 'cover',
+                      borderRadius: '16px',
+                      width: 128,
+                      height: 128
+                    }}
                     key={`cover-${editedWedding.coverImage.id}-${imageRefreshKey}-${editedWedding.coverImage.fileUrlThumbnail || 'no-thumb'}`}
                   />
                   <IconButton
@@ -375,10 +375,29 @@ export function CoverImageSection({
         </Grid>
         {showAddCoverImage && (
           <Grid size={{ xs: 6 }}>
-            <Box sx={{ height: '100%', p: 2, bgcolor: '#f9fafb', borderRadius: 1 }}>
+            <Box sx={{ 
+              height: 200, 
+              maxHeight: 230, 
+              p: 2, 
+              bgcolor: '#f9fafb', 
+              borderRadius: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignContent: 'space-around',
+            }}>
               {uploadType === 'coverUrl' && (
-                <Box display="flex" flexDirection="column" gap={2} height="100%">
-                    <Box>
+                <Box 
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    height: "100%",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
                     <Box
                       component="textarea"
                       value={newImageUrlCover}
@@ -389,7 +408,7 @@ export function CoverImageSection({
                       width: '100%',
                       resize: 'vertical',
                       overflow: 'auto',
-                      border: `2px solid ${isValidUrlCover ? '#4caf50' : '#f44336'}`,
+                      border: `2px solid ${isValidUrlCover ? '#aae4acff' : '#f44336'}`,
                       borderRadius: '4px',
                       padding: '8px',
                       fontFamily: 'inherit',
@@ -397,7 +416,6 @@ export function CoverImageSection({
                       outline: 'none',
                       }}
                     />
-                    </Box>
                   <MuiButton
                   variant="outlined"
                   onClick={() => handleAddImageByUrl('coverLink')}
@@ -430,7 +448,7 @@ export function CoverImageSection({
                   {editedWedding.coverImage && editedWedding.coverImage.fileType === 'coverLink' && (
                     <Box display="flex" alignItems="center" height="100%">
                       <Typography variant="body2" color="text.secondary">
-                        Impossible de produire une miniature pour une image externe
+                        Impossible de produire une vignette pour une image externe
                       </Typography>
                     </Box>
                   )}
@@ -535,7 +553,7 @@ export function CoverImageSection({
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              Une <strong>miniature&nbsp;</strong> est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
+              Une <strong>vignette&nbsp;</strong>est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
             </Typography>
           </Box>
         </Grid>
@@ -679,7 +697,7 @@ export function CoverImageSection({
           >
             <Tab label="Image originale" />
             <Tab 
-              label="Miniature" 
+              label="Vignette" 
               disabled={!editedWedding.coverImage?.fileUrlThumbnail}
             />
           </Tabs>
@@ -688,40 +706,40 @@ export function CoverImageSection({
             {editedWedding.coverImage && (
               <>
                 {previewTabValue === 0 && (
-                  <Image
+                  <Box
+                    component="img"
                     src={getImageUrl(editedWedding.coverImage, false, true)}
                     alt="Aperçu image de couverture - Originale"
-                    width={600}
-                    height={400}
-                    style={{ 
+                    sx={{
                       maxWidth: '100%',
                       height: 'auto',
                       borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      width: 600,
+                      maxHeight: 400
                     }}
-                    quality={90}
                     key={`original-${imageRefreshKey}`}
                   />
                 )}
                 {previewTabValue === 1 && editedWedding.coverImage.fileUrlThumbnail && (
-                  <Image
+                  <Box
+                    component="img"
                     src={getImageUrl(editedWedding.coverImage, true, true)}
-                    alt="Aperçu image de couverture - Miniature"
-                    width={600}
-                    height={400}
-                    style={{ 
+                    alt="Aperçu image de couverture - Vignette"
+                    sx={{
                       maxWidth: '100%',
                       height: 'auto',
                       borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      width: 600,
+                      maxHeight: 400
                     }}
-                    quality={90}
                     key={`thumbnail-${imageRefreshKey}`}
                   />
                 )}
                 {previewTabValue === 1 && !editedWedding.coverImage.fileUrlThumbnail && (
                   <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                    Aucune miniature disponible
+                    Aucune vignette disponible
                   </Typography>
                 )}
               </>

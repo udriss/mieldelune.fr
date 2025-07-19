@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import ReactImageZoom from 'react-image-zoom';
 import { Button } from "@/components/ui/button";
 import { Divide, Loader2 } from "lucide-react";
-import * as Slider from '@radix-ui/react-slider';
 import { Image, Wedding } from '@/lib/dataTemplate';
 import { toast } from 'react-toastify';
-import Masonry from 'react-masonry-css';
+import { Masonry } from 'masonic';
 import { 
   Paper, 
   Typography, 
@@ -34,7 +34,8 @@ import {
   Checkbox,
   Card,
   CardMedia,
-  Divider
+  Divider,
+  Slider as MuiSlider
 } from '@mui/material';
 import { 
   ImageOutlined, 
@@ -50,6 +51,62 @@ import {
   SelectAllOutlined,
   DeselectOutlined
 } from '@mui/icons-material';
+
+// Types pour la minimap (doivent être déclarés hors du bloc JSX)
+type MinimapViewportRectProps = { zoomValue: number };
+type MinimapRect = { left: number; top: number; width: number; height: number };
+
+// Composant pour afficher le rectangle de la vue dans la minimap
+const MinimapViewportRect = ({ zoomValue }: MinimapViewportRectProps) => {
+  const [rect, setRect] = React.useState<MinimapRect | null>(null);
+  React.useEffect(() => {
+    const update = () => {
+      const container = (window as any)._zoomPreviewContainer as HTMLElement;
+      const img = document.getElementById('zoomed-image-preview') as HTMLImageElement;
+      const minimap = document.querySelector('[alt="minimap"]') as HTMLImageElement;
+      if (!container || !img || !minimap) return;
+      const imgW = img.naturalWidth * zoomValue;
+      const imgH = img.naturalHeight * zoomValue;
+      const viewW = container.clientWidth;
+      const viewH = container.clientHeight;
+      const scrollLeft = container.scrollLeft;
+      const scrollTop = container.scrollTop;
+      const minimapW = minimap.clientWidth;
+      const minimapH = minimap.clientHeight;
+      const ratioW = viewW / imgW;
+      const ratioH = viewH / imgH;
+      const left = (scrollLeft / imgW) * minimapW;
+      const top = (scrollTop / imgH) * minimapH;
+      const width = minimapW * ratioW;
+      const height = minimapH * ratioH;
+      setRect({ left, top, width, height });
+    };
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [zoomValue]);
+  if (!rect) return null;
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        border: '2px solid #1976d2',
+        borderRadius: 1,
+        boxSizing: 'border-box',
+        pointerEvents: 'none',
+        zIndex: 2,
+      }}
+    />
+  );
+};
 
 interface CompressionStat {
   imageName: string;
@@ -86,6 +143,8 @@ export function ThumbnailManager({
   onDataRefresh,
 }: ThumbnailManagerProps) {
   const [failedThumbnails, setFailedThumbnails] = useState<string[]>([]);
+  // Zoom pour l'aperçu d'image
+  const [zoomValue, setZoomValue] = useState(1);
   const [compressionStats, setCompressionStats] = useState<{ [key: string]: CompressionStat }>({});
   const [compressionStrategy, setCompressionStrategy] = useState<'best' | 'worst'>('worst');
   const [tableRowsToShow, setTableRowsToShow] = useState<5 | 11 | 15 | 'all'>(5);
@@ -422,9 +481,9 @@ export function ThumbnailManager({
   return (
     <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
       <Typography variant="h6" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        Miniatures
+        Vignettes
       </Typography>
-      <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 50 }}>
+      <Grid container spacing={2} sx={{ minHeight: 50 }}>
       <Grid size={{ xs: 12 }}>
           <Box
             sx={{
@@ -438,7 +497,7 @@ export function ThumbnailManager({
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              Une <strong>miniature&nbsp;</strong> est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
+              Une <strong>vignette&nbsp;</strong>est une version compressée de l’image de couverture, générée pour accélérer le chargement côté client et réduire la consommation de données. Elle est utilisée sur la page d’accueil pour un affichage plus rapide.
             </Typography>
           </Box>
         </Grid>
@@ -462,22 +521,15 @@ export function ThumbnailManager({
           <Typography variant="overline" color="text.secondary" fontWeight={500} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {resizeValue}% (compression à {100 - resizeValue} %)
           </Typography>
-          <Slider.Root
-            className="relative flex items-center select-none touch-none w-full h-5 mt-1"
-            value={[resizeValue]}
-            onValueChange={([value]) => setResizeValue(value)}
-            max={100}
+          <MuiSlider
+            value={resizeValue}
+            onChange={(_, value) => setResizeValue(Array.isArray(value) ? value[0] : value)}
             min={1}
+            max={100}
             step={1}
-          >
-            <Slider.Track className="bg-gray-200 relative grow rounded-full h-2">
-              <Slider.Range className="absolute bg-blue-500 rounded-full h-full" />
-            </Slider.Track>
-            <Slider.Thumb
-              className="block w-4 h-4 bg-white border-2 border-blue-500 rounded-full hover:bg-blue-50 focus:outline-none"
-              aria-label="Resize percentage"
-            />
-          </Slider.Root>
+            sx={{ width: '100%', mt: 1 }}
+            aria-label="Compression"
+          />
         </Box>
         
         <Box sx={{ gridColumn: 'span 5' }}>
@@ -965,29 +1017,26 @@ export function ThumbnailManager({
           bgcolor: '#f8fafc'
         }}>
           <Masonry
-            breakpointCols={{
-              default: 4,
-              1100: 3,
-              700: 2,
-              500: 1
-            }}
-            className="masonry-grid"
-            columnClassName="masonry-grid_column"
-          >
-            {editedWedding.images.map((image, index) => {
-              const isSelected = selectedImages.includes(image.fileUrl);
-              const imageName = cleanImageName(image.fileUrl.split('/').pop() || '');
+            items={editedWedding.images.map((image, index) => ({
+              id: image.fileUrl,
+              image,
+              index,
+              imageName: cleanImageName(image.fileUrl.split('/').pop() || ''),
+              isSelected: selectedImages.includes(image.fileUrl)
+            }))}
+            render={({ data }) => {
+              const { image, imageName, isSelected } = data;
               
               return (
-                <div key={image.fileUrl} style={{ marginBottom: '16px' }}>
+                <div style={{ marginBottom: '16px' }}>
                   <Card 
                     sx={{ 
-                      position: 'relative',
                       borderRadius: 2,
                       overflow: 'hidden',
                       border: isSelected ? '3px solid #4CAF50' : '2px solid transparent',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
+                      position: 'relative',
                       '&:hover': {
                         transform: 'scale(1.02)',
                         boxShadow: 3
@@ -996,6 +1045,7 @@ export function ThumbnailManager({
                     onClick={() => handleImageSelection(image.fileUrl)}
                   >
                     <CardMedia
+                      className="my-bg-image-el"
                       component="img"
                       image={getImageUrl(image, true)}
                       alt={imageName}
@@ -1077,53 +1127,104 @@ export function ThumbnailManager({
                   </Card>
                 </div>
               );
-            })}
-          </Masonry>
+            }}
+            columnWidth={250}
+            columnGutter={16}
+          />
         </DialogContent>
         
 
       </Dialog>
 
-      {/* Dialog d'aperçu d'image */}
+      {/* Dialog d'aperçu d'image avec react-image-zooom */}
       <Dialog 
         open={!!previewImage} 
-        onClose={() => setPreviewImage(null)}
-        maxWidth="md"
+        onClose={() => {
+          setPreviewImage(null);
+        }}
+        maxWidth="xl"
         fullWidth
+        sx={{
+          maxWidth: '1350px',
+          margin: '0 auto',
+        }}
       >
-        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <DialogContent
+          sx={{
+            margin: '0 auto',
+            p: 3, pt: 0,
+            alignSelf: 'start',
+            width: '100%',
+            overflow: 'auto',
+            position: 'relative',
+            minHeight: 400,
+            background: 'transparent',
+          }}
+        >
+          {/* Barre sticky de zoom */}
           {previewImage && (
-            <img
-              src={previewImage}
-              alt="Aperçu"
-              style={{ 
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                objectFit: 'contain'
-              }}
-            />
+            <>
+              <Box
+                sx={{
+                  position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 20,
+                  px: 3,
+                  py: 1.5,
+                  minWidth: 320,
+                  maxWidth: 600,
+                  width: '60%',
+                  margin: '0 auto',
+                  backdropFilter: 'blur(16px)',
+                  background: 'rgba(255,255,255,0.45)',
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  border: '1px solid rgba(180,180,180,0.18)',
+                  mt: 2,
+                }}
+              >
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80 }}>
+                  Zoom&nbsp;:
+                </Typography>
+                <MuiSlider
+                  value={zoomValue}
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  onChange={(_, value) => setZoomValue(Array.isArray(value) ? value[0] : value)}
+                  sx={{ flex: 1, mx: 2 }}
+                  aria-label="Zoom"
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 60, textAlign: 'right' }}>
+                  {Math.round(zoomValue * 100)}%
+                </Typography>
+              </Box>
+              <Box sx={{ width: '100%', mt: 2 }}>
+                <ReactImageZoom
+                  src={previewImage}
+                  alt="Aperçu"
+                  zoom={zoomValue * 100}
+                  width={undefined}
+                  height={undefined}
+                  style={{ width: '100%', height: 'auto', borderRadius: 8, boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                />
+              </Box>
+            </>
           )}
         </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={() => setPreviewImage(null)}>
+        <DialogActions sx={{ p: 2}} >
+          <MuiButton onClick={() => {
+            setPreviewImage(null);
+          }}>
             Fermer
           </MuiButton>
         </DialogActions>
       </Dialog>
-      
-      <style jsx global>{`
-        /* Styles pour react-masonry-css */
-        .masonry-grid {
-          display: flex;
-          margin-left: -16px; /* gutter size offset */
-          width: auto;
-        }
-        
-        .masonry-grid_column {
-          padding-left: 16px; /* gutter size */
-          background-clip: padding-box;
-        }
-      `}</style>
     </Paper>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -51,7 +51,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  InputAdornment
 } from '@mui/material';
 import {
   Devices,
@@ -60,50 +61,7 @@ import {
   SignalCellularAlt,
   Visibility
 } from '@mui/icons-material';
-
-interface PageVisit {
-  page: string;
-  timestamp: number;
-  duration?: number;
-  referrer?: string;
-}
-
-interface ExtendedConnection {
-  deviceInfo: {
-    userIp: string;
-    userAgent: string;
-    language: string;
-    screen: string;
-    timezone: string;
-    platform?: string;
-    browser?: string;
-    deviceType?: 'mobile' | 'tablet' | 'desktop';
-    location?: {
-      country?: string;
-      city?: string;
-    };
-  };
-  timestamp: number;
-  id: string;
-  sessionDuration?: number;
-  pagesVisited?: PageVisit[];
-  lastActivity?: number;
-  isActive?: boolean;
-}
-
-interface ConnectionStats {
-  total: number;
-  today: number;
-  thisWeek: number;
-  thisMonth: number;
-  activeNow: number;
-  uniqueIPs: number;
-  avgSessionDuration: number;
-  topPages: { page: string; visits: number }[];
-  topCountries: { country: string; visits: number }[];
-  deviceTypes: { type: string; count: number }[];
-  browsers: { browser: string; count: number }[];
-}
+import { Connection as ExtendedConnection, ConnectionStats, PageVisit } from '@/types/connections';
 
 export function ConnectionsList() {
   const [connections, setConnections] = useState<ExtendedConnection[]>([]);
@@ -119,49 +77,74 @@ export function ConnectionsList() {
   const [selectedConnection, setSelectedConnection] = useState<ExtendedConnection | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const fetchConnections = useCallback(async () => {
+    try {
+      const response = await fetch('/api/connections');
+      if (response.ok) {
+        let data: ExtendedConnection[] = await response.json();
+        
+        data = data.map(conn => {
+            const { platform, browser, deviceType } = parseUserAgent(conn.deviceInfo.userAgent);
+            const { location } = parseLocationFromTimezone(conn.deviceInfo.timezone);
+            return {
+                ...conn,
+                deviceInfo: {
+                    ...conn.deviceInfo,
+                    platform,
+                    browser,
+                    deviceType,
+                    location,
+                }
+            };
+        });
+
+        setConnections(data);
+      } else {
+        console.error('Failed to fetch connections');
+      }
+    } catch (error) {
+      console.error('Error fetching connections:', error);
+    }
+  }, []);
+
+
   // Charger et traiter les connexions
   useEffect(() => {
-    const loadConnections = () => {
-      const storedConnections = localStorage.getItem('connections');
-      const storedPageVisits = localStorage.getItem('pageVisits');
-      const storedSessionData = localStorage.getItem('sessionData');
-      
-      if (storedConnections) {
-        let parsedConnections: ExtendedConnection[] = JSON.parse(storedConnections);
-        
-        // Enrichir les données avec les informations de session et pages visitées
-        if (storedPageVisits) {
-          const pageVisits = JSON.parse(storedPageVisits);
-          parsedConnections = parsedConnections.map(conn => ({
-            ...conn,
-            pagesVisited: pageVisits[conn.id] || [],
-            sessionDuration: calculateSessionDuration(conn.id, pageVisits),
-            lastActivity: getLastActivity(conn.id, pageVisits),
-            isActive: isSessionActive(conn.id, pageVisits),
-            deviceInfo: {
-              ...conn.deviceInfo,
-              ...parseUserAgent(conn.deviceInfo.userAgent),
-              ...parseLocationFromTimezone(conn.deviceInfo.timezone)
-            }
-          }));
-        }
-        
-        setConnections(parsedConnections);
-      }
-    };
-
-    loadConnections();
+    fetchConnections();
     
     // Actualisation automatique toutes les 30 secondes
-    const interval = setInterval(loadConnections, 30000);
+    const interval = setInterval(fetchConnections, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchConnections]);
 
   // Fonction pour parser l'User Agent
   const parseUserAgent = (userAgent: string) => {
     let platform = 'Unknown';
     let browser = 'Unknown';
     let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop';
+
+    if (!userAgent) return { platform, browser, deviceType };
+
+    // Détection du type d'appareil et de la plateforme en priorité
+    if (/iPhone/.test(userAgent)) {
+      platform = 'iOS';
+      deviceType = 'mobile';
+    } else if (/iPad/.test(userAgent)) {
+      platform = 'iOS';
+      deviceType = 'tablet';
+    } else if (/Android/.test(userAgent)) {
+      platform = 'Android';
+      deviceType = /Mobile/.test(userAgent) ? 'mobile' : 'tablet';
+    } else if (/Windows/.test(userAgent)) {
+      platform = 'Windows';
+      deviceType = 'desktop';
+    } else if (/Macintosh/.test(userAgent)) {
+      platform = 'macOS';
+      deviceType = 'desktop';
+    } else if (/Linux/.test(userAgent)) {
+      platform = 'Linux';
+      deviceType = 'desktop';
+    }
 
     // Détection du navigateur
     if (userAgent.includes('Chrome')) browser = 'Chrome';
@@ -170,64 +153,27 @@ export function ConnectionsList() {
     else if (userAgent.includes('Edge')) browser = 'Edge';
     else if (userAgent.includes('Opera')) browser = 'Opera';
 
-    // Détection de la plateforme
-    if (userAgent.includes('Windows')) platform = 'Windows';
-    else if (userAgent.includes('Mac')) platform = 'macOS';
-    else if (userAgent.includes('Linux')) platform = 'Linux';
-    else if (userAgent.includes('Android')) platform = 'Android';
-    else if (userAgent.includes('iOS')) platform = 'iOS';
-
-    // Détection du type d'appareil
-    if (/Mobile|Android|iPhone/.test(userAgent)) deviceType = 'mobile';
-    else if (/iPad|Tablet/.test(userAgent)) deviceType = 'tablet';
-
     return { platform, browser, deviceType };
   };
 
   // Fonction pour extraire des informations de localisation basiques du timezone
-  const parseLocationFromTimezone = (timezone: string) => {
+  const parseLocationFromTimezone = (tz: string) => {
     const location: { country?: string; city?: string } = {};
-    
-    if (timezone.includes('Europe/Paris')) {
+    if (!tz) return { location };
+    if (tz.includes('Europe/Paris')) {
       location.country = 'France';
       location.city = 'Paris';
-    } else if (timezone.includes('Europe/')) {
+    } else if (tz.includes('Europe/')) {
       location.country = 'Europe';
-      location.city = timezone.split('/')[1];
-    } else if (timezone.includes('America/')) {
+      location.city = tz.split('/')[1].replace(/_/g, ' ');
+    } else if (tz.includes('America/')) {
       location.country = 'Amérique';
-      location.city = timezone.split('/')[1];
-    } else if (timezone.includes('Asia/')) {
+      location.city = tz.split('/')[1].replace(/_/g, ' ');
+    } else if (tz.includes('Asia/')) {
       location.country = 'Asie';
-      location.city = timezone.split('/')[1];
+      location.city = tz.split('/')[1].replace(/_/g, ' ');
     }
-    
     return { location };
-  };
-
-  // Calculer la durée de session
-  const calculateSessionDuration = (connectionId: string, pageVisits: any) => {
-    if (!pageVisits[connectionId]) return 0;
-    
-    const visits = pageVisits[connectionId];
-    if (visits.length === 0) return 0;
-    
-    const firstVisit = Math.min(...visits.map((v: PageVisit) => v.timestamp));
-    const lastVisit = Math.max(...visits.map((v: PageVisit) => v.timestamp));
-    
-    return lastVisit - firstVisit;
-  };
-
-  // Obtenir la dernière activité
-  const getLastActivity = (connectionId: string, pageVisits: any) => {
-    if (!pageVisits[connectionId] || pageVisits[connectionId].length === 0) return 0;
-    return Math.max(...pageVisits[connectionId].map((v: PageVisit) => v.timestamp));
-  };
-
-  // Vérifier si la session est active (dernière activité < 30 minutes)
-  const isSessionActive = (connectionId: string, pageVisits: any) => {
-    const lastActivity = getLastActivity(connectionId, pageVisits);
-    return Date.now() - lastActivity < 30 * 60 * 1000; // 30 minutes
   };
 
   // Calculer les statistiques
@@ -240,7 +186,8 @@ export function ConnectionsList() {
     const uniqueIPs = new Set(connections.map(c => c.deviceInfo.userIp)).size;
     const activeNow = connections.filter(c => c.isActive).length;
     
-    const avgSessionDuration = connections.reduce((acc, c) => acc + (c.sessionDuration || 0), 0) / connections.length;
+    const validDurations = connections.filter(c => c.sessionDuration && c.sessionDuration > 0);
+    const avgSessionDuration = validDurations.reduce((acc, c) => acc + (c.sessionDuration || 0), 0) / (validDurations.length || 1);
 
     // Top pages
     const pageVisits = connections.flatMap(c => c.pagesVisited || []);
@@ -302,11 +249,12 @@ export function ConnectionsList() {
   // Filtrer et trier les connexions
   const filteredConnections = useMemo(() => {
     let filtered = connections.filter(conn => {
+      const searchTermLower = searchTerm.toLowerCase();
       const matchesSearch = searchTerm === '' || 
         conn.deviceInfo.userIp.includes(searchTerm) ||
-        conn.deviceInfo.userAgent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        conn.deviceInfo.browser?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        conn.deviceInfo.platform?.toLowerCase().includes(searchTerm.toLowerCase());
+        (conn.deviceInfo.userAgent && conn.deviceInfo.userAgent.toLowerCase().includes(searchTermLower)) ||
+        (conn.deviceInfo.browser && conn.deviceInfo.browser.toLowerCase().includes(searchTermLower)) ||
+        (conn.deviceInfo.platform && conn.deviceInfo.platform.toLowerCase().includes(searchTermLower));
 
       const matchesFilter = filterType === 'all' ||
         (filterType === 'active' && conn.isActive) ||
@@ -370,6 +318,7 @@ export function ConnectionsList() {
   };
 
   const formatDuration = (ms: number) => {
+    if (!ms || ms === 0) return '0s';
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -387,12 +336,19 @@ export function ConnectionsList() {
     }
   };
 
-  const clearConnections = () => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les données de connexion ?')) {
-      localStorage.removeItem('connections');
-      localStorage.removeItem('pageVisits');
-      localStorage.removeItem('sessionData');
-      setConnections([]);
+  const clearConnections = async () => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les données de connexion ? Cette action est irréversible.')) {
+        try {
+            const response = await fetch('/api/connections/clear', { method: 'POST' });
+            if (response.ok) {
+                setConnections([]);
+            } else {
+                alert('Erreur lors de la suppression des données.');
+            }
+        } catch (error) {
+            console.error('Error clearing connections:', error);
+            alert('Erreur lors de la suppression des données.');
+        }
     }
   };
 
@@ -497,7 +453,7 @@ export function ConnectionsList() {
               <Typography variant="body2" color="text.secondary">
                 {new Date(conn.timestamp).toLocaleString('fr-FR')}
               </Typography>
-              {conn.sessionDuration && (
+              {conn.sessionDuration && conn.sessionDuration > 0 && (
                 <Typography variant="body2" color="text.secondary">
                   Session: {formatDuration(conn.sessionDuration)}
                 </Typography>
@@ -511,9 +467,9 @@ export function ConnectionsList() {
           <Collapse in={expandedIds.includes(conn.id)}>
             <Divider sx={{ my: 2 }} />
             <Grid container spacing={2}>
-              <Grid size={{ xs:12, md:6 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="subtitle2" gutterBottom>Informations Techniques</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, wordBreak: 'break-all' }}>
                   <strong>User Agent:</strong> {conn.deviceInfo.userAgent}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -526,19 +482,23 @@ export function ConnectionsList() {
                   <strong>Fuseau horaire:</strong> {conn.deviceInfo.timezone}
                 </Typography>
               </Grid>
-              <Grid size={{ xs:12, md:6 }}>
-                <Typography variant="subtitle2" gutterBottom>Pages Visitées</Typography>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle2" gutterBottom>Pages Visitées ({conn.pagesVisited?.length || 0})</Typography>
                 {conn.pagesVisited && conn.pagesVisited.length > 0 ? (
-                  <Box sx={{ maxHeight: 150, overflow: 'auto' }}>
-                    {conn.pagesVisited.map((visit, index) => (
-                      <Box key={index} sx={{ mb: 1 }}>
-                        <Typography variant="body2">
+                  <Box sx={{ maxHeight: 200, overflow: 'auto', pr: 1 }}>
+                    {conn.pagesVisited.slice().reverse().map((visit, index) => (
+                      <Box key={index} sx={{ mb: 1.5, p: 1, borderRadius: 1, border: '1px solid #eee' }}>
+                        <Typography variant="body2" sx={{ wordBreak: 'break-all', fontWeight: 500 }}>
                           {visit.page}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(visit.timestamp).toLocaleTimeString('fr-FR')}
-                          {visit.duration && ` - ${formatDuration(visit.duration)}`}
+                          📅 {new Date(visit.timestamp).toLocaleString('fr-FR')}
                         </Typography>
+                        {visit.referrer && (
+                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', wordBreak: 'break-all' }}>
+                             🔗 Depuis: {visit.referrer}
+                           </Typography>
+                        )}
                       </Box>
                     ))}
                   </Box>
@@ -665,8 +625,8 @@ export function ConnectionsList() {
     <Box 
       sx={{ 
         p: 4, 
-        maxWidth: '800px',
-        width: '800px',
+        maxWidth: '1200px',
+        width: '100%',
         mx: 'auto',
         '@media (max-width: 840px)': {
           width: '100%',
@@ -681,7 +641,7 @@ export function ConnectionsList() {
         </Typography>
         <Box display="flex" gap={1}>
           <Tooltip title="Actualiser">
-            <IconButton onClick={() => window.location.reload()}>
+            <IconButton onClick={fetchConnections}>
               <RefreshCw size={20} />
             </IconButton>
           </Tooltip>
@@ -745,6 +705,7 @@ export function ConnectionsList() {
                       <Typography variant="body2" sx={{ 
                         overflow: 'hidden', 
                         textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                         maxWidth: '200px'
                       }}>
                         {page.page}
@@ -792,10 +753,8 @@ export function ConnectionsList() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
-              slotProps={{
-              input: {
-                startAdornment: <Search size={20} />
-              }
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Search size={20} /></InputAdornment>
               }}
               sx={{ flex: '2 1 200px' }}
             />
@@ -924,28 +883,26 @@ export function ConnectionsList() {
         onClose={closeConnectionDetails}
         maxWidth="md"
         fullWidth
-        slotProps={{
-          paper: {
-            sx: {
-              background: 'rgba(255, 255, 255, 0)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-              minHeight: '500px'
-            }
-          },
-          backdrop: {
-            sx: {
-              backdropFilter: 'blur(15px)',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)'
-            }
+        PaperProps={{
+          sx: {
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+            minHeight: '500px'
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: 'blur(5px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
           }
         }}
       >
         <DialogTitle 
           sx={{ 
-            background: '#ffffff',
+            background: 'rgba(255, 255, 255, 0.7)',
             borderBottom: '1px solid #e5e7eb',
             display: 'flex',
             alignItems: 'center',
@@ -977,19 +934,18 @@ export function ConnectionsList() {
         <DialogContent 
           sx={{ 
             p: 4,
-            background: 'rgba(255, 255, 255, 0)',
+            background: 'transparent',
           }}
         >
           {selectedConnection && (
             <Grid container spacing={3} sx={{
-              mt: 4,
-              background: 'rgba(255, 255, 255, 0)',
+              mt: 1,
             }}>
               {/* Informations principales */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card 
                   sx={{
-                    background: '#ffffff',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     borderRadius: '12px'
                   }}
@@ -1052,7 +1008,7 @@ export function ConnectionsList() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card 
                   sx={{ 
-                    background: '#ffffff',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     borderRadius: '12px'
                   }}
@@ -1113,7 +1069,7 @@ export function ConnectionsList() {
               <Grid size={{ xs: 12 }}>
                 <Card 
                   sx={{ 
-                    background: '#ffffff',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     borderRadius: '12px'
                   }}
@@ -1137,20 +1093,20 @@ export function ConnectionsList() {
                               border: '1px solid #e2e8f0'
                             }}
                           >
-                            <Typography variant="body1" fontWeight={600}>
+                            <Typography variant="body1" fontWeight={600} sx={{wordBreak: 'break-all'}}>
                               {visit.page}
                             </Typography>
-                            <Box display="flex" gap={2} mt={1}>
+                            <Box display="flex" gap={2} mt={1} flexWrap="wrap">
                               <Typography variant="caption" color="text.secondary">
                                 📅 {new Date(visit.timestamp).toLocaleString('fr-FR')}
                               </Typography>
-                              {visit.duration && (
-                                <Typography variant="caption" color="text.secondary">
-                                  ⏱️ {formatDuration(visit.duration)}
-                                </Typography>
-                              )}
                               {visit.referrer && (
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography variant="caption" color="text.secondary" sx={{
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: '300px'
+                                }}>
                                   🔗 Depuis: {visit.referrer}
                                 </Typography>
                               )}
@@ -1171,14 +1127,14 @@ export function ConnectionsList() {
               <Grid size={{ xs: 12 }}>
                 <Card 
                   sx={{ 
-                    background: '#ffffff',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     borderRadius: '12px'
                   }}
                 >
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
-                      user agent complet
+                      User Agent Complet
                     </Typography>
                     <Typography 
                       variant="body2" 
@@ -1202,7 +1158,7 @@ export function ConnectionsList() {
         
         <DialogActions 
           sx={{ 
-            background: '#ffffff',
+            background: 'rgba(255, 255, 255, 0.7)',
             borderTop: '1px solid #e5e7eb',
             p: 3
           }}

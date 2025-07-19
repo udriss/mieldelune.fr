@@ -8,6 +8,7 @@ export interface Profile {
   imageUrl: string;
   imagetype: 'profileLink' | 'profileStorage';
   description: string;
+  imageUrlThumbnail?: string; // Optional thumbnail URL
 }
 
   export const profile: Profile = {

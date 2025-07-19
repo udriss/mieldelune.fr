@@ -7,15 +7,13 @@ import { ToastContainer } from 'react-toastify';
 import { NextUIProvider } from '@nextui-org/react';
 import { NavbarClient } from '@/components/nav/navbar-client';
 import { Footer } from '@/components/footer';
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ScrollToTopButton } from '@/components/scroll-top';
-import Head from 'next/head';
 import { useEffect, useState, createContext, useContext } from 'react';
 import { usePathname } from 'next/navigation';
 import { myFetch } from '@/lib/fetch-wrapper';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import ConnectionTracker from '@/components/utils/ConnectionTracker';
+import { Analytics } from '@vercel/analytics/react';
 // Ajout des hooks de tracking
 import { usePageTracking, usePageDuration, useInteractionTracking } from '@/hooks/usePageTracking';
 import { generateFingerprint } from '@/lib/fingerprint';
@@ -565,7 +563,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 style={{ fontSize: 16 }}
               />
               <Analytics />
-              <SpeedInsights />
+              {/* <SpeedInsights /> */}
             </NextUIProvider>
           </ThemeProvider>
         </SiteSettingsContext.Provider>

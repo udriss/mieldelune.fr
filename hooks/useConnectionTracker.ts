@@ -1,68 +1,70 @@
-import { useEffect } from 'react';
+'use client';
 
-interface ConnectionData {
-  timestamp: number;
-  url: string;
-  userAgent: string;
-  screenResolution: string;
-  timezone: string;
-  language: string;
-}
+import { useEffect, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { usePathname } from 'next/navigation';
+import { Connection, PageVisit } from '@/types/connections';
+
+const getSessionId = (): string => {
+  let sessionId = localStorage.getItem('mieldeLuneSessionId');
+  if (!sessionId) {
+    sessionId = uuidv4();
+    localStorage.setItem('mieldeLuneSessionId', sessionId);
+  }
+  return sessionId;
+};
 
 export function useConnectionTracker() {
-  useEffect(() => {
-    // Fonction pour enregistrer une connexion
-    const trackConnection = async () => {
-      try {
-        // Vérifier si la connexion a déjà été enregistrée
-        const trackingKey = 'mieldelune_tracked';
-        const hasBeenTracked = localStorage.getItem(trackingKey);
-        
-        if (hasBeenTracked) {
-          // La connexion a déjà été enregistrée
-          return;
-        }
-        
-        // Collecter les informations de la connexion
-        const connectionData: ConnectionData = {
-          timestamp: Date.now(),
-          url: window.location.href,
-          userAgent: navigator.userAgent,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          language: navigator.language
-        };
-        
-        // Envoyer les données au serveur
-        const response = await fetch('/api/connections', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(connectionData)
-        });
-        
-        if (response.ok) {
-          // Marquer la connexion comme enregistrée
-          localStorage.setItem(trackingKey, 'true');
-          
-        } else {
-          console.error('Erreur lors de l\'enregistrement de la connexion');
-        }
-        
-      } catch (error) {
-        console.error('Erreur lors du suivi de la connexion:', error);
-      }
+  const pathname = usePathname();
+
+  const track = useCallback(async () => {
+    const sessionId = getSessionId();
+    
+    const pageVisit: PageVisit = {
+      page: pathname,
+      timestamp: Date.now(),
+      referrer: document.referrer,
     };
-    
-    // Enregistrer la connexion après un petit délai pour éviter les problèmes de hydratation
+
+    const connectionData: Partial<Connection> = {
+      id: sessionId,
+      deviceInfo: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        // IP will be added server-side
+        userIp: '', 
+      },
+      pagesVisited: [pageVisit],
+    };
+
+    try {
+      await fetch('/api/connections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(connectionData),
+      });
+    } catch (error) {
+      console.error('Error tracking connection:', error);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    // Don't track admin pages to avoid noise
+    if (pathname.startsWith('/admin')) {
+      return;
+    }
+
+    // Track after a short delay to ensure all page elements are loaded
     const timer = setTimeout(() => {
-      trackConnection();
-    }, 1000);
-    
-    // Nettoyer le timer lors du démontage du composant
+      track();
+    }, 500);
+
     return () => {
       clearTimeout(timer);
     };
-  }, []); // Tableau de dépendances vide pour n'exécuter qu'une seule fois
+  }, [pathname, track]);
 }

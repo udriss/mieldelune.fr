@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { myFetch } from '@/lib/fetch-wrapper';
-import { Paper, Typography, Switch, FormControlLabel, IconButton, Box } from '@mui/material';
+import { Paper, Typography, Switch, FormControlLabel, IconButton, Box, Button as MuiButton, Grid } from '@mui/material';
 import { ExternalLink } from 'lucide-react';
 
 
@@ -85,111 +85,123 @@ export function WeddingForm({
   };
 
   return (
-    <div className="flex flex-col justify-around w-full">
-
+    <Box display="flex" flexDirection="column" justifyContent="space-around" width="100%">
       <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
-      <div className="space-y-4 w-full">
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6" fontWeight={600}>
-            Informations du mariage
-          </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
-            <IconButton
-              size="small"
-              onClick={() => window.open(`/mariage/${editedWedding?.id}`, '_blank')}
-              title="Voir la page du mariage"
-              sx={{ 
-                color: '#3b82f6',
-                border: '1px solid #3b82f6',
-                borderRadius: '6px',
-                '&:hover': {
-                  backgroundColor: '#eff6ff',
-                  borderColor: '#2563eb'
-                }
-              }}
-            >
-              <ExternalLink size={16} />
-            </IconButton>
-            <Typography variant="caption" color="text.secondary">
-              Voir la page du mariage
+        <Box sx={{ mb: 4, width: '100%' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" fontWeight={600}>
+              Informations du mariage
             </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton
+                size="small"
+                onClick={() => window.open(`/mariage/${editedWedding?.id}`, '_blank')}
+                title="Voir la page du mariage"
+                sx={{ 
+                  color: '#3b82f6',
+                  border: '1px solid #3b82f6',
+                  borderRadius: '6px',
+                  '&:hover': {
+                    backgroundColor: '#eff6ff',
+                    borderColor: '#2563eb'
+                  }
+                }}
+              >
+                <ExternalLink size={16} />
+              </IconButton>
+              <Typography variant="caption" color="text.secondary">
+                Voir la page du mariage
+              </Typography>
+            </Box>
           </Box>
         </Box>
-        <h2 className="font-bold text-lg mb-4"></h2>
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4 items-center">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Titre</h4>
-          <Input
-            className={`col-span-6 ${getInputStyle('title')}`}
-            value={fieldValues.title || ''}
-            onChange={(e) => handleInputChange('title', e.target.value)}
-            placeholder="Titre"
-          />
-        </div>
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Date</h4>
-          <Input
-            className={`col-span-6 ${getInputStyle('date')}`}
-            value={fieldValues.date || ''}
-            onChange={(e) => handleInputChange('date', e.target.value)}
-            placeholder="Date"
-          />
-        </div>
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Lieu</h4>
-          <Input
-            className={`col-span-6 ${getInputStyle('location')}`}
-            value={fieldValues.location || ''}
-            onChange={(e) => handleInputChange('location', e.target.value)}
-            placeholder="Lieu"
-          />
-        </div>
-
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4 items-center">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Afficher lieu</h4>
-          <div className="col-span-6">
+        <Grid container spacing={2} alignItems="center">
+          {/* Titre */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Titre</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            <Input
+              className={getInputStyle('title')}
+              value={fieldValues.title || ''}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="Ex : Mariage de Sophie & Lucas"
+            />
+          </Grid>
+          {/* Date */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Date</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            <Input
+              className={getInputStyle('date')}
+              value={fieldValues.date || ''}
+              onChange={(e) => handleInputChange('date', e.target.value)}
+              placeholder="Ex : 15 août 2025"
+            />
+          </Grid>
+          {/* Lieu */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Lieu</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            <Input
+              className={getInputStyle('location')}
+              value={fieldValues.location || ''}
+              onChange={(e) => handleInputChange('location', e.target.value)}
+              placeholder="Ex : Château de la Loire, Tours"
+            />
+          </Grid>
+          {/* Afficher lieu */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Afficher lieu</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={Boolean(editedWedding?.showLocation ?? true)} // Par défaut à true si indéfini
+                  checked={Boolean(editedWedding?.showLocation ?? true)}
                   onChange={(e) => handleSwitchChange('showLocation', e.target.checked)}
                   name="showLocation"
                 />
               }
               label={<Typography sx={{ fontSize: '0.875rem' }}>{Boolean(editedWedding?.showLocation ?? true) ? "Affiché" : "Masqué"}</Typography>}
             />
-          </div>
-        </div>
-        
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Description</h4>
-          <Textarea
-            placeholder="Description"
-            rows={3}
-            value={fieldValues.description || ''}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            className={`col-span-6 ${getInputStyle('description')}`}
-          />
-        </div>
-
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4 items-center">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Afficher description</h4>
-          <div className="col-span-6">
+          </Grid>
+          {/* Description */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Description</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            <Textarea
+              placeholder="Quelques mots sur le mariage, le lieu, l'ambiance..."
+              rows={3}
+              value={fieldValues.description || ''}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              className={getInputStyle('description')}
+            />
+          </Grid>
+          {/* Afficher description */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Afficher description</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={Boolean(editedWedding?.showDescription ?? true)} // Par défaut à true si indéfini
+                  checked={Boolean(editedWedding?.showDescription ?? true)}
                   onChange={(e) => handleSwitchChange('showDescription', e.target.checked)}
                   name="showDescription"
                 />
               }
               label={<Typography sx={{ fontSize: '0.875rem' }}>{Boolean(editedWedding?.showDescription ?? true) ? "Affichée" : "Masquée"}</Typography>}
             />
-          </div>
-        </div>
-
-        <div className="flex justify-around gap-4 flex-row grid grid-cols-8 gap-4">
-          <h4 className="text-sm text-gray-500 text-right flex items-center justify-end h-full col-span-2">Template</h4>
-          <div className="col-span-6">
+          </Grid>
+          {/* Template */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Template</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
             <Select 
               value={fieldValues.templateType || 'timeline'} 
               onValueChange={(value) => handleInputChange('templateType', value)}
@@ -203,34 +215,64 @@ export function WeddingForm({
                 <SelectItem value="grid">Grille (ancien)</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        </div>
-      </div>
-      <div className="flex grid grid-cols-9 gap-4 mt-4">
-        <Button 
-          onClick={handleDelete}
-          variant={'outline'}
-          className="col-span-3 bg-white border-gray-300 text-black hover:bg-red-100 "
-          disabled={isDeleting}
-        >
-          {isDeleting ? 'Suppression...' : 'Supprimer l\'événement'}
-        </Button>
-        <Button 
-          onClick={toggleVisibility}
-          variant={editedWedding?.visible ? 'outline' : 'outline'}
-          className={`col-span-3 bg-white text-black font-semibold border-gray-300 ${editedWedding?.visible ? "hover:bg-orange-100" : "hover:bg-green-100"}`}
-        >
-          {editedWedding?.visible ? "Masquer l'événement" : "Rendre l'événément visible"}
-        </Button>
-        <Button 
-          onClick={handleSave}
-          variant={'outline'}
-          className="col-span-3 bg-white border-gray-300 text-black hover:bg-green-100 border-gray-300"
-        >
-          Enregistrer les modifications
-        </Button>
-      </div>
+          </Grid>
+        </Grid>
+        <Box display="flex" className="grid grid-cols-9 gap-4 mt-4">
+          <MuiButton
+            onClick={handleDelete}
+            variant="outlined"
+            size="small"
+            disabled={isDeleting}
+            sx={{
+              bgcolor: 'white',
+              borderColor: 'gray.300',
+              color: 'black',
+              '&:hover': {
+                bgcolor: 'red.100',
+                borderColor: 'gray.300',
+              },
+            }}
+            className="col-span-3"
+          >
+            {isDeleting ? 'Suppression...' : "Supprimer l'événement"}
+          </MuiButton>
+          <MuiButton
+            onClick={toggleVisibility}
+            variant="outlined"
+            size="small"
+            sx={{
+              bgcolor: 'white',
+              borderColor: 'gray.300',
+              color: 'black',
+              fontWeight: 600,
+              '&:hover': {
+                bgcolor: editedWedding?.visible ? 'orange.100' : 'green.100',
+                borderColor: 'gray.300',
+              },
+            }}
+            className="col-span-3"
+          >
+            {editedWedding?.visible ? "Masquer l'événement" : "Rendre l'événément visible"}
+          </MuiButton>
+          <MuiButton
+            onClick={handleSave}
+            variant="outlined"
+            size='small'
+            sx={{
+              bgcolor: 'white',
+              borderColor: 'gray.300',
+              color: 'black',
+              '&:hover': {
+                bgcolor: 'green.100',
+                borderColor: 'gray.300',
+              },
+            }}
+            className="col-span-3"
+          >
+            Enregistrer les modifications
+          </MuiButton>
+        </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }
