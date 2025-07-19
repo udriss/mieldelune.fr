@@ -914,7 +914,13 @@ export function ImageGallery({
               exclusive
               onChange={(_, newType) => newType && setUploadType(newType)}
               size="small"
-              sx={{ width: '100%' }}
+              sx={{ 
+                width: '100%',
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row'},
+                justifyContent: 'center',
+                alignItems: 'center',
+               }}
             >
               <ToggleButton value="url" sx={{ flex: 1, fontSize: '0.85rem', py: 0.5 }}>
                 <Link style={{ width: 16, height: 16, marginRight: 4 }} />
@@ -971,7 +977,22 @@ export function ImageGallery({
               items={sortedImages.map((img) => img.fileUrl)}
               strategy={rectSortingStrategy}
             >
-              <Box display="grid" gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={2} width="100%" maxWidth={900}>
+              <Box display="grid" 
+              gap={2} width="100%" maxWidth={900}
+              sx={{
+                gap: 2,
+                width: '100%',
+                maxWidth: 900,
+                padding: 2,
+                display: 'grid',
+                gridTemplateColumns: { 
+                  xs: 'repeat(1, 1fr)', 
+                  sm: 'repeat(2, 1fr)', 
+                  md: 'repeat(3, 1fr)', 
+                  lg: 'repeat(4, 1fr)' },
+                justifyItems: 'center',
+              }}
+              >
                 {sortedImages.map((image) => (
                   <SortableWeddingImage
                     key={`${image.id}-${updateKey}`}

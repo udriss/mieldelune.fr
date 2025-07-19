@@ -252,10 +252,11 @@ export function TimelineGallery({ wedding }: { wedding: Wedding }) {
                 return (
                   <TimelineItem 
                     key={image.id}
-                    className="timeline-item"
                     sx={{ 
                       opacity: 0,
                       animation: `fadeIn 0.7s ease-out ${randomDelay}s forwards`,
+                      minHeight: isMobile ? 'auto' : '350px',
+                      margin: isMobile ? 1 : 2,
                     }}
                   >
                     <TimelineSeparator>
@@ -277,7 +278,6 @@ export function TimelineGallery({ wedding }: { wedding: Wedding }) {
                     </TimelineSeparator>
                     
                     <TimelineContent 
-                      className="timeline-content" 
                       sx={{ 
                         py: 3, 
                         px: isMobile ? 2 : 3,
@@ -289,6 +289,8 @@ export function TimelineGallery({ wedding }: { wedding: Wedding }) {
                         animationDuration: '0.7s',
                         animationFillMode: 'forwards',
                         width: isMobile ? '100%' : 'auto',
+                        minHeight: isMobile ? 'auto' : '350px',
+                        margin: isMobile ? 1 : 2,
                       }}
                     >
                       {/* Time display */}

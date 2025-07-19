@@ -115,12 +115,31 @@ export function WeddingForm({
             </Box>
           </Box>
         </Box>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container
+        sx={{
+          alignItems: 'center',
+          gap: {
+            md: .5,
+            lg: 2,
+          }
+        }}
+        >
           {/* Titre */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Titre</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Titre</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Input
               className={getInputStyle('title')}
               value={fieldValues.title || ''}
@@ -130,9 +149,20 @@ export function WeddingForm({
           </Grid>
           {/* Date */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Date</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              }, 
+              mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Date</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Input
               className={getInputStyle('date')}
               value={fieldValues.date || ''}
@@ -142,9 +172,20 @@ export function WeddingForm({
           </Grid>
           {/* Lieu */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Lieu</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+              mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Lieu</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Input
               className={getInputStyle('location')}
               value={fieldValues.location || ''}
@@ -154,9 +195,20 @@ export function WeddingForm({
           </Grid>
           {/* Afficher lieu */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Afficher lieu</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+              mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Afficher lieu</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -170,9 +222,20 @@ export function WeddingForm({
           </Grid>
           {/* Description */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Description</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+              mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Description</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Textarea
               placeholder="Quelques mots sur le mariage, le lieu, l'ambiance..."
               rows={3}
@@ -183,9 +246,20 @@ export function WeddingForm({
           </Grid>
           {/* Afficher description */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Afficher description</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Afficher description</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -199,9 +273,20 @@ export function WeddingForm({
           </Grid>
           {/* Template */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Typography variant="subtitle2" sx={{ textAlign: 'right' }}>Template</Typography>
+            <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                lg: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                lg: 0,
+              }
+            }}
+            >Template</Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Select 
               value={fieldValues.templateType || 'timeline'} 
               onValueChange={(value) => handleInputChange('templateType', value)}
@@ -217,7 +302,24 @@ export function WeddingForm({
             </Select>
           </Grid>
         </Grid>
-        <Box display="flex" className="grid grid-cols-9 gap-4 mt-4">
+        <Box
+        sx={{
+          gap: 2,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'stretch',
+          flexDirection: {
+            xs: 'column',
+            md: 'row',
+          },
+          maxWidth:{
+            xs: 350,
+            md: '100%',
+          },
+          margin: '0 auto',
+          mt:4,
+        }}
+        >
           <MuiButton
             onClick={handleDelete}
             variant="outlined"

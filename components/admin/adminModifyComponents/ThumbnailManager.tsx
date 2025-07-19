@@ -49,7 +49,8 @@ import {
   CheckBoxOutlined,
   CheckBoxOutlineBlankOutlined,
   SelectAllOutlined,
-  DeselectOutlined
+  DeselectOutlined,
+  Height
 } from '@mui/icons-material';
 
 // Types pour la minimap (doivent être déclarés hors du bloc JSX)
@@ -956,7 +957,10 @@ export function ThumbnailManager({
           alignItems: 'center',
           justifyContent: 'space-around',
         }}>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Box sx={{ display: 
+            'flex', gap: 2, 
+            justifyContent: 'center', 
+            alignItems: 'center', flexWrap: 'wrap' }}>
             <MuiButton
               variant="outlined"
               startIcon={<SelectAllOutlined />}
@@ -1054,7 +1058,8 @@ export function ThumbnailManager({
               image,
               index,
               imageName: cleanImageName(image.fileUrl.split('/').pop() || ''),
-              isSelected: selectedImages.includes(image.fileUrl)
+              isSelected: selectedImages.includes(image.fileUrl),
+              Height: 'auto', // Laisser la hauteur s'ajuster automatiquement
             }))}
             render={({ data }) => {
               const { image, imageName, isSelected } = data;
@@ -1162,6 +1167,9 @@ export function ThumbnailManager({
             }}
             columnWidth={250}
             columnGutter={16}
+            style={{
+              height: '100%',
+            }}
           />
         </DialogContent>
         

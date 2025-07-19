@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Image as MuiImage } from '@mui/icons-material';
 import { Loader2, ExternalLink } from "lucide-react";
-import * as Slider from '@radix-ui/react-slider';
+import Slider from '@mui/material/Slider';
 import { toast } from 'react-toastify';
 import { Wedding, Image as WeddingImage } from '@/lib/dataTemplate';
 import { FileUploader } from '@/components/admin/admin-file-uploader';
@@ -297,7 +297,7 @@ export function CoverImageSection({
                       objectFit: 'cover',
                       borderRadius: '16px',
                       width: 128,
-                      height: 'auto'
+                      height: 'auto',
                     }}
                     key={`cover-${editedWedding.coverImage.id}-${imageRefreshKey}-${editedWedding.coverImage.fileUrlThumbnail || 'no-thumb'}`}
                   />
@@ -346,7 +346,8 @@ export function CoverImageSection({
               xs: 'center',
               md: 'center',
             },
-          }}>
+          }
+          }>
             {/* ToggleButtonGroup pour le choix du type d'upload */}
             <Box 
             sx ={{
@@ -495,22 +496,18 @@ export function CoverImageSection({
                         <Typography variant="overline" color="text.secondary">
                           {resizeValueCover} % (compression à {100 - resizeValueCover} %)
                         </Typography>
-                        <Slider.Root
-                          className="relative flex items-center w-[200px] h-5"
-                          defaultValue={[20]}
-                          max={100}
+                        <Slider
+                          value={resizeValueCover}
                           min={1}
+                          max={100}
                           step={1}
-                          onValueChange={([value]) => setResizeValueCover(value)}
-                        >
-                          <Slider.Track className="bg-gray-200 relative grow rounded-full h-2">
-                            <Slider.Range className="absolute bg-blue-500 rounded-full h-full" />
-                          </Slider.Track>
-                          <Slider.Thumb
-                            className="block w-5 h-5 bg-white border-2 border-blue-500 rounded-full hover:bg-blue-50 focus:outline-none"
-                            aria-label="Resize percentage"
-                          />
-                        </Slider.Root>
+                          onChange={(_, value) => {
+                            if (typeof value === 'number') setResizeValueCover(value);
+                          }}
+                          valueLabelDisplay="auto"
+                          sx={{ width: '100%', mt: 1 }}
+                          aria-label="Pourcentage de compression"
+                        />
                       </Box>
                       
                       <Box display="flex" justifyContent="center">

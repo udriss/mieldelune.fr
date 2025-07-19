@@ -769,7 +769,7 @@ const getInputStyle = (field: string) => {
         Image de profil
         </Typography>
       <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 150 }}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={{ xs: 4, md: 3 }}>
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" height="100%">
             {profile?.imageUrl ? (
               <>
@@ -781,11 +781,10 @@ const getInputStyle = (field: string) => {
                       : getImageUrl(profile, false, true)}
                     alt="Profile image"
                     sx={{
-                      maxWidth: '1200px',
-                      height: 'auto',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                      maxHeight: 'auto',
+                      objectFit: 'cover',
+                      borderRadius: '16px',
+                      width: 128,
+                      height: 'auto'
                     }}
                     key={`profile-${imageRefreshKey}-${profile.imageUrlThumbnail || 'no-thumb'}`}
                   />
@@ -824,18 +823,43 @@ const getInputStyle = (field: string) => {
           </Box>
         </Grid>
         
-        <Grid size={{ xs: 3 }}>
-          <Box display="flex" flexDirection="column" gap={2} justifyContent="flex-start" height="100%"
+        <Grid size={{ xs: 8, md: 3 }}>
+          <Box 
           sx={{
             minHeight: 100,
-          }}>
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: {
+              xs: 'center',
+              md: 'center',
+            },
+          }}
+          >
           <Box display="flex" flexDirection="column" gap={2} justifyContent="center"
           sx={{
             height: '100%',
             maxHeight: 150,
           }}>
             {/* ToggleButtonGroup pour le choix du type d'upload */}
-            <Box width="100%">
+            <Box
+            sx ={{
+              width: {
+                xs: '100%',
+                md: '100%',
+              },
+              maxWidth: {
+                xs: 350,
+                md: '100%',
+              },
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            >
               <ToggleButtonGroup
                 orientation="vertical"
                 value={uploadType}
@@ -865,7 +889,7 @@ const getInputStyle = (field: string) => {
         </Grid>
 
         {showAddImage && (
-          <Grid size={{ xs: 6 }}>
+          <Grid size={{ xs: 12, md: 6, }}>
             <Box sx={{ 
               height: 200, 
               maxHeight: 230, 
