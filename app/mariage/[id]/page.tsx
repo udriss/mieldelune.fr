@@ -61,7 +61,7 @@ export default async function WeddingPage({ params }: Params) {
     const wedding = await res.json();
 
     return (
-        <div className="max-w-[1600px] mx-auto py-16">
+        <div className="max-w-[1600px] mx-auto py-16 w-full">
           <WeddingGallery wedding={wedding} />
         </div>
     );
