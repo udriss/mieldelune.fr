@@ -306,7 +306,6 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 3,
               }}
             >
               <Tabs

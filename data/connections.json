@@ -1602,16 +1602,21 @@
       "language": "fr-FR",
       "screen": "428x926",
       "timezone": "Europe/Paris",
-      "userIp": "212.194.203.102"
+      "userIp": "176.185.203.110"
     },
     "pagesVisited": [
       {
         "page": "/",
         "timestamp": 1753021002139,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753039323637,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753021003859,
+    "lastActivity": 1753039327582,
     "isActive": true
   },
   {
@@ -1629,9 +1634,94 @@
         "page": "/",
         "timestamp": 1753036568275,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753050463239,
+        "referrer": ""
+      },
+      {
+        "page": "/page/DYOR/",
+        "timestamp": 1753050924792,
+        "referrer": "https://mieldelune.fr/admin/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753051125264,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753051131645,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753051140240,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753051149690,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753051150482,
+        "referrer": "https://mieldelune.fr/artiste/"
       }
     ],
-    "lastActivity": 1753036568470,
+    "lastActivity": 1753051150894,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753039157355,
+    "id": "28fceecd-87da-4a90-9513-5626b6e8b9af",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+      "language": "fr-FR",
+      "screen": "393x852",
+      "timezone": "Europe/Paris",
+      "userIp": "176.140.196.94"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753039153847,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753039168119,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753039191037,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753039191172,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753043112043,
+    "id": "239a9084-6fc1-4725-9a6e-0dd99005e5d1",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "192.178.4.104"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1752969600510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753043112043,
     "isActive": true
   }
 ]

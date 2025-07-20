@@ -751,37 +751,42 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
         <Typography variant="h6" mb={2}>URL et accès</Typography>
         
         <Box display="flex" flexDirection="column" gap={3}>
-          <Box>
+            <Box>
             <Typography variant="subtitle2" color="textSecondary" mb={1}>
               URL de la page
             </Typography>
             <Box display="flex" gap={2} alignItems="start">
               <TextField
-                fullWidth
-                label="Slug de la page"
-                value={customSlug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-                error={!!slugError}
-                helperText={slugError || `URL: ${window.location.origin}/page/${customSlug}`}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Typography variant="body2" color="textSecondary">
-                        {window.location.origin}/page/
-                      </Typography>
-                    </InputAdornment>
-                  ),
-                }}
+              fullWidth
+              label="Slug de la page"
+              value={customSlug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              error={!!slugError}
+              helperText={slugError || `URL: ${window.location.origin}/page/${customSlug}`}
+              slotProps={{
+                input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                  <Typography variant="body2" color="textSecondary">
+                    {window.location.origin}/page/
+                  </Typography>
+                  </InputAdornment>
+                ),
+                },
+              }}
               />
               <Button
-                variant="outlined"
-                onClick={generateRandomSlug}
-                startIcon={<RefreshCw />}
-                sx={{ minWidth: 'auto', height: 56 }}
+              variant="outlined"
+              onClick={generateRandomSlug}
+              startIcon={<RefreshCw />}
+              sx={{ minWidth: 'auto', height: 56 }}
               >
-                Générer
+              Générer
               </Button>
             </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Vous pouvez saisir votre propre code ou cliquer sur <Typography component="span" variant="overline" sx={{ fontSize: 'inherit' }}>"Générer"</Typography> pour obtenir un code aléatoire.
+            </Typography>
             
             {editedPage.isRandomSlug && (
               <Chip 
@@ -878,10 +883,20 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
               />
             }
             label={
-              <Box display="flex" alignItems="center" gap={1}>
+                <Box display="flex" alignItems="center" gap={1}>
                 {editedPage.isPasswordProtected ? <Lock size={16} /> : <Unlock size={16} />}
-                {editedPage.isPasswordProtected ? 'Page protégée par mot de passe' : 'Page publique'}
-              </Box>
+                <Typography
+                  sx={
+                  editedPage.isPasswordProtected
+                    ? { color: 'error.main', fontWeight: 700 }
+                    : { color: 'success.main', fontWeight: 500 }
+                  }
+                >
+                  {editedPage.isPasswordProtected
+                  ? 'Page protégée par mot de passe'
+                  : 'Accès libre à la page'}
+                </Typography>
+                </Box>
             }
           />
 
