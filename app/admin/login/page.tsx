@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import { useRouter } from "next/navigation";
 import { 
   Card, 
@@ -65,7 +66,11 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
       <Typography variant="h3" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         Connexion admin
       </Typography>
@@ -148,5 +153,6 @@ export default function AdminLoginPage() {
         </CardContent>
       </Card>
     </Container>
+    </>
   );
 }

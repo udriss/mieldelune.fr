@@ -1,4 +1,5 @@
 import { myFetch } from '@/lib/fetch-wrapper';
+import Head from 'next/head';
 import { Wedding } from '@/lib/dataTemplate';
 import { Profile } from '@/lib/dataProfil';
 import AdminClientWrapper from '@/components/admin/AdminPageClient';
@@ -48,5 +49,12 @@ export default async function AdminPage() {
     console.error('Error fetching profile:', error);
   }
 
-  return <AdminClientWrapper initialWeddings={weddings} initialProfile={profile} />;
+  return (
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <AdminClientWrapper initialWeddings={weddings} initialProfile={profile} />
+    </>
+  );
 }
