@@ -4,8 +4,14 @@ import { Box, Typography, Button } from '@mui/material';
 import { Type, FileText, Image as ImageIcon, Video, Save, X } from 'lucide-react';
 import { ContentElement } from './types';
 
+interface TitleSettings {
+  fontFamily?: string;
+  color?: string;
+}
+
 interface EditorToolbarProps {
   title: string;
+  titleSettings?: TitleSettings;
   hasUnsavedChanges: boolean;
   onSave: () => void;
   onCancel: () => void;
@@ -13,13 +19,13 @@ interface EditorToolbarProps {
   onAddElement: (type: ContentElement['type']) => void;
 }
 
-export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onReset, onAddElement }: EditorToolbarProps) {
+export function EditorToolbar({ title, titleSettings, hasUnsavedChanges, onSave, onCancel, onReset, onAddElement }: EditorToolbarProps) {
   return (
     <Box 
       sx={{
         position: 'sticky',
-        top: '70px', // Décalé pour laisser place aux tabs (hauteur approximative)
-        zIndex: 1000,
+        top: 60,
+        zIndex: 1002, // Au-dessus des deux barres Tabs
         bgcolor: 'white',
         borderBottom: '1px solid #e0e0e0',
         px: 3,
@@ -29,7 +35,17 @@ export function EditorToolbar({ title, hasUnsavedChanges, onSave, onCancel, onRe
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6" fontWeight={600}>
-          Édition de la page : {title}
+          Édition de la page {' '}
+          <span
+            style={{
+              fontFamily: titleSettings?.fontFamily
+                ? `'${titleSettings.fontFamily}', Arial, sans-serif`
+                : 'Montserrat, Arial, sans-serif',
+              color: titleSettings?.color || '#333333',
+            }}
+          >
+            {title}
+          </span>
         </Typography>
         
         <Box display="flex" gap={2}>

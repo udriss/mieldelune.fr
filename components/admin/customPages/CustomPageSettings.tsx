@@ -409,7 +409,7 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
       <Box 
         sx={{
           position: 'sticky',
-          top: '70px', // Décalé pour laisser place aux tabs (hauteur approximative)
+          top: 60, // Décalé pour laisser place aux tabs (hauteur approximative)
           zIndex: 1000,
           bgcolor: 'white',
           borderBottom: '1px solid #e0e0e0',
@@ -420,7 +420,17 @@ export function CustomPageSettings({ page, onSave, onSlugGenerate, onUnsavedChan
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" fontWeight={600}>
-            Paramètres de la page : {editedPage.title}
+            Paramètres de la page {' '}
+            <span
+              style={{
+                fontFamily: editedPage.titleSettings?.fontFamily
+                  ? `'${editedPage.titleSettings.fontFamily}', Arial, sans-serif`
+                  : 'Montserrat, Arial, sans-serif',
+                color: editedPage.titleSettings?.color || '#333333',
+              }}
+            >
+              {editedPage.title}
+            </span>
           </Typography>
           
           <Box display="flex" gap={2}>

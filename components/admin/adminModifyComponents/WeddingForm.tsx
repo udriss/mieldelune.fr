@@ -85,7 +85,14 @@ export function WeddingForm({
   };
 
   return (
-    <Box display="flex" flexDirection="column" justifyContent="space-around" width="100%">
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-around",
+        width: "100%",
+      }}
+    >
       <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
         <Box sx={{ mb: 4, width: '100%' }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>

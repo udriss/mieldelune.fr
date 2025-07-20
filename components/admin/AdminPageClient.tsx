@@ -210,62 +210,110 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
         </DialogActions>
       </Dialog>
 
+      {/* Header dans un conteneur fixe en haut */}
+      <Box sx={{ minWidth: 900, maxWidth: 900, mx: 'auto', py: 4, px: 2 }}>
+        <Header onLogout={handleLogout} />
+      </Box>
+
+      {/* Éléments sticky HORS du conteneur scrollable - SEULEMENT si pas custom-pages */}
+      {activeTab !== 'custom-pages' && (
+        <Paper 
+          elevation={0}
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1000,
+            width: 800,
+            minWidth: 900,
+            maxWidth: 900,
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(12px)',
+            borderTopLeftRadius: '16px',
+            borderTopRightRadius: '16px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mx: 'auto',
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="standard"
+            centered
+            sx={{
+              minHeight: 'auto',
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#3b82f6',
+                height: '2px'
+              },
+              '& .MuiTab-root': {
+                minHeight: 'auto',
+                minWidth: 'auto',
+                py: 2,
+                px: 2,
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                textTransform: 'none',
+                color: '#6b7280',
+                '&:hover': {
+                  color: '#374151',
+                },
+                '&.Mui-selected': {
+                  color: '#2563eb',
+                }
+              }
+            }}
+          >
+            <Tab label="Nouveau" value="nouveau" />
+            <Tab label="Modifications" value="modification" />
+            <Tab label="Profil" value="profil" />
+            <Tab label="Disponibilités" value="disponibilites" />
+            <Tab label="Gestion du site web" value="parameters" />
+            <Tab label="Pages perso" value="custom-pages" />
+            <Tab label="Connexions" value="connections" />
+          </Tabs>
+        </Paper>
+      )}
+
+      {/* Conteneur scrollable pour le contenu principal */}
       <Box 
         ref={mainScrollableRef}
-        className="mainScrollableRef w-full h-screen overflow-y-auto flex flex-col"
+        className="mainScrollableRef w-full overflow-y-auto"
         sx={{
-          mb:16, // Pour laisser de l'espace pour le header
-          // Styles de scrollbar personnalisés pour la scrollbar principale
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'rgba(0,0,0,0.1)',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(0,0,0,0.3)',
-            borderRadius: '4px',
-            '&:hover': {
-              background: 'rgba(0,0,0,0.4)',
-            },
-          },
+          mb:16,
+          width: '100%', 
+          mx: 'auto',
+          height: activeTab !== 'custom-pages' ? 'calc(100vh - 200px)' : 'calc(100vh - 120px)', // Moins de hauteur si pas de Tabs sticky
         }}
       >
-        <Box 
-          className="w-full flex flex-col items-center justify-start pt-16 mb-32"
-        >
-        <Box sx={{ mb: 2 }} />
-        <Box className="w-full min-w-[800px] max-w-[800px]">
-          <Header onLogout={handleLogout} />
-        </Box>
-        <Box sx={{ mb: 2 }} />
-        
-        <Container maxWidth='md' sx={{ p: 3, maxWidth: '1000px', width: '100%' }}>
-          <Box className="w-full">
+        <Box sx={{ minWidth: 900, maxWidth: 900, mx: 'auto', py: 4, px: 2 }}>
+          {/* Tabs DANS le conteneur scrollable SEULEMENT pour custom-pages */}
+          {activeTab === 'custom-pages' && (
             <Paper 
               elevation={0}
               sx={{
-                position: activeTab === 'custom-pages' ? 'static' : 'sticky',
-                top: activeTab === 'custom-pages' ? 'auto' : 0, // 4rem = 64px
-                zIndex: activeTab === 'custom-pages' ? 'auto' : 1000,
-                minWidth: '800px',
-                maxWidth: '100%',
-                margin: '0 auto',
+                position: 'static',
+                width: '100%',
+                maxWidth: 900,
                 background: 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(12px)',
                 borderTopLeftRadius: '16px',
                 borderTopRightRadius: '16px',
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
                 display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
-                alignItems: 'center'
+                mx: 'auto',
+                mb: 3,
               }}
             >
               <Tabs
                 value={activeTab}
                 onChange={handleTabChange}
                 variant="standard"
+                centered
                 sx={{
                   minHeight: 'auto',
                   '& .MuiTabs-indicator': {
@@ -299,20 +347,26 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
                 <Tab label="Connexions" value="connections" />
               </Tabs>
             </Paper>
-      
-            <Box className="mt-4 flex flex-col items-center justify-center w-full">
-              {activeTab === 'nouveau' && <NewEventButton onEventCreated={handleEventCreated} />}
-              {activeTab === 'modification' && <AdminWeddings weddings={weddingsToTransfer} setWeddings={setWeddingsForTransfer} onDataRefresh={fetchWeddings} />}
-              {activeTab === 'profil' &&  <AdminProfil profile={profileToTransfer[0]} setProfile={setProfileForTransfer} />}
-              {activeTab === 'disponibilites' && <AdminAvailability />}
-              {activeTab === 'parameters' && <AdminSiteSettings ref={siteSettingsRef} onPendingInsertionsChange={setHasPendingChanges} />}
-              {activeTab === 'custom-pages' && <CustomPagesManager onUnsavedChanges={setHasCustomPageChanges} scrollableContainerRef={mainScrollableRef} />}
-              {activeTab === 'connections' && <ConnectionsList />}
-            </Box>
+          )}
+
+          <Box
+            sx={{ 
+              maxWidth: 'min(900px, 90vw)', 
+              width: '100%',
+              margin: '0 auto',
+            }}
+          >
+            {activeTab === 'nouveau' && <NewEventButton onEventCreated={handleEventCreated} />}
+            {activeTab === 'modification' && <AdminWeddings weddings={weddingsToTransfer} setWeddings={setWeddingsForTransfer} onDataRefresh={fetchWeddings} />}
+            {activeTab === 'profil' &&  <AdminProfil profile={profileToTransfer[0]} setProfile={setProfileForTransfer} />}
+            {activeTab === 'disponibilites' && <AdminAvailability />}
+            {activeTab === 'parameters' && <AdminSiteSettings ref={siteSettingsRef} onPendingInsertionsChange={setHasPendingChanges} />}
+            {activeTab === 'custom-pages' && <CustomPagesManager onUnsavedChanges={setHasCustomPageChanges} scrollableContainerRef={mainScrollableRef} />}
+            {activeTab === 'connections' && <ConnectionsList />}
           </Box>
-        </Container>
         </Box>
       </Box>
+
     </>
   );
 }

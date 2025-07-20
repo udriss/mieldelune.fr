@@ -632,28 +632,36 @@ export function ConnectionsList() {
           width: '100%',
           maxWidth: '100%',
           px: 2
-        }
+        },
+        background: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(12px)',
+        borderRadius: '16px',
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 3,
+         }}>
         <Typography variant="h5" fontWeight={700}>
           Connexions et Analytics
         </Typography>
         <Box display="flex" gap={1}>
           <Tooltip title="Actualiser">
-            <IconButton onClick={fetchConnections}>
-              <RefreshCw size={20} />
-            </IconButton>
+        <IconButton onClick={fetchConnections}>
+          <RefreshCw size={20} />
+        </IconButton>
           </Tooltip>
           <Tooltip title="Exporter les données">
-            <IconButton onClick={exportData}>
-              <Download size={20} />
-            </IconButton>
+        <IconButton onClick={exportData}>
+          <Download size={20} />
+        </IconButton>
           </Tooltip>
           <Tooltip title="Vider les données">
-            <IconButton onClick={clearConnections} color="error">
-              <Trash2 size={20} />
-            </IconButton>
+        <IconButton onClick={clearConnections} color="error">
+          <Trash2 size={20} />
+        </IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -663,8 +671,8 @@ export function ConnectionsList() {
         sx={{
           width: '100%',
           margin: '0 auto',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(12px)',
+          background: 'rgba(255, 255, 255, 0)',
+          // backdropFilter: 'blur(12px)',
           borderBottomLeftRadius: '16px',
           borderBottomRightRadius: '16px',
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -687,8 +695,8 @@ export function ConnectionsList() {
       {selectedTab === 0 && (
         <Box
           sx={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(8px)',
+            background: 'rgba(255, 255, 255, 0)',
+            backdropFilter: 'blur(4px)',
             borderRadius: '12px',
             p: 3,
             mt: 2
@@ -736,8 +744,8 @@ export function ConnectionsList() {
       {selectedTab === 1 && (
         <Box
           sx={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(8px)',
+            background: 'rgba(255, 255, 255, 0)',
+            backdropFilter: 'blur(0px)',
             borderRadius: '12px',
             p: 3,
             mt: 2
@@ -753,8 +761,10 @@ export function ConnectionsList() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Search size={20} /></InputAdornment>
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><Search size={20} /></InputAdornment>
+                }
               }}
               sx={{ flex: '2 1 200px' }}
             />
@@ -828,8 +838,8 @@ export function ConnectionsList() {
       {selectedTab === 2 && (
         <Box
           sx={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(8px)',
+            background: 'rgba(255, 255, 255, 0)',
+            backdropFilter: 'blur(2px)',
             borderRadius: '12px',
             p: 3,
             mt: 2
@@ -883,298 +893,300 @@ export function ConnectionsList() {
         onClose={closeConnectionDetails}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-            minHeight: '500px'
-          }
-        }}
-        BackdropProps={{
-          sx: {
-            backdropFilter: 'blur(5px)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        slotProps={{
+          paper: {
+        sx: {
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+          minHeight: '500px'
+        }
+          },
+          backdrop: {
+        sx: {
+          backdropFilter: 'blur(5px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }
           }
         }}
       >
         <DialogTitle 
           sx={{ 
-            background: 'rgba(255, 255, 255, 0.7)',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            pb: 2
+        background: 'rgba(255, 255, 255, 0.7)',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        pb: 2
           }}
         >
           <Box display="flex" alignItems="center" gap={2}>
-            {selectedConnection && getDeviceIcon(selectedConnection.deviceInfo.deviceType)}
-            <Box>
-              <Typography variant="h5" fontWeight={700}>
-                Détails de la connexion
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {selectedConnection?.deviceInfo.userIp}
-              </Typography>
-            </Box>
+        {selectedConnection && getDeviceIcon(selectedConnection.deviceInfo.deviceType)}
+        <Box>
+          <Typography variant="h5" fontWeight={700}>
+            Détails de la connexion
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {selectedConnection?.deviceInfo.userIp}
+          </Typography>
+        </Box>
           </Box>
           {selectedConnection?.isActive && (
-            <Chip 
-              label="En ligne" 
-              color="success" 
-              size="small"
-              sx={{ ml: 'auto' }}
-            />
+        <Chip 
+          label="En ligne" 
+          color="success" 
+          size="small"
+          sx={{ ml: 'auto' }}
+        />
           )}
         </DialogTitle>
         
         <DialogContent 
           sx={{ 
-            p: 4,
-            background: 'transparent',
+        p: 4,
+        background: 'transparent',
           }}
         >
           {selectedConnection && (
-            <Grid container spacing={3} sx={{
-              mt: 1,
-            }}>
-              {/* Informations principales */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card 
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
-                      <Devices fontSize="small" />
-                      Informations techniques
-                    </Typography>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Adresse IP</Typography>
-                      <Typography variant="body1" fontWeight={600}>
-                        {selectedConnection.deviceInfo.userIp}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Plateforme</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.deviceInfo.platform || 'Inconnu'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Navigateur</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.deviceInfo.browser || 'Inconnu'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Type d'appareil</Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {getDeviceIcon(selectedConnection.deviceInfo.deviceType)}
-                        <Typography variant="body1" textTransform="capitalize">
-                          {selectedConnection.deviceInfo.deviceType || 'Desktop'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Langue</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.deviceInfo.language}
-                      </Typography>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Résolution écran</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.deviceInfo.screen}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              {/* Informations de session */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card 
-                  sx={{ 
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
-                      <AccessTime fontSize="small" />
-                      Session & localisation
-                    </Typography>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Première connexion</Typography>
-                      <Typography variant="body1">
-                        {new Date(selectedConnection.timestamp).toLocaleString('fr-FR')}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Durée de session</Typography>
-                      <Typography variant="body1" fontWeight={600}>
-                        {selectedConnection.sessionDuration ? formatDuration(selectedConnection.sessionDuration) : 'Pas de données'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Dernière activité</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.lastActivity ? 
-                          new Date(selectedConnection.lastActivity).toLocaleString('fr-FR') : 
-                          'Pas de données'
-                        }
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">Localisation</Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <LocationOn fontSize="small" />
-                        <Typography variant="body1">
-                          {selectedConnection.deviceInfo.location?.country || 'Inconnu'}
-                          {selectedConnection.deviceInfo.location?.city && 
-                            `, ${selectedConnection.deviceInfo.location.city}`}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Fuseau horaire</Typography>
-                      <Typography variant="body1">
-                        {selectedConnection.deviceInfo.timezone}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              {/* Pages visitées */}
-              <Grid size={{ xs: 12 }}>
-                <Card 
-                  sx={{ 
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
-                      <Visibility fontSize="small" />
-                      Pages visitées ({selectedConnection.pagesVisited?.length || 0})
-                    </Typography>
-                    
-                    {selectedConnection.pagesVisited && selectedConnection.pagesVisited.length > 0 ? (
-                      <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                        {selectedConnection.pagesVisited.map((visit, index) => (
-                          <Box 
-                            key={index} 
-                            sx={{ 
-                              p: 2, 
-                              mb: 1, 
-                              background: '#f8fafc',
-                              borderRadius: 1,
-                              border: '1px solid #e2e8f0'
-                            }}
-                          >
-                            <Typography variant="body1" fontWeight={600} sx={{wordBreak: 'break-all'}}>
-                              {visit.page}
-                            </Typography>
-                            <Box display="flex" gap={2} mt={1} flexWrap="wrap">
-                              <Typography variant="caption" color="text.secondary">
-                                📅 {new Date(visit.timestamp).toLocaleString('fr-FR')}
-                              </Typography>
-                              {visit.referrer && (
-                                <Typography variant="caption" color="text.secondary" sx={{
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    maxWidth: '300px'
-                                }}>
-                                  🔗 Depuis: {visit.referrer}
-                                </Typography>
-                              )}
-                            </Box>
-                          </Box>
-                        ))}
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                        Aucune page visitée enregistrée
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              {/* User Agent complet */}
-              <Grid size={{ xs: 12 }}>
-                <Card 
-                  sx={{ 
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      User Agent Complet
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        fontFamily: 'monospace',
-                        background: '#f1f5f9',
-                        p: 2,
-                        borderRadius: 1,
-                        wordBreak: 'break-all',
-                        border: '1px solid #e2e8f0'
-                      }}
-                    >
-                      {selectedConnection.deviceInfo.userAgent}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+        <Grid container spacing={3} sx={{
+          mt: 1,
+        }}>
+          {/* Informations principales */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card 
+          sx={{
+            background: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            borderRadius: '12px'
+          }}
+            >
+          <CardContent>
+            <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
+              <Devices fontSize="small" />
+              Informations techniques
+            </Typography>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Adresse IP</Typography>
+              <Typography variant="body1" fontWeight={600}>
+            {selectedConnection.deviceInfo.userIp}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Plateforme</Typography>
+              <Typography variant="body1">
+            {selectedConnection.deviceInfo.platform || 'Inconnu'}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Navigateur</Typography>
+              <Typography variant="body1">
+            {selectedConnection.deviceInfo.browser || 'Inconnu'}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Type d'appareil</Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+            {getDeviceIcon(selectedConnection.deviceInfo.deviceType)}
+            <Typography variant="body1" textTransform="capitalize">
+              {selectedConnection.deviceInfo.deviceType || 'Desktop'}
+            </Typography>
+              </Box>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Langue</Typography>
+              <Typography variant="body1">
+            {selectedConnection.deviceInfo.language}
+              </Typography>
+            </Box>
+            
+            <Box>
+              <Typography variant="body2" color="text.secondary">Résolution écran</Typography>
+              <Typography variant="body1">
+            {selectedConnection.deviceInfo.screen}
+              </Typography>
+            </Box>
+          </CardContent>
+            </Card>
+          </Grid>
+          
+          {/* Informations de session */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card 
+          sx={{ 
+            background: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            borderRadius: '12px'
+          }}
+            >
+          <CardContent>
+            <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
+              <AccessTime fontSize="small" />
+              Session & localisation
+            </Typography>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Première connexion</Typography>
+              <Typography variant="body1">
+            {new Date(selectedConnection.timestamp).toLocaleString('fr-FR')}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Durée de session</Typography>
+              <Typography variant="body1" fontWeight={600}>
+            {selectedConnection.sessionDuration ? formatDuration(selectedConnection.sessionDuration) : 'Pas de données'}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Dernière activité</Typography>
+              <Typography variant="body1">
+            {selectedConnection.lastActivity ? 
+              new Date(selectedConnection.lastActivity).toLocaleString('fr-FR') : 
+              'Pas de données'
+            }
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Localisation</Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+            <LocationOn fontSize="small" />
+            <Typography variant="body1">
+              {selectedConnection.deviceInfo.location?.country || 'Inconnu'}
+              {selectedConnection.deviceInfo.location?.city && 
+                `, ${selectedConnection.deviceInfo.location.city}`}
+            </Typography>
+              </Box>
+            </Box>
+            
+            <Box>
+              <Typography variant="body2" color="text.secondary">Fuseau horaire</Typography>
+              <Typography variant="body1">
+            {selectedConnection.deviceInfo.timezone}
+              </Typography>
+            </Box>
+          </CardContent>
+            </Card>
+          </Grid>
+          
+          {/* Pages visitées */}
+          <Grid size={{ xs: 12 }}>
+            <Card 
+          sx={{ 
+            background: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            borderRadius: '12px'
+          }}
+            >
+          <CardContent>
+            <Typography variant="h6" gutterBottom display="flex" alignItems="center" gap={1}>
+              <Visibility fontSize="small" />
+              Pages visitées ({selectedConnection.pagesVisited?.length || 0})
+            </Typography>
+            
+            {selectedConnection.pagesVisited && selectedConnection.pagesVisited.length > 0 ? (
+              <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+            {selectedConnection.pagesVisited.map((visit, index) => (
+              <Box 
+                key={index} 
+                sx={{ 
+              p: 2, 
+              mb: 1, 
+              background: '#f8fafc',
+              borderRadius: 1,
+              border: '1px solid #e2e8f0'
+                }}
+              >
+                <Typography variant="body1" fontWeight={600} sx={{wordBreak: 'break-all'}}>
+              {visit.page}
+                </Typography>
+                <Box display="flex" gap={2} mt={1} flexWrap="wrap">
+              <Typography variant="caption" color="text.secondary">
+                📅 {new Date(visit.timestamp).toLocaleString('fr-FR')}
+              </Typography>
+              {visit.referrer && (
+                <Typography variant="caption" color="text.secondary" sx={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '300px'
+                }}>
+                  🔗 Depuis: {visit.referrer}
+                </Typography>
+              )}
+                </Box>
+              </Box>
+            ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+            Aucune page visitée enregistrée
+              </Typography>
+            )}
+          </CardContent>
+            </Card>
+          </Grid>
+          
+          {/* User Agent complet */}
+          <Grid size={{ xs: 12 }}>
+            <Card 
+          sx={{ 
+            background: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            borderRadius: '12px'
+          }}
+            >
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              User Agent Complet
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+            fontFamily: 'monospace',
+            background: '#f1f5f9',
+            p: 2,
+            borderRadius: 1,
+            wordBreak: 'break-all',
+            border: '1px solid #e2e8f0'
+              }}
+            >
+              {selectedConnection.deviceInfo.userAgent}
+            </Typography>
+          </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
           )}
         </DialogContent>
         
         <DialogActions 
           sx={{ 
-            background: 'rgba(255, 255, 255, 0.7)',
-            borderTop: '1px solid #e5e7eb',
-            p: 3
+        background: 'rgba(255, 255, 255, 0.7)',
+        borderTop: '1px solid #e5e7eb',
+        p: 3
           }}
         >
           <Button 
-            onClick={closeConnectionDetails} 
-            variant="contained"
-            sx={{
-              background: '#3b82f6',
-              color: 'white',
-              '&:hover': {
-                background: '#2563eb'
-              }
-            }}
+        onClick={closeConnectionDetails} 
+        variant="contained"
+        sx={{
+          background: '#3b82f6',
+          color: 'white',
+          '&:hover': {
+            background: '#2563eb'
+          }
+        }}
           >
-            Fermer
+        Fermer
           </Button>
         </DialogActions>
       </Dialog>

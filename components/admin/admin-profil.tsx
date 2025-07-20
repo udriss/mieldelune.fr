@@ -30,7 +30,8 @@ import {
   DialogTitle,
   DialogActions,
   Tabs,
-  Tab
+  Tab,
+  Slider,
 } from '@mui/material';
 import { 
   CompressOutlined,
@@ -593,10 +594,17 @@ const getInputStyle = (field: string) => {
   };
 
   return (
-    <Grid container spacing={2} direction={'column'} className="mb-8">
-
-      
-    <Paper elevation={1} sx={{ mt: 8, width: '800px', p: 3, borderRadius: 2, border: '1px solid #e5e7eb', maxWidth: '800px', margin: '0 auto' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-around",
+        width: "100%",
+      }}
+    >
+      <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb', margin: '0 auto',
+        
+       }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6" fontWeight={600}>
           Profil
@@ -623,21 +631,35 @@ const getInputStyle = (field: string) => {
           </Typography>
         </Box>
       </Box>
-      <Grid container spacing={2} direction={'row'}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        justifyItems: 'center',
-        flexWrap: 'wrap',
-        mb: 2
-      }}>
-        <Grid size={{ xs:'grow' }}>
-          <Typography variant='body2' className="text-right" sx={{ whiteSpace: 'nowrap', color: 'rgb(177, 177, 177)' }}>
+      <Grid container
+        sx={{
+          alignItems: 'center',
+          gap: {
+            md: .5,
+            lg: 2,
+          }
+        }}
+        >
+        <Grid size={{ xs: 12, md: 3 }}>
+          <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                md: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                md: 0,
+              },
+               mr: {
+                xs: 0,
+                md: 1.5,
+              }
+            }}>
             Réseau social principal
           </Typography>
         </Grid>
-        <Grid size={{ xs:9 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Input
             className={getInputStyle('socialUrl')}
             value={fieldValues.socialUrl || ''}
@@ -645,22 +667,26 @@ const getInputStyle = (field: string) => {
             placeholder="URL du réseau social"
           />
         </Grid>
-      </Grid>
-      <Grid container spacing={2} direction={'row'}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        justifyItems: 'center',
-        flexWrap: 'wrap',
-        mb: 2,
-      }}>
-        <Grid size={{ xs:'grow' }}>
-          <Typography variant="body2" className="text-right" sx={{ whiteSpace: 'nowrap', color: 'rgb(177, 177, 177)' }}>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                md: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                md: 0,
+              },
+               mr: {
+                xs: 0,
+                md: 1.5,
+              }
+            }}>
             Nom d'artiste
           </Typography>
         </Grid>
-        <Grid size={{ xs:9 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Input
             className={getInputStyle('artistName')}
             value={fieldValues.artistName || ''}
@@ -668,22 +694,26 @@ const getInputStyle = (field: string) => {
             placeholder="Nom d'artiste"
           />
         </Grid>
-      </Grid>
-      <Grid container spacing={2} direction={'row'}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        justifyItems: 'center',
-        flexWrap: 'wrap',
-        mb: 2,
-      }}>
-      <Grid size={{ xs:'grow' }}>
-          <Typography variant="body2" className="text-right" sx={{ whiteSpace: 'nowrap', color: 'rgb(177, 177, 177)' }}>
+      <Grid size={{ xs: 12, md: 3 }}>
+          <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                md: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                md: 0,
+              },
+               mr: {
+                xs: 0,
+                md: 1.5,
+              }
+            }}>
             Sous-titre
           </Typography>
         </Grid>
-        <Grid size={{ xs:9 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Input
             className={getInputStyle('subTitle')}
             value={fieldValues.subTitle || ''}
@@ -691,22 +721,26 @@ const getInputStyle = (field: string) => {
             placeholder="Ex: Photographe professionnel, Artiste digital, etc."
           />
         </Grid>
-      </Grid>
-      <Grid container spacing={2} direction={'row'}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        justifyItems: 'center',
-        flexWrap: 'wrap',
-        mb: 2,
-      }}>
-      <Grid size={{ xs:'grow' }}>
-          <Typography variant="body2" className="text-right" sx={{ whiteSpace: 'nowrap', color: 'rgb(177, 177, 177)' }}>
+      <Grid size={{ xs: 12, md: 3 }}>
+          <Typography variant="subtitle2" 
+            sx={{ 
+              textAlign: {
+                sm: 'left',
+                md: 'right'
+              },
+               mt: {
+                xs: 1.5,
+                md: 0,
+              },
+               mr: {
+                xs: 0,
+                md: 1.5,
+              }
+            }}>
             Description
           </Typography>
         </Grid>
-        <Grid size={{ xs:9 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <TextField
             multiline
             minRows={4}
@@ -747,6 +781,7 @@ const getInputStyle = (field: string) => {
           <MuiButton
             variant="outlined"
             onClick={handleSubmit}
+            size="small"
             sx={{
               bgcolor: 'white',
               borderColor: 'gray.300',
@@ -763,11 +798,35 @@ const getInputStyle = (field: string) => {
       </Grid>
     </Paper>
 
-      <Paper elevation={1} sx={{ mt: 8, width: '800px', p: 3, borderRadius: 2, border: '1px solid #e5e7eb',
-         maxWidth: '800px', margin: '0 auto' }}>
+
+      <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
       <Typography variant="h6" fontWeight={600} mb={2}>
         Image de profil
         </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton
+            size="small"
+            onClick={() => window.open('/artiste', '_blank')}
+            title="Voir la page artiste"
+            sx={{ 
+              color: '#3b82f6',
+              border: '1px solid #3b82f6',
+              borderRadius: '6px',
+              '&:hover': {
+                backgroundColor: '#eff6ff',
+                borderColor: '#2563eb'
+              }
+            }}
+          >
+            <ExternalLink size={16} />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary">
+            Voir la page de profil
+          </Typography>
+        </Box>
+        </Box>
+      
       <Grid container spacing={2} sx={{ border: '1px solid #e5e7eb', borderRadius: 1, p: 1, minHeight: 150 }}>
         <Grid size={{ xs: 4, md: 3 }}>
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" height="100%">
@@ -824,7 +883,7 @@ const getInputStyle = (field: string) => {
         </Grid>
         
         <Grid size={{ xs: 8, md: 3 }}>
-          <Box 
+          <Box display="flex" flexDirection="column" gap={2} justifyContent="center"
           sx={{
             minHeight: 100,
             height: '100%',
@@ -835,15 +894,9 @@ const getInputStyle = (field: string) => {
               xs: 'center',
               md: 'center',
             },
-          }}
-          >
-          <Box display="flex" flexDirection="column" gap={2} justifyContent="center"
-          sx={{
-            height: '100%',
-            maxHeight: 150,
           }}>
             {/* ToggleButtonGroup pour le choix du type d'upload */}
-            <Box
+            <Box 
             sx ={{
               width: {
                 xs: '100%',
@@ -873,18 +926,17 @@ const getInputStyle = (field: string) => {
                 size="small"
                 sx={{ width: '100%' }}
               >
-                <ToggleButton value="profileLink" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                <ToggleButton value="profileLink" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }}>
                   Lien web
                 </ToggleButton>
-                <ToggleButton value="profileStorage" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }}>
+                <ToggleButton value="profileStorage" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }}>
                   Upload de fichier
                 </ToggleButton>
-                <ToggleButton value="profileThumbnail" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'flex-start' }} disabled={isProcessingThumbnail}>
+                <ToggleButton value="profileThumbnail" sx={{ fontSize: '0.75rem', py: 1, justifyContent: 'center' }} disabled={isProcessingThumbnail}>
                   Produire la vignette
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
-          </Box>
           </Box>
         </Grid>
 
@@ -1059,21 +1111,13 @@ const getInputStyle = (field: string) => {
                         <Typography variant="overline" color="text.secondary">
                           {resizeValue} % (compression à {100 - resizeValue} %)
                         </Typography>
-                        <Box sx={{ width: 200, mt: 1 }}>
-                          <input
-                            type="range"
-                            min="1"
-                            max="100"
+                        <Box sx={{ width: '100%', minWidth: 120, mt: 1 }}>
+                          <Slider
                             value={resizeValue}
-                            onChange={(e) => setResizeValue(Number(e.target.value))}
-                            style={{
-                              width: '100%',
-                              height: '8px',
-                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${resizeValue}%, #e5e7eb ${resizeValue}%, #e5e7eb 100%)`,
-                              borderRadius: '4px',
-                              outline: 'none',
-                              WebkitAppearance: 'none',
-                            }}
+                            min={1}
+                            max={100}
+                            onChange={(e, newValue) => setResizeValue(newValue as number)}
+                            sx={{ width: '100%', mt: 1 }}
                           />
                         </Box>
                       </Box>
@@ -1141,6 +1185,7 @@ const getInputStyle = (field: string) => {
             borderRadius: 1,
             p: 2,
             border: '1px dashed #cbd5e1',
+            mt:2, 
           }}
         >
           <Typography variant="caption" color="text.secondary">
@@ -1268,8 +1313,7 @@ const getInputStyle = (field: string) => {
       )}
       </Paper>
 
-      <Paper elevation={1} sx={{ mt: 8, width: '800px', p: 3, borderRadius: 2, border: '1px solid #e5e7eb',
-         maxWidth: '800px', margin: '0 auto' }}>
+      <Paper elevation={1} sx={{ mt: 8, width: '100%', p: 3, borderRadius: 2, border: '1px solid #e5e7eb' }}>
       <Typography variant="h6" fontWeight={600} mb={2}>
         Réseaux sociaux</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
@@ -1309,6 +1353,7 @@ const getInputStyle = (field: string) => {
           variant="outlined"
           onClick={handleSave}
           disabled={isSaving}
+          size="small"
           sx={{
             bgcolor: 'white',
             borderColor: 'gray.300',
@@ -1413,7 +1458,7 @@ const getInputStyle = (field: string) => {
           </MuiButton>
         </DialogActions>
       </Dialog>
-      </Grid>
+      </Box>
   );
 }
 

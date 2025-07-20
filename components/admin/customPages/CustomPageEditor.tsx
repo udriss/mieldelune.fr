@@ -14,12 +14,12 @@ import {
   preloadEssentialFonts,
   useAllGoogleFonts,
   useTitleGoogleFont,
-  EditorToolbar,
   TitleSettings,
   PragmaticSortableContentElement,
   reorderContentElements,
   autoScrollRegistry,
 } from './editor';
+import { EditorToolbar } from './editor/EditorToolbar';
 
 interface CustomPageEditorProps {
   page: CustomPage;
@@ -185,10 +185,12 @@ export default function CustomPageEditor({ page, onSave, onCancel, onUnsavedChan
   };
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    // Pour que le sticky fonctionne, il ne faut PAS de overflow vertical sur le parent direct de la Toolbar !
+    <Box sx={{ position: 'relative', overflowY: 'unset', overflowX: 'visible' }}>
       {/* Barre d'outils sticky */}
       <EditorToolbar
         title={editedPage.title}
+        titleSettings={editedPage.titleSettings}
         hasUnsavedChanges={hasUnsavedChanges}
         onSave={handleSave}
         onCancel={onCancel}

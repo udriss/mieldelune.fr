@@ -571,6 +571,7 @@ export function CoverImageSection({
               borderRadius: 1,
               p: 2,
               border: '1px dashed #cbd5e1',
+              mt:2, 
             }}
           >
             <Typography variant="caption" color="text.secondary">

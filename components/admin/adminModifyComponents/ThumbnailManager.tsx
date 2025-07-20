@@ -495,6 +495,7 @@ export function ThumbnailManager({
               borderRadius: 1,
               p: 2,
               border: '1px dashed #cbd5e1',
+              mt:2, 
             }}
           >
             <Typography variant="caption" color="text.secondary">
@@ -952,7 +953,7 @@ export function ThumbnailManager({
           borderBottom: '1px solid #e2e8f0',
           p: 2,
           display: 'flex', 
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', md: 'row' },
           gap: 1,
           alignItems: 'center',
           justifyContent: 'space-around',
@@ -966,13 +967,13 @@ export function ThumbnailManager({
               startIcon={<SelectAllOutlined />}
               onClick={handleSelectAll}
               sx={{ 
-                borderRadius: 2,
-                background: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(5px)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                '&:hover': {
-                  background: 'rgba(239, 246, 255, 0.9)',
-                }
+          borderRadius: 2,
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(5px)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          '&:hover': {
+            background: 'rgba(239, 246, 255, 0.9)',
+          }
               }}
             >
               Tout sélectionner
@@ -982,13 +983,13 @@ export function ThumbnailManager({
               startIcon={<DeselectOutlined />}
               onClick={handleDeselectAll}
               sx={{ 
-                borderRadius: 2,
-                background: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(5px)',
-                border: '1px solid rgba(107, 114, 128, 0.3)',
-                '&:hover': {
-                  background: 'rgba(249, 250, 251, 0.9)',
-                }
+          borderRadius: 2,
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(5px)',
+          border: '1px solid rgba(107, 114, 128, 0.3)',
+          '&:hover': {
+            background: 'rgba(249, 250, 251, 0.9)',
+          }
               }}
             >
               Tout désélectionner
@@ -996,16 +997,23 @@ export function ThumbnailManager({
             <Chip 
               label={`${selectedImages.length} / ${editedWedding.images.length} images`}
               sx={{ 
-                background: 'rgba(34, 197, 94, 0.1)',
-                backdropFilter: 'blur(5px)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                fontWeight: 600
+          background: 'rgba(34, 197, 94, 0.1)',
+          backdropFilter: 'blur(5px)',
+          border: '1px solid rgba(34, 197, 94, 0.3)',
+          fontWeight: 600
               }}
               color="success"
               variant="outlined"
             />
           </Box>
-          <Divider orientation="vertical" flexItem />
+            { 
+            // Affiche un Divider horizontal sur md et plus, sinon vertical
+            <Divider 
+              orientation={{ xs: "vertical", md: "horizontal" } as any} 
+              flexItem 
+              sx={{ mx: { xs: 1, md: 0 }, my: { xs: 0, md: 1 } }} 
+            />
+            }
           {/* Bouton de validation */}
         <DialogActions sx={{ 
           p: 1, 
@@ -1028,7 +1036,7 @@ export function ThumbnailManager({
           >
             Annuler
           </MuiButton>
-          <MuiButton 
+            <MuiButton 
             onClick={handleProcessSelectedImages}
             variant="contained"
             disabled={selectedImages.length === 0}
@@ -1037,12 +1045,14 @@ export function ThumbnailManager({
               borderRadius: 2,
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               }
             }}
-          >
-            Lancer {selectedImages.length} miniature{selectedImages.length > 1 ? 's' : ''}
-          </MuiButton>
+            >
+            {selectedImages.length === 0
+              ? "Aucune miniature sélectionnée"
+              : `Lancer ${selectedImages.length} miniature${selectedImages.length > 1 ? 's' : ''}`}
+            </MuiButton>
         </DialogActions>
         </Box>
         
@@ -1059,7 +1069,7 @@ export function ThumbnailManager({
               index,
               imageName: cleanImageName(image.fileUrl.split('/').pop() || ''),
               isSelected: selectedImages.includes(image.fileUrl),
-              Height: 'auto', // Laisser la hauteur s'ajuster automatiquement
+              height: 200, // Hauteur fixe pour le calcul de disposition
             }))}
             render={({ data }) => {
               const { image, imageName, isSelected } = data;
@@ -1165,11 +1175,10 @@ export function ThumbnailManager({
                 </div>
               );
             }}
-            columnWidth={250}
+            // columnWidth={250}
             columnGutter={16}
-            style={{
-              height: '100%',
-            }}
+            overscanBy={5}
+            maxColumnCount={6}
           />
         </DialogContent>
         

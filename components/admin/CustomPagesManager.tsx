@@ -376,9 +376,7 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         backgroundColor: 'rgba(255, 255, 255, 0.3)', 
         backdropFilter: 'blur(8px)',
-        // Hauteur automatique pour tous les onglets
-        height: 'auto',
-        overflow: 'visible',
+        // RETIRER toute contrainte de height et overflow pour que le sticky fonctionne !
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -389,14 +387,16 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
         elevation={0}
         sx={{
           position: 'sticky',
-          top: 0,
-          zIndex: 1100, // Au-dessus des barres sticky des sous-composants (z-index: 1000)
+          top: 0, // Se positionner sous la barre Tabs principale
+          zIndex: 1001, // Au-dessus de la barre Tabs principale (z-index: 1000)
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(12px)',
           borderTopLeftRadius: '8px',
           borderTopRightRadius: '8px',
           borderBottom: '1px solid #e5e7eb',
-          flexShrink: 0, // Ne pas rétrécir
+          //flexShrink: 0, // Ne pas rétrécir
+          maxHeight:60, 
+          p:0,
         }}
       >
         <Tabs 
@@ -417,6 +417,8 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
           }}
           variant="fullWidth"
           sx={{
+            maxHeight:60,
+            p:0,
             '& .MuiTabs-indicator': {
               backgroundColor: '#3b82f6',
             },
@@ -433,18 +435,33 @@ export function CustomPagesManager({ onUnsavedChanges, scrollableContainerRef }:
             label="Liste des pages" 
             icon={<List size={18} />}
             iconPosition="start"
+            sx={{
+              maxHeight:60,
+              minHeight: 60,
+              p:0,
+            }}
           />
           <Tab 
             label="Éditeur" 
             icon={<Edit size={18} />}
             iconPosition="start"
             disabled={!selectedPage}
+            sx={{
+              maxHeight:60,
+              minHeight: 60,
+              p:0,
+            }}
           />
           <Tab 
             label="Paramètres" 
             icon={<Settings size={18} />}
             iconPosition="start"
             disabled={!selectedPage}
+            sx={{
+              maxHeight:60,
+              minHeight: 60,
+              p:0,
+            }}
           />
         </Tabs>
       </Paper>
