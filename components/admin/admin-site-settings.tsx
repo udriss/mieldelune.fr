@@ -487,7 +487,7 @@ export const AdminSiteSettings = forwardRef<AdminSiteSettingsRef, AdminSiteSetti
   }, [weddings]);
 
   return (
-    <Box maxWidth={800} display="flex" flexDirection="column" alignItems="center" width="100%">
+    <Box maxWidth={900} display="flex" flexDirection="column" alignItems="center" width="100%">
 
       {/* Dialogue de confirmation pour changement d'accordéon */}
       <Dialog open={showAccordionConfirmDialog} onClose={handleAccordionDialogCancel}>
@@ -545,7 +545,6 @@ export const AdminSiteSettings = forwardRef<AdminSiteSettingsRef, AdminSiteSetti
       {/* Conteneur pour tous les accordéons */}
       <Box sx={{
         width: '100%',
-        p: 2,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(10px)',
         borderRadius: 2,

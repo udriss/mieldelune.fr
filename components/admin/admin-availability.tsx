@@ -69,7 +69,7 @@ export function AdminAvailability() {
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 3, width: '100%', maxWidth: 800, mx: 'auto' }}>
+    <Paper elevation={3} sx={{ p: 3, width: '100%', maxWidth: 900, mx: 'auto' }}>
         <Typography variant="h6" fontWeight={600}>
           Gérer les indisponibilités
         </Typography>

@@ -3,9 +3,9 @@
     "timestamp": 1752940887467,
     "id": "dfcb5f70-919d-4c21-a8c9-2c8ea568cde8",
     "deviceInfo": {
-      "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
       "language": "fr-FR",
-      "screen": "445x696",
+      "screen": "2056x1329",
       "timezone": "Europe/Paris",
       "userIp": "89.158.80.136"
     },
@@ -414,9 +414,34 @@
         "page": "/artiste/",
         "timestamp": 1753023550943,
         "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753023762814,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753023767199,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/mariage/1/",
+        "timestamp": 1753023770285,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753023787061,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753023824353,
+        "referrer": "https://mieldelune.fr/"
       }
     ],
-    "lastActivity": 1753023551128,
+    "lastActivity": 1753023824427,
     "isActive": true
   },
   {
@@ -1587,6 +1612,26 @@
       }
     ],
     "lastActivity": 1753021003859,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753036568470,
+    "id": "a2bd7cd1-293f-44bf-82f7-381974a98cd1",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+      "language": "fr-FR",
+      "screen": "2056x1329",
+      "timezone": "Europe/Paris",
+      "userIp": "89.158.80.136"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753036568275,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753036568470,
     "isActive": true
   }
 ]

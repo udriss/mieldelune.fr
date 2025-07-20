@@ -288,7 +288,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
           height: activeTab !== 'custom-pages' ? 'calc(100vh - 200px)' : 'calc(100vh - 120px)', // Moins de hauteur si pas de Tabs sticky
         }}
       >
-        <Box sx={{ minWidth: 900, maxWidth: 900, mx: 'auto', py: 4, px: 2 }}>
+        <Box sx={{ minWidth: 900, maxWidth: 900, mx: 'auto' }}>
           {/* Tabs DANS le conteneur scrollable SEULEMENT pour custom-pages */}
           {activeTab === 'custom-pages' && (
             <Paper 
@@ -354,6 +354,7 @@ export default function AdminClientWrapper({ initialWeddings, initialProfile }: 
               maxWidth: 'min(900px, 90vw)', 
               width: '100%',
               margin: '0 auto',
+              py: 4, px: 2,
             }}
           >
             {activeTab === 'nouveau' && <NewEventButton onEventCreated={handleEventCreated} />}

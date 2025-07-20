@@ -623,16 +623,9 @@ export function ConnectionsList() {
 
   return (
     <Box 
-      sx={{ 
-        p: 4, 
-        maxWidth: '1200px',
+      sx={{  
         width: '100%',
         mx: 'auto',
-        '@media (max-width: 840px)': {
-          width: '100%',
-          maxWidth: '100%',
-          px: 2
-        },
         background: 'rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(12px)',
         borderRadius: '16px',

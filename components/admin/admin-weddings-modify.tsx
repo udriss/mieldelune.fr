@@ -528,8 +528,7 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
   };
 
   return (
-    <div className="flex flex-col items-center max-w-[800px] w-full mt-8">
-      <div className="justify-between items-center flex flex-col max-w-[800px] w-full">
+      <div className="justify-between items-center flex flex-col w-full">
         <div className="flex justify-between items-center w-full">
           <WeddingSelector 
             weddings={weddings} 
@@ -619,6 +618,5 @@ export function AdminWeddings({ weddings, setWeddings, onDataRefresh }: AdminWed
           </>
         )}
       </div>
-    </div>
   );
 }
