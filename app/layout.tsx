@@ -523,8 +523,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <head>
-        <meta property="og:title" content="MielDeLune – Photographe Mariage & Événement" />
-        <meta property="og:description" content="Photographe professionnel spécialisé dans les mariages et événements prestigieux. Découvrez nos galeries et réservez en ligne." />
+        <meta name="description" content="MielDeLune - Photographe professionnel spécialisé mariage, couple, famille. Reportages authentiques et naturels à Paris et partout en France. Galeries exclusives, tarifs transparents et réservation en ligne simple." />
+        <meta name="keywords" content="photographe mariage, photos mariage, photographe professionnel, galerie photos, réservation, paris, france, reportage mariage, couple, famille" />
+        <meta property="og:title" content="MielDeLune – Photographe Mariage & Événement Professionnel" />
+        <meta property="og:description" content="Photographe professionnel spécialisé mariage, couple et famille. Reportages authentiques à Paris et partout en France. Découvrez nos galeries exclusives et réservez en ligne." />
         <meta property="og:image" content="https://mieldelune.fr/og-image.jpg" />
         <meta property="og:url" content="https://mieldelune.fr" />
         <meta property="og:type" content="website" />
@@ -532,6 +534,104 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="twitter:title" content="MielDeLune – Photographe Mariage & Événement" />
         <meta name="twitter:description" content="Photographe professionnel spécialisé dans les mariages et événements prestigieux." />
         <meta name="twitter:image" content="https://mieldelune.fr/og-image.jpg" />
+        
+        {/* Référence vers les données structurées pour les sitelinks */}
+        <link rel="alternate" type="application/ld+json" href="/api/structured-data" />
+        
+        {/* Données structurées pour améliorer l'affichage Google et les sitelinks */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfessionalService",
+            "name": "MielDeLune",
+            "alternateName": "MielDeLune Photographie",
+            "description": "Photographe professionnel spécialisé mariage, couple et famille. Reportages authentiques et naturels.",
+            "url": "https://mieldelune.fr",
+            "telephone": "+33-XX-XX-XX-XX",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Paris",
+              "addressCountry": "FR"
+            },
+            "sameAs": [
+              "https://mieldelune.fr"
+            ],
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": "https://mieldelune.fr/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            ],
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://mieldelune.fr"
+            },
+            "offers": {
+              "@type": "Offer",
+              "description": "Services de photographie de mariage professionnels"
+            },
+            // Navigation structure pour les sitelinks Google
+            "mainEntity": [
+              {
+                "@type": "WebPage",
+                "@id": "https://mieldelune.fr/",
+                "name": "Accueil",
+                "description": "Galeries photos de mariage authentiques et naturelles",
+                "url": "https://mieldelune.fr/"
+              },
+              {
+                "@type": "WebPage", 
+                "@id": "https://mieldelune.fr/artiste/",
+                "name": "Photographe",
+                "description": "Découvrez le parcours et la vision de votre photographe",
+                "url": "https://mieldelune.fr/artiste/"
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://mieldelune.fr/contact/", 
+                "name": "Contact",
+                "description": "Contactez-nous pour réserver votre séance photo",
+                "url": "https://mieldelune.fr/contact/"
+              }
+            ]
+          })
+        }} />
+
+        {/* Données structurées pour le site web */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "MielDeLune",
+            "url": "https://mieldelune.fr",
+            "description": "Photographe professionnel spécialisé dans les mariages et événements prestigieux",
+            "publisher": {
+              "@type": "Organization",
+              "name": "MielDeLune"
+            },
+            "mainEntity": [
+              {
+                "@type": "WebPage",
+                "name": "Galeries Photos",
+                "url": "https://mieldelune.fr/",
+                "description": "Découvrez nos galeries de photos de mariage"
+              },
+              {
+                "@type": "WebPage", 
+                "name": "Photographe",
+                "url": "https://mieldelune.fr/artiste",
+                "description": "Découvrez le parcours et la vision de votre photographe"
+              },
+              {
+                "@type": "WebPage",
+                "name": "Contact - Réservation",
+                "url": "https://mieldelune.fr/contact",
+                "description": "Contactez-nous pour réserver votre séance photo"
+              },
+            ]
+          })
+        }} />
       </head>
       <body style={getMainGradient() ? { 
         background: getMainGradient(), 

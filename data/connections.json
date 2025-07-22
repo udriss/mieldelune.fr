@@ -5,7 +5,7 @@
     "deviceInfo": {
       "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
       "language": "fr-FR",
-      "screen": "2056x1329",
+      "screen": "2560x1440",
       "timezone": "Europe/Paris",
       "userIp": "89.158.80.136"
     },
@@ -439,9 +439,79 @@
         "page": "/",
         "timestamp": 1753023824353,
         "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753071802890,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174602537,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174605226,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174662565,
+        "referrer": "https://mieldelune.fr/admin/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174868910,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753174871079,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753174873620,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174874943,
+        "referrer": "https://mieldelune.fr/contact/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753174876060,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174877049,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/mariage/1/",
+        "timestamp": 1753174877884,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174883138,
+        "referrer": "https://mieldelune.fr/mariage/1/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753174975213,
+        "referrer": ""
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753174977335,
+        "referrer": "https://mieldelune.fr/"
       }
     ],
-    "lastActivity": 1753023824427,
+    "lastActivity": 1753174977459,
     "isActive": true
   },
   {
@@ -1614,9 +1684,14 @@
         "page": "/",
         "timestamp": 1753039323637,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753094314467,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753039327582,
+    "lastActivity": 1753094317532,
     "isActive": true
   },
   {
@@ -1669,9 +1744,74 @@
         "page": "/",
         "timestamp": 1753051150482,
         "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753063824801,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753064264353,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753064272487,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753064286785,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/3/",
+        "timestamp": 1753064291611,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753064313524,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753064318641,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753064784515,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753064874348,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753064975119,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753064995370,
+        "referrer": "https://mieldelune.fr/mariage/2/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753065218034,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753137400941,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753051150894,
+    "lastActivity": 1753137401294,
     "isActive": true
   },
   {
@@ -1682,7 +1822,7 @@
       "language": "fr-FR",
       "screen": "393x852",
       "timezone": "Europe/Paris",
-      "userIp": "176.140.196.94"
+      "userIp": "176.140.215.66"
     },
     "pagesVisited": [
       {
@@ -1699,9 +1839,14 @@
         "page": "/",
         "timestamp": 1753039191037,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753110033746,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753039191172,
+    "lastActivity": 1753110033863,
     "isActive": true
   },
   {
@@ -1722,6 +1867,301 @@
       }
     ],
     "lastActivity": 1753043112043,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753112699828,
+    "id": "98b0d6f6-6929-461c-a556-7befed97b191",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.70.109"
+    },
+    "pagesVisited": [
+      {
+        "page": "/mentions-legales/",
+        "timestamp": 1753056000510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753112699828,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753119575745,
+    "id": "1950793f-3c53-4637-8630-3121aa36d734",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.73.196"
+    },
+    "pagesVisited": [
+      {
+        "page": "/mentions-legales/",
+        "timestamp": 1753056000510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753119575745,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753134727688,
+    "id": "b24a4448-fc64-4be5-bd48-bc89d565aa57",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1",
+      "language": "fr-FR",
+      "screen": "414x896",
+      "timezone": "Europe/Paris",
+      "userIp": "212.195.74.148"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753134724468,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/4/",
+        "timestamp": 1753134733007,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753134745983,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753135265148,
+    "id": "8d1b565c-3d3f-4124-a51f-d32d5664a088",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1",
+      "language": "fr-FR",
+      "screen": "414x896",
+      "timezone": "Europe/Paris",
+      "userIp": "212.195.74.148"
+    },
+    "pagesVisited": [
+      {
+        "page": "/artiste/",
+        "timestamp": 1753135264318,
+        "referrer": "https://mieldelune.fr/mariage/4/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753135373684,
+        "referrer": "https://mieldelune.fr/mariage/4/"
+      },
+      {
+        "page": "/mentions-legales/",
+        "timestamp": 1753135377432,
+        "referrer": "https://mieldelune.fr/mariage/4/"
+      }
+    ],
+    "lastActivity": 1753135377614,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753136036255,
+    "id": "fa39f6d1-beb6-456f-a80d-3781473befa4",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1",
+      "language": "fr-FR",
+      "screen": "414x896",
+      "timezone": "Europe/Paris",
+      "userIp": "212.195.74.148"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753136032320,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753136036255,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753136072517,
+    "id": "1c4bb846-09d7-4b77-a9b9-b0edad5e9ddf",
+    "deviceInfo": {
+      "userAgent": "Trustpilot-websitescreenshotcreator/1.0",
+      "language": "en-US",
+      "screen": "800x600",
+      "timezone": "UTC",
+      "userIp": "18.201.132.240"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753136072255,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753136072517,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753136137347,
+    "id": "398ac185-e355-4634-af6b-cc9288230ef4",
+    "deviceInfo": {
+      "userAgent": "Trustpilot-websitescreenshotcreator/1.0",
+      "language": "en-US",
+      "screen": "800x600",
+      "timezone": "UTC",
+      "userIp": "18.201.58.85"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753136135736,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753136137347,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164725219,
+    "id": "4a937334-a7f4-4c1b-abc4-54973d02f7a2",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.15"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753142400510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164725219,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164807335,
+    "id": "cfd0010e-e4be-4cb0-a160-20929b17e555",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.14"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753164793476,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164807335,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164808870,
+    "id": "e908f9d3-613b-4f6e-9819-fa28a6afcc81",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/137.0.7151.119 Safari/537.36",
+      "language": "en-US",
+      "screen": "1024x1024",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.14"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753164796865,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164808870,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164809689,
+    "id": "5377a1c8-b1b4-44bc-aa0a-a89e06642543",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.14"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753164796870,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164809689,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164810508,
+    "id": "e764f58b-24f9-46ad-a190-a0e55fa28c36",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/137.0.7151.119 Safari/537.36",
+      "language": "en-US",
+      "screen": "1024x1024",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.14"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753164793479,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164810508,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753164811235,
+    "id": "ba2849c3-8a69-4dbc-941b-8cbf00e37f16",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.74.14"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753142400510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753164811235,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753165078389,
+    "id": "64cf4886-ccce-4ea2-aa7b-a0ac85f4ee4c",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.7151.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "language": "en-US",
+      "screen": "412x732",
+      "timezone": "America/Los_Angeles",
+      "userIp": "66.249.73.196"
+    },
+    "pagesVisited": [
+      {
+        "page": "/mentions-legales/",
+        "timestamp": 1753142400510,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753165078389,
     "isActive": true
   }
 ]

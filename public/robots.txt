@@ -1,10 +1,35 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /admin/login
+Disallow: /api/
+Disallow: /_next/
+Disallow: /trash.txt
 
 # Host
-Host: mieldelune.fr
+Host: https://mieldelune.fr
 
 # Sitemaps
-Sitemap: mieldelune.fr/sitemap.xml
+Sitemap: https://mieldelune.fr/sitemap.xml
 Sitemap: mieldelune.fr/sitemap-0.xml
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 1
+
+# Spécifications pour les moteurs de recherche spécifiques
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /

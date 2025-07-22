@@ -115,11 +115,11 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
   const isMobile = useMediaQuery('(max-width:600px)');
   const [fadeOut, setFadeOut] = useState(false);
   const [showProgress, setShowProgress] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
   const [thumbsSwiper, setThumbsSwiper] = React.useState<any>(null);
   const mainSwiperRef = useRef<any>(null);
   const [autoplayProgress, setAutoplayProgress] = useState(0); // 0 à 1
-  const [autoplayTime, setAutoplayTime] = useState(4000); // ms
+  const [autoplayTime, setAutoplayTime] = useState(2000); // ms
 
   // Effet pour forcer la mise à jour des thumbs quand on dézoome
   React.useEffect(() => {
@@ -532,11 +532,17 @@ export default function SwiperGallery({ images, initialIndex, onClose, weddingTi
           spaceBetween={10}
           navigation
           loop
-          autoplay={{ delay: 3500, disableOnInteraction: false }}
+          autoplay={{ delay: 2000, disableOnInteraction: false }}
           effect="fade"
           fadeEffect={{ crossFade: true }}
           speed={400}
           onAutoplayTimeLeft={handleAutoplayTimeLeft}
+          onInit={swiper => {
+            // Stop autoplay at mount
+            if (swiper.autoplay && swiper.autoplay.running) {
+              swiper.autoplay.stop();
+            }
+          }}
           onSlideChange={swiper => {
             
             if (thumbsSwiper && !thumbsSwiper.destroyed) {
