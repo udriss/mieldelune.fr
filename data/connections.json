@@ -509,9 +509,44 @@
         "page": "/contact/",
         "timestamp": 1753174977335,
         "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753342952752,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753432486398,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461049881,
+        "referrer": ""
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753461055980,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461089309,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461200472,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461205664,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753174977459,
+    "lastActivity": 1753461205773,
     "isActive": true
   },
   {
@@ -1672,7 +1707,7 @@
       "language": "fr-FR",
       "screen": "428x926",
       "timezone": "Europe/Paris",
-      "userIp": "176.185.203.110"
+      "userIp": "176.179.57.117"
     },
     "pagesVisited": [
       {
@@ -1689,9 +1724,49 @@
         "page": "/",
         "timestamp": 1753094314467,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753467382319,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/1/",
+        "timestamp": 1753467398851,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/1/",
+        "timestamp": 1753467478968,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753467626181,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/2/",
+        "timestamp": 1753467630132,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753467690747,
+        "referrer": ""
+      },
+      {
+        "page": "/mariage/4/",
+        "timestamp": 1753467701828,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753467729426,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753094317532,
+    "lastActivity": 1753467729588,
     "isActive": true
   },
   {
@@ -1700,7 +1775,7 @@
     "deviceInfo": {
       "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
       "language": "fr-FR",
-      "screen": "2056x1329",
+      "screen": "2560x1440",
       "timezone": "Europe/Paris",
       "userIp": "89.158.80.136"
     },
@@ -1809,9 +1884,89 @@
         "page": "/",
         "timestamp": 1753137400941,
         "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461602537,
+        "referrer": ""
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461613205,
+        "referrer": ""
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753461624917,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753461634223,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753461637512,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753461647716,
+        "referrer": "https://mieldelune.fr/contact/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461649107,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461651687,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461656708,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461658717,
+        "referrer": "https://mieldelune.fr/"
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753463556752,
+        "referrer": ""
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753463595853,
+        "referrer": ""
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753463607825,
+        "referrer": ""
+      },
+      {
+        "page": "/artiste/",
+        "timestamp": 1753463609103,
+        "referrer": "https://mieldelune.fr/contact/"
+      },
+      {
+        "page": "/contact/",
+        "timestamp": 1753463610180,
+        "referrer": "https://mieldelune.fr/artiste/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753479477465,
+        "referrer": ""
       }
     ],
-    "lastActivity": 1753137401294,
+    "lastActivity": 1753479477879,
     "isActive": true
   },
   {
@@ -2162,6 +2317,76 @@
       }
     ],
     "lastActivity": 1753165078389,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753461311597,
+    "id": "aef89af3-90b1-4f0c-a4e5-8c3f737195c1",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+      "language": "fr-FR",
+      "screen": "2560x1440",
+      "timezone": "Europe/Paris",
+      "userIp": "89.158.80.136"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753461310471,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461408676,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461411661,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461417769,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753461558235,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753479471649,
+        "referrer": "https://www.google.com/"
+      },
+      {
+        "page": "/",
+        "timestamp": 1753479629815,
+        "referrer": ""
+      }
+    ],
+    "lastActivity": 1753479629885,
+    "isActive": true
+  },
+  {
+    "timestamp": 1753480163455,
+    "id": "2b812aca-37a8-4fcf-bd90-095889a6b590",
+    "deviceInfo": {
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+      "language": "fr-FR",
+      "screen": "414x896",
+      "timezone": "Europe/Paris",
+      "userIp": "89.158.80.136"
+    },
+    "pagesVisited": [
+      {
+        "page": "/",
+        "timestamp": 1753480163195,
+        "referrer": "https://mieldelune.fr/admin/"
+      }
+    ],
+    "lastActivity": 1753480163455,
     "isActive": true
   }
 ]

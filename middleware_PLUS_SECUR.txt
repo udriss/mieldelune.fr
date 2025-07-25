@@ -6,29 +6,46 @@ import { jwtVerify } from 'jose';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.SECRET_KEY);
 
+// Domaines autorisés pour CORS
+const ALLOWED_ORIGINS = [
+  'https://mieldelune.fr',
+  'https://www.mieldelune.fr',
+  'http://localhost:3000', // Pour le développement
+];
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
+  const origin = request.headers.get('origin') || '';
   
   // 1. GÉRER LES REQUÊTES API ET CORS
   if (url.pathname.startsWith('/api')) {
-    // Gérer les requêtes OPTIONS (preflight) pour CORS
+    // Vérifier si l'origine est autorisée
+    const isAllowedOrigin = ALLOWED_ORIGINS.includes(origin) || 
+                           origin.includes('localhost') || 
+                           origin.includes('127.0.0.1');
+    
+    // Gérer les requêtes OPTIONS (preflight)
     if (request.method === 'OPTIONS') {
       return new NextResponse(null, {
         status: 200,
         headers: {
-          'Access-Control-Allow-Origin': '*', // Ou spécifiez les domaines autorisés
+          'Access-Control-Allow-Origin': isAllowedOrigin ? origin : '',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Credentials': 'true',
           'Access-Control-Max-Age': '86400',
         },
       });
     }
 
-    // Pour les autres méthodes, ajouter les headers CORS à la réponse
+    // Pour les autres méthodes
     const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (isAllowedOrigin) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+    }
     
     return response;
   }
@@ -37,7 +54,6 @@ export async function middleware(request: NextRequest) {
   if (url.pathname.startsWith('/admin')) {
     const token = request.cookies.get('adminAuth')?.value;
     
-    // Allow access to login page
     if (url.pathname === '/admin/login') {
       if (!token) {
         return NextResponse.next();
@@ -50,7 +66,6 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // All other admin routes require valid token
     if (!token) {
       return NextResponse.rewrite(new URL('/admin/login', request.url));
     }
@@ -63,7 +78,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Pour toutes les autres routes, continuer normalement
   return NextResponse.next();
 }
 

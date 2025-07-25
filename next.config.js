@@ -6,7 +6,7 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     unoptimized: true,
-    domains: [process.env.NEXT_PUBLIC_DEPLOYMENT_DOMAIN || 'mieldelune.fr'],
+    domains: ['mieldelune.fr', 'www.mieldelune.fr'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp'],
@@ -14,15 +14,23 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/api/:path*',
         headers: [
           {
+            key: 'Access-Control-Allow-Origin',
+            value: '*' // Ou spécifiez 'https://www.mieldelune.fr,https://mieldelune.fr'
+          },
+          {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, OPTIONS'
+            value: 'GET, POST, PUT, DELETE, OPTIONS'
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type'
+            value: 'Content-Type, Authorization'
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400'
           }
         ]
       },
@@ -30,7 +38,7 @@ const nextConfig = {
         source: '/_next/static/:path*',
         headers: [
           { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, OPTIONS' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Origin, Content-Type, Accept' },
         ],
       },
@@ -38,21 +46,12 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: '20mb', // Ajustez cette valeur selon vos besoins
+      bodySizeLimit: '20mb',
     },
   },
   typescript: {
-    // Ensure TypeScript compilation
     ignoreBuildErrors: false
   },
-  // Configuration pour les origines autorisées en développement
-  allowedDevOrigins: [
-    'mieldelune.fr',
-    'www.mieldelune.fr',
-    'localhost:8005',
-    '127.0.0.1:8005'
-  ],
-  // Add trailing slash to URLs
   trailingSlash: true
 };
 
